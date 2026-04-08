@@ -12,6 +12,7 @@ import type { PageLoad } from './$types';
 export const load: PageLoad = () => {
 	return {
 		assetBaseUrl: `${base}/three`,
+		cubeSourceUrl: `${base}/three/cube.ts`,
 		title: 'Three.js demo viewer',
 		description: 'A minimal rotating cube that keeps runtime errors inside the viewer panel.'
 	};

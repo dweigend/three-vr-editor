@@ -23,6 +23,11 @@ describe('toViewerError', () => {
 			title: 'Three.js viewer error',
 			message: 'Cube exploded',
 			location: '/src/lib/three/create-three-viewer.ts:88:13',
+			source: {
+				column: 13,
+				filePath: '/src/lib/three/create-three-viewer.ts',
+				line: 88
+			},
 			stack:
 				'Error: Cube exploded\n    at renderFrame (/src/lib/three/create-three-viewer.ts:88:13)\n'
 		});
@@ -33,6 +38,7 @@ describe('toViewerError', () => {
 			title: 'Three.js viewer error',
 			message: 'broken shader',
 			location: null,
+			source: null,
 			stack: 'broken shader'
 		});
 	});
@@ -44,7 +50,14 @@ describe('extractErrorLocation', () => {
 			extractErrorLocation(
 				'Error: boom\n    at renderFrame (http://localhost:5173/src/lib/three/create-three-viewer.ts:112:7)\n'
 			)
-		).toBe('http://localhost:5173/src/lib/three/create-three-viewer.ts:112:7');
+		).toEqual({
+			location: 'http://localhost:5173/src/lib/three/create-three-viewer.ts:112:7',
+			source: {
+				column: 7,
+				filePath: 'http://localhost:5173/src/lib/three/create-three-viewer.ts',
+				line: 112
+			}
+		});
 	});
 
 	it('returns null when the stack has no parseable location', () => {

@@ -23,6 +23,8 @@
 <p>{data.description}</p>
 <p><a href={resolve('/')}>Back to start</a></p>
 <p><a href={resolve('/demo')}>Back to demos</a></p>
+<p><a href={resolve('/demo/three/editor')}>Open editor demo</a></p>
 <p>Three static files live under <code>{data.assetBaseUrl}</code>.</p>
+<p>The cube scene source lives in <code>{data.cubeSourceUrl}</code>.</p>
 
 <ThreeViewer assetBaseUrl={data.assetBaseUrl} />

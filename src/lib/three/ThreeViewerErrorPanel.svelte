@@ -23,6 +23,12 @@
 		<p><strong>Location:</strong> <code>{error.location}</code></p>
 	{/if}
 
+	{#if error.source?.line}
+		<p>
+			<strong>Line:</strong> {error.source.line}{#if error.source.column}, Column: {error.source.column}{/if}
+		</p>
+	{/if}
+
 	{#if error.stack}
 		<pre>{error.stack}</pre>
 	{/if}

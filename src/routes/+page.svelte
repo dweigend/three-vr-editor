@@ -11,8 +11,10 @@
 
 <h1>Start</h1>
 
+<p><a href={resolve('/demo')}>All demos</a></p>
 <p><a href={resolve('/demo/pi')}>Pi key setup</a></p>
 <p><a href={resolve('/demo/pi/chat')}>Pi chat demo</a></p>
 <p><a href={resolve('/demo/pi/models')}>Pi model settings</a></p>
 <p><a href={resolve('/demo/codemirror')}>CodeMirror test</a></p>
+<p><a href={resolve('/demo/three/editor')}>Three.js editor demo</a></p>
 <p><a href={resolve('/demo/three')}>Three.js demo viewer</a></p>
