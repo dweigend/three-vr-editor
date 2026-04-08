@@ -12,6 +12,13 @@ Boundaries: This file defines project guidance, not product behavior.
 - For `.svelte` editing, prefer `@replit/codemirror-lang-svelte`.
 - Only introduce `Monaco Editor` if a request explicitly requires IDE-style features such as diff views, VS Code-like providers, or significantly richer inline editor UX.
 
+## Tooling Default
+
+- Use `bun` as the default package manager and script runner for this repository.
+- Prefer `bun add`, `bun remove`, and `bun run` over `npm` equivalents unless a task explicitly requires something else.
+- Use `Biome` as the default linter and formatter when linting or formatting is needed in this repository.
+- Prefer running `Biome` checks before finishing code changes whenever linting is part of the task.
+
 ## Pi Integration Boundary
 
 - Keep `Pi` SDK imports in server-only modules, route handlers, and `.server.ts` files.

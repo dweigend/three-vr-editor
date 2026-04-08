@@ -22,6 +22,7 @@
 		"@tailwindcss/forms": "^0.5.11",
 		"@tailwindcss/typography": "^0.5.19",
 		"@tailwindcss/vite": "^4.1.18",
+		"@types/three": "^0.183.1",
 		"@vitest/browser-playwright": "^4.1.0",
 		"playwright": "^1.58.2",
 		"svelte": "^5.54.0",
@@ -36,6 +37,7 @@
 		"@mariozechner/pi-coding-agent": "^0.65.2",
 		"@replit/codemirror-lang-svelte": "^6.0.0",
 		"biome": "^0.3.3",
-		"codemirror": "^6.0.2"
+		"codemirror": "^6.0.2",
+		"three": "^0.183.2"
 	}
 }
