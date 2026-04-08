@@ -49,6 +49,7 @@
 <p><a href={resolve('/demo')}>Back to demos</a></p>
 <p><a href={resolve('/demo/three')}>Open viewer demo</a></p>
 <p><a href={resolve('/demo/three/editor')}>Open plain editor demo</a></p>
+<p><a href={resolve('/demo/three/editor-templates')}>Open template workbench demo</a></p>
 
 <div class="page-grid">
 	<div class="workspace-column">

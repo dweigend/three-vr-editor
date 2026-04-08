@@ -1,24 +1,27 @@
 /**
  * Purpose: Load bundled preview code into the browser as a scene factory module.
  * Context: The editor preview rebuilds TypeScript on the server and swaps the resulting module in the browser.
- * Responsibility: Import Blob-backed ESM code, validate the expected scene export, and expose source-map metadata.
+ * Responsibility: Import Blob-backed ESM code, validate the expected scene export, and expose source-map metadata plus optional renderer hints.
  * Boundaries: This module does not know anything about file persistence or Three runtime lifecycle.
  */
 
 import type { ThreePreviewBuildSuccess } from './three-editor-types';
-import type { ThreeDemoSceneFactory } from './three-demo-scene';
+import type { ThreeDemoRendererKind, ThreeDemoSceneFactory } from './three-demo-scene';
 
 const SCENE_EXPORT_NAME = 'createDemoScene';
+const RENDERER_KIND_EXPORT_NAME = 'demoRendererKind';
 
 export type LoadedThreePreviewModule = {
 	dispose: () => void;
 	moduleUrl: string;
+	rendererKind: ThreeDemoRendererKind;
 	sceneFactory: ThreeDemoSceneFactory;
 	sourceMap: string;
 };
 
 type ThreePreviewModule = {
 	createDemoScene?: unknown;
+	demoRendererKind?: unknown;
 };
 
 export async function loadThreePreviewModule(
@@ -35,11 +38,14 @@ export async function loadThreePreviewModule(
 			throw new Error(`Preview module must export a "${SCENE_EXPORT_NAME}" function.`);
 		}
 
+		const rendererKind = readRendererKind(module[RENDERER_KIND_EXPORT_NAME]);
+
 		return {
 			dispose: () => {
 				URL.revokeObjectURL(moduleUrl);
 			},
 			moduleUrl,
+			rendererKind,
 			sceneFactory: sceneFactory as ThreeDemoSceneFactory,
 			sourceMap: preview.map
 		};
@@ -47,4 +53,12 @@ export async function loadThreePreviewModule(
 		URL.revokeObjectURL(moduleUrl);
 		throw error;
 	}
+}
+
+function readRendererKind(value: unknown): ThreeDemoRendererKind {
+	if (value === 'webgpu') {
+		return 'webgpu';
+	}
+
+	return 'webgl';
 }

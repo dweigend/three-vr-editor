@@ -23,8 +23,12 @@ describe('createThreeFileService', () => {
 		const rootDir = await createFixtureDir();
 		await writeFile(join(rootDir, '.gitkeep'), '', 'utf-8');
 		await mkdir(join(rootDir, 'nested'));
+		await mkdir(join(rootDir, 'templates'));
+		await mkdir(join(rootDir, 'shared'));
 		await writeFile(join(rootDir, 'cube.ts'), 'export const createDemoScene = () => null;', 'utf-8');
 		await writeFile(join(rootDir, 'nested', 'helper.ts'), 'export const helper = true;', 'utf-8');
+		await writeFile(join(rootDir, 'templates', 'template.ts'), 'export const ignored = true;', 'utf-8');
+		await writeFile(join(rootDir, 'shared', 'helper.ts'), 'export const ignored = true;', 'utf-8');
 		const service = createThreeFileService(rootDir);
 
 		await expect(service.listFiles()).resolves.toEqual([
@@ -67,6 +71,57 @@ describe('createThreeFileService', () => {
 		});
 
 		await expect(readFile(filePath, 'utf-8')).resolves.toContain('update() {}');
+	});
+
+	it('creates a blank scene file under scenes', async () => {
+		const rootDir = await createFixtureDir();
+		const service = createThreeFileService(rootDir);
+
+		const createdFile = await service.createManagedFile({
+			fileName: 'My New Scene',
+			mode: 'blank'
+		});
+
+		expect(createdFile.path).toBe('scenes/my-new-scene.ts');
+		await expect(readFile(join(rootDir, createdFile.path), 'utf-8')).resolves.toContain(
+			'export const createDemoScene'
+		);
+	});
+
+	it('creates a scene file from a managed template', async () => {
+		const rootDir = await createFixtureDir();
+		await mkdir(join(rootDir, 'templates'));
+		await writeFile(
+			join(rootDir, 'templates', 'template.ts'),
+			'export const createDemoScene = () => ({ update() {}, dispose() {} });',
+			'utf-8'
+		);
+		const service = createThreeFileService(rootDir);
+
+		const createdFile = await service.createManagedFile({
+			fileName: 'Template Clone',
+			mode: 'template',
+			templatePath: 'templates/template.ts'
+		});
+
+		expect(createdFile.path).toBe('scenes/template-clone.ts');
+		await expect(readFile(join(rootDir, createdFile.path), 'utf-8')).resolves.toContain(
+			'createDemoScene'
+		);
+	});
+
+	it('rejects template copies outside the managed templates directory', async () => {
+		const rootDir = await createFixtureDir();
+		await writeFile(join(rootDir, 'cube.ts'), 'export const createDemoScene = () => null;', 'utf-8');
+		const service = createThreeFileService(rootDir);
+
+		await expect(
+			service.createManagedFile({
+				fileName: 'Bad Template Clone',
+				mode: 'template',
+				templatePath: 'cube.ts'
+			})
+		).rejects.toThrow('Template path must point to a file under static/three/templates.');
 	});
 });
 

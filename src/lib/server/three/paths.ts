@@ -9,6 +9,9 @@ import { realpathSync } from 'node:fs';
 import { isAbsolute, relative, resolve } from 'node:path';
 
 export const STATIC_THREE_DIR = resolve(process.cwd(), 'static', 'three');
+export const STATIC_THREE_SCENES_DIR = resolve(STATIC_THREE_DIR, 'scenes');
+export const STATIC_THREE_SHARED_DIR = resolve(STATIC_THREE_DIR, 'shared');
+export const STATIC_THREE_TEMPLATES_DIR = resolve(STATIC_THREE_DIR, 'templates');
 
 export function toManagedRelativePath(rootDir: string, filePath: string): string {
 	const normalizedRootDir = toRealPath(resolve(rootDir));

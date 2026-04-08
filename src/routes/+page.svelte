@@ -18,4 +18,5 @@
 <p><a href={resolve('/demo/codemirror')}>CodeMirror test</a></p>
 <p><a href={resolve('/demo/three/editor')}>Three.js editor demo</a></p>
 <p><a href={resolve('/demo/three/editor-agent')}>Three.js editor + Pi agent demo</a></p>
+<p><a href={resolve('/demo/three/editor-templates')}>Three.js template workbench demo</a></p>
 <p><a href={resolve('/demo/three')}>Three.js demo viewer</a></p>

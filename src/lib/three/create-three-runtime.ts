@@ -1,17 +1,24 @@
 /**
  * Purpose: Create a reusable Three.js runtime shell for demo scenes.
  * Context: Multiple pages and preview variants should share the same renderer, resize, and cleanup behavior.
- * Responsibility: Mount a renderer, run a scene factory, animate frames, and dispose resources safely.
+ * Responsibility: Mount a WebGL or WebGPU renderer, run a scene factory, animate frames, and dispose resources safely.
  * Boundaries: This module does not load source files or decide which scene module should be rendered.
  */
 
 import { PerspectiveCamera, Scene, WebGLRenderer } from 'three';
+import { WebGPURenderer } from 'three/webgpu';
 
-import type { ThreeDemoSceneFactory } from './three-demo-scene';
+import type {
+	ThreeCompatibleRenderer,
+	ThreeDemoRendererKind,
+	ThreeDemoSceneController,
+	ThreeDemoSceneFactory
+} from './three-demo-scene';
 
 export type CreateThreeRuntimeOptions = {
 	container: HTMLDivElement;
 	onRuntimeError: (error: unknown) => void;
+	rendererKind?: ThreeDemoRendererKind;
 	sceneFactory: ThreeDemoSceneFactory;
 };
 
@@ -27,18 +34,15 @@ const FALLBACK_WIDTH = 640;
 const MAX_PIXEL_RATIO = 2;
 
 export function createThreeRuntime(options: CreateThreeRuntimeOptions): ThreeRuntimeController {
-	const { container, onRuntimeError, sceneFactory } = options;
+	const { container, onRuntimeError, rendererKind = 'webgl', sceneFactory } = options;
 	const scene = new Scene();
 	const camera = new PerspectiveCamera(CAMERA_FOV, 1, CAMERA_NEAR, CAMERA_FAR);
-	const renderer = new WebGLRenderer({ antialias: true, alpha: false });
-	const sceneController = sceneFactory({ camera, scene });
 
 	let animationFrameId = 0;
 	let isDisposed = false;
+	let renderer: ThreeCompatibleRenderer | null = null;
 	let resizeObserver: ResizeObserver | null = null;
-
-	renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, MAX_PIXEL_RATIO));
-	container.replaceChildren(renderer.domElement);
+	let sceneController: ThreeDemoSceneController | null = null;
 
 	const updateSize = (): void => {
 		const width = container.clientWidth || FALLBACK_WIDTH;
@@ -46,7 +50,8 @@ export function createThreeRuntime(options: CreateThreeRuntimeOptions): ThreeRun
 
 		camera.aspect = width / height;
 		camera.updateProjectionMatrix();
-		renderer.setSize(width, height, false);
+		renderer?.setSize(width, height, false);
+		sceneController?.resize?.({ height, width });
 	};
 
 	const dispose = (): void => {
@@ -57,8 +62,8 @@ export function createThreeRuntime(options: CreateThreeRuntimeOptions): ThreeRun
 		isDisposed = true;
 		window.cancelAnimationFrame(animationFrameId);
 		resizeObserver?.disconnect();
-		sceneController.dispose();
-		renderer.dispose();
+		sceneController?.dispose();
+		renderer?.dispose();
 		container.replaceChildren();
 	};
 
@@ -77,24 +82,63 @@ export function createThreeRuntime(options: CreateThreeRuntimeOptions): ThreeRun
 		}
 
 		try {
-			sceneController.update();
-			renderer.render(scene, camera);
+			sceneController?.update();
+			sceneController?.render?.() ?? renderer?.render(scene, camera);
 			animationFrameId = window.requestAnimationFrame(renderFrame);
 		} catch (error) {
 			fail(error);
 		}
 	};
 
-	updateSize();
-	resizeObserver = new ResizeObserver(() => {
+	void initialize();
+
+	return { dispose };
+
+	async function initialize(): Promise<void> {
 		try {
+			const nextRenderer = createRenderer(rendererKind);
+
+			nextRenderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, MAX_PIXEL_RATIO));
+			container.replaceChildren(nextRenderer.domElement);
+			renderer = nextRenderer;
+
+			if (rendererKind === 'webgpu') {
+				await (nextRenderer as WebGPURenderer).init();
+			}
+
+			if (isDisposed) {
+				nextRenderer.dispose();
+				return;
+			}
+
+			sceneController = sceneFactory({
+				camera,
+				container,
+				renderer: nextRenderer,
+				rendererKind,
+				scene
+			});
+
 			updateSize();
+			resizeObserver = new ResizeObserver(() => {
+				try {
+					updateSize();
+				} catch (error) {
+					fail(error);
+				}
+			});
+			resizeObserver.observe(container);
+			renderFrame();
 		} catch (error) {
 			fail(error);
 		}
-	});
-	resizeObserver.observe(container);
-	renderFrame();
+	}
+}
 
-	return { dispose };
+function createRenderer(rendererKind: ThreeDemoRendererKind): ThreeCompatibleRenderer {
+	if (rendererKind === 'webgpu') {
+		return new WebGPURenderer({ antialias: true });
+	}
+
+	return new WebGLRenderer({ antialias: true, alpha: false });
 }

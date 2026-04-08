@@ -1,8 +1,8 @@
 <!--
-	Purpose: Compose the reusable file picker, editor, and live Three preview workspace for editable demos.
-	Context: Multiple routes should share the same local file/edit/preview orchestration without duplicating page logic.
-	Responsibility: Manage selected-file state, in-memory edits, save actions, preview rebuilds, and active-file context.
-	Boundaries: Route-specific headings, Pi agent UI, and server-side file or preview implementations live elsewhere.
+	Purpose: Compose the additive Three template workbench with file creation, dynamic parameter controls, code editing, and live preview.
+	Context: This new demo route should extend the existing editor architecture without replacing the original editor or Pi-enhanced variants.
+	Responsibility: Reuse the shared workspace state, wire in template-aware side panels, and keep scene selection preview-driven.
+	Boundaries: Route-level headings and server-only file or preview endpoints live elsewhere.
 -->
 
 <script lang="ts">
@@ -10,41 +10,33 @@
 	import { resolve } from '$app/paths';
 
 	import CodeEditor from '$lib/editor/CodeEditor.svelte';
-	import type { PiEditorAgentAppliedEdit } from '$lib/pi/pi-editor-agent-types';
 	import FileSelect from '$lib/editor/FileSelect.svelte';
-	import ThreePreview from '$lib/three/ThreePreview.svelte';
 	import type {
 		ThreePreviewBuildResult,
 		ThreeSourceDocument,
 		ThreeSourceFileSummary
 	} from '$lib/three/three-editor-types';
-	import type { ThreeEditorActiveFileContext } from '$lib/three/three-editor-workspace-types';
 	import { createThreeEditorWorkspaceState } from '$lib/three/three-editor-workspace-state.svelte';
+	import type { ThreeTemplateSummary } from '$lib/three/three-template-types';
+
+	import ThreeFileCreatePanel from './ThreeFileCreatePanel.svelte';
+	import ThreePreview from './ThreePreview.svelte';
+	import ThreeTemplateParameterPanel from './ThreeTemplateParameterPanel.svelte';
 
 	type Props = {
-		activeFileContext?: ThreeEditorActiveFileContext | null;
 		files: ThreeSourceFileSummary[];
 		initialDocument: ThreeSourceDocument;
 		initialPreview: ThreePreviewBuildResult;
-		pendingAppliedEdit?: PiEditorAgentAppliedEdit | null;
-		pendingAppliedEditToken?: number;
 		previewEntryPath: string;
+		templates: ThreeTemplateSummary[];
 	};
 
-	let {
-		activeFileContext = $bindable<ThreeEditorActiveFileContext | null>(null),
-		files,
-		initialDocument,
-		initialPreview,
-		pendingAppliedEdit = null,
-		pendingAppliedEditToken = 0,
-		previewEntryPath
-	}: Props = $props();
-	let lastAppliedEditToken = $state(0);
+	let { files, initialDocument, initialPreview, previewEntryPath, templates }: Props = $props();
 	const stableFiles = untrack(() => files);
 	const stableInitialDocument = untrack(() => initialDocument);
 	const stableInitialPreview = untrack(() => initialPreview);
 	const stablePreviewEntryPath = untrack(() => previewEntryPath);
+
 	const workspaceState = createThreeEditorWorkspaceState({
 		createFileEndpoint: resolve('/demo/three/editor/file/create'),
 		fileEndpoint: resolve('/demo/three/editor/file'),
@@ -52,33 +44,14 @@
 		initialDocument: stableInitialDocument,
 		initialPreview: stableInitialPreview,
 		previewEndpoint: resolve('/demo/three/editor/preview'),
-		previewEntryPath: stablePreviewEntryPath
-	});
-
-	$effect(() => {
-		activeFileContext = workspaceState.activeFileContext;
-	});
-
-	$effect(() => {
-		if (!pendingAppliedEdit || pendingAppliedEditToken === lastAppliedEditToken) {
-			return;
-		}
-
-		lastAppliedEditToken = pendingAppliedEditToken;
-
-		if (pendingAppliedEdit.path !== workspaceState.selectedPath) {
-			return;
-		}
-
-		workspaceState.applyDocumentUpdate(
-			pendingAppliedEdit.content,
-			pendingAppliedEdit.changedLineRanges
-		);
-		void workspaceState.saveActiveDocument();
+		previewEntryPath: stablePreviewEntryPath,
+		previewMode: 'selected'
 	});
 </script>
 
-<FileSelect files={workspaceState.files} bind:value={workspaceState.selectedPath} label="Static Three file" />
+<div class="toolbar-row">
+	<FileSelect files={workspaceState.files} bind:value={workspaceState.selectedPath} label="Workbench file" />
+</div>
 
 {#if workspaceState.saveError}
 	<p>{workspaceState.saveError}</p>
@@ -87,6 +60,16 @@
 {/if}
 
 <div class="workspace-grid">
+	<div class="sidebar-column">
+		<ThreeFileCreatePanel templates={templates} onCreate={workspaceState.createFile} />
+		{#if workspaceState.activeDocument !== undefined}
+			<ThreeTemplateParameterPanel
+				source={workspaceState.activeDocument}
+				onSourceChange={workspaceState.handleSourceChange}
+			/>
+		{/if}
+	</div>
+
 	<div class="workspace-column">
 		{#if workspaceState.activeDocument === undefined}
 			<p>Loading file...</p>
@@ -105,22 +88,42 @@
 	</div>
 
 	<div class="workspace-column">
-		<ThreePreview preview={workspaceState.preview} onErrorChange={workspaceState.handlePreviewErrorChange} />
+		<ThreePreview
+			preview={workspaceState.preview}
+			onErrorChange={workspaceState.handlePreviewErrorChange}
+		/>
 	</div>
 </div>
 
 <style>
+	.toolbar-row {
+		margin-bottom: 1rem;
+	}
+
 	.workspace-grid {
 		display: grid;
 		gap: 1rem;
-		grid-template-columns: 1fr 1fr;
+		grid-template-columns: minmax(18rem, 22rem) minmax(0, 1.2fr) minmax(0, 1fr);
 	}
 
+	.sidebar-column,
 	.workspace-column {
+		display: grid;
+		gap: 1rem;
 		min-width: 0;
 	}
 
-	@media (max-width: 960px) {
+	@media (max-width: 1280px) {
+		.workspace-grid {
+			grid-template-columns: 1fr 1fr;
+		}
+
+		.sidebar-column {
+			grid-column: 1 / -1;
+		}
+	}
+
+	@media (max-width: 900px) {
 		.workspace-grid {
 			grid-template-columns: 1fr;
 		}

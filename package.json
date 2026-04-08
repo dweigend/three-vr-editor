@@ -44,6 +44,7 @@
 		"biome": "^0.3.3",
 		"codemirror": "^6.0.2",
 		"esbuild": "^0.28.0",
-		"three": "^0.183.2"
+		"three": "^0.183.2",
+		"three-bvh-csg": "^0.0.18"
 	}
 }

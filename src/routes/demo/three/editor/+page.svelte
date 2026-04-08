@@ -24,6 +24,7 @@
 <p><a href={resolve('/demo')}>Back to demos</a></p>
 <p><a href={resolve('/demo/three')}>Open viewer demo</a></p>
 <p><a href={resolve('/demo/three/editor-agent')}>Open editor + Pi agent demo</a></p>
+<p><a href={resolve('/demo/three/editor-templates')}>Open template workbench demo</a></p>
 
 <ThreeEditorWorkspace
 	files={data.files}
