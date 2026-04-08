@@ -19,7 +19,7 @@ const EDITOR_AGENT_SYSTEM_PROMPTS = [
 	'Beantworte nur dann rein erklaerend ohne Tool-Nutzung, wenn der Nutzer offensichtlich eine Analyse, Erklaerung oder Rueckfrage moechte.'
 ];
 
-export async function createPiEditorAgentSession(activeFileContext: ThreeEditorActiveFileContext) {
+export async function createEditorAgentSession(activeFileContext: ThreeEditorActiveFileContext) {
 	const resourceLoader = await createPiDemoResourceLoader({
 		appendSystemPrompts: EDITOR_AGENT_SYSTEM_PROMPTS
 	});

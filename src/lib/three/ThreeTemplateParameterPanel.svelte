@@ -43,97 +43,94 @@
 	}
 </script>
 
-<section class="panel">
-	<h2>Parameters</h2>
+<section class="ui-pane">
+	<div class="ui-pane__header">
+		<p class="ui-surface-label">Parameters</p>
+	</div>
 
-	{#if !templateHeader}
-		<p class="hint">No optional template header found in the active file.</p>
-	{:else if !templateParameters}
-		<p class="hint">This template declares controls but has no editable parameter block yet.</p>
-	{:else if templateHeader.parameters.length === 0}
-		<p class="hint">This template does not expose any editable controls.</p>
-	{:else}
-		<p class="hint">{templateHeader.description}</p>
+	<div class="ui-pane__body ui-pane__body--scroll">
+		{#if !templateHeader}
+			<p class="ui-status">No optional template header found in the active file.</p>
+		{:else if !templateParameters}
+			<p class="ui-status">This template declares controls but has no editable parameter block yet.</p>
+		{:else if templateHeader.parameters.length === 0}
+			<p class="ui-status">This template does not expose any editable controls.</p>
+		{:else}
+			<div class="ui-form-grid">
+				<p class="ui-status">{templateHeader.description}</p>
 
-		<div class="parameter-list">
-			{#each templateHeader.parameters as definition}
-				<label class="field">
-					<span>{definition.label}</span>
+				<div class="parameter-list">
+					{#each templateHeader.parameters as definition}
+						<label class="ui-form-row">
+							<span class="ui-form-label">{definition.label}</span>
 
-					{#if definition.control === 'color'}
-						<input
-							type="color"
-							value={String(readParameterValue(definition))}
-							oninput={(event) => updateParameter(definition, event.currentTarget.value)}
-						/>
-					{:else if definition.control === 'range'}
-						<div class="range-field">
-							<input
-								type="range"
-								min={definition.min}
-								max={definition.max}
-								step={definition.step ?? 0.1}
-								value={Number(readParameterValue(definition))}
-								oninput={(event) => updateParameter(definition, event.currentTarget.value)}
-							/>
-							<output>{Number(readParameterValue(definition)).toFixed(2)}</output>
-						</div>
-					{:else if definition.control === 'select'}
-						<select
-							value={String(readParameterValue(definition))}
-							onchange={(event) => updateParameter(definition, event.currentTarget.value)}
-						>
-							{#each definition.options as option}
-								<option value={String(option.value)}>{option.label}</option>
-							{/each}
-						</select>
-					{:else}
-						<input
-							type="text"
-							value={String(readParameterValue(definition))}
-							placeholder={definition.placeholder}
-							oninput={(event) => updateParameter(definition, event.currentTarget.value)}
-						/>
-					{/if}
-				</label>
-			{/each}
-		</div>
-	{/if}
+							{#if definition.control === 'color'}
+								<input
+									class="parameter-color"
+									type="color"
+									value={String(readParameterValue(definition))}
+									oninput={(event) => updateParameter(definition, event.currentTarget.value)}
+								/>
+							{:else if definition.control === 'range'}
+								<div class="range-field">
+									<input
+										type="range"
+										min={definition.min}
+										max={definition.max}
+										step={definition.step ?? 0.1}
+										value={Number(readParameterValue(definition))}
+										oninput={(event) => updateParameter(definition, event.currentTarget.value)}
+									/>
+									<output>{Number(readParameterValue(definition)).toFixed(2)}</output>
+								</div>
+							{:else if definition.control === 'select'}
+								<select
+									class="ui-select"
+									value={String(readParameterValue(definition))}
+									onchange={(event) => updateParameter(definition, event.currentTarget.value)}
+								>
+									{#each definition.options as option}
+										<option value={String(option.value)}>{option.label}</option>
+									{/each}
+								</select>
+							{:else}
+								<input
+									class="ui-input"
+									type="text"
+									value={String(readParameterValue(definition))}
+									placeholder={definition.placeholder}
+									oninput={(event) => updateParameter(definition, event.currentTarget.value)}
+								/>
+							{/if}
+						</label>
+					{/each}
+				</div>
+			</div>
+		{/if}
+	</div>
 </section>
 
 <style>
-	.panel {
-		border: 1px solid #d4d4d8;
-		border-radius: 0.75rem;
-		display: grid;
-		gap: 0.75rem;
-		padding: 1rem;
-	}
-
-	.hint {
-		color: #52525b;
-		margin: 0;
-	}
-
 	.parameter-list {
 		display: grid;
 		gap: 0.9rem;
 	}
 
-	.field {
-		display: grid;
-		gap: 0.35rem;
-	}
-
-	.field input,
-	.field select {
-		font: inherit;
-		padding: 0.45rem 0.55rem;
+	.parameter-color {
+		min-height: 2.6rem;
+		padding: 0.2rem;
 		width: 100%;
 	}
 
-	.field input[type='color'] {
-		min-height: 2.6rem;
+	.range-field input {
+		width: 100%;
+	}
+
+	.parameter-color,
+	.range-field input {
+		border: 1px solid var(--ui-color-border);
+		background: rgba(255, 255, 255, 0.02);
+		color: var(--ui-color-text);
 		padding: 0.2rem;
 	}
 
@@ -145,7 +142,7 @@
 	}
 
 	.range-field output {
-		color: #18181b;
+		color: var(--ui-color-text);
 		font-variant-numeric: tabular-nums;
 	}
 </style>

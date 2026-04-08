@@ -7,11 +7,11 @@
 
 import { describe, expect, it } from 'vitest';
 
-import { buildPiEditorAgentPrompt, toPiEditorAgentAppliedEdit } from './editor-agent';
+import { buildEditorAgentPrompt, toEditorAgentAppliedEdit } from './editor-agent';
 
-describe('buildPiEditorAgentPrompt', () => {
+describe('buildEditorAgentPrompt', () => {
 	it('includes the active file path, editor snapshot, and dirty-state hint', () => {
-		const prompt = buildPiEditorAgentPrompt({
+		const prompt = buildEditorAgentPrompt({
 			file: {
 				content: 'export const createDemoScene = () => ({ update() {}, dispose() {} });',
 				isDirty: true,
@@ -30,7 +30,7 @@ describe('buildPiEditorAgentPrompt', () => {
 	});
 
 	it('includes only the provided previous turn for follow-up context', () => {
-		const prompt = buildPiEditorAgentPrompt({
+		const prompt = buildEditorAgentPrompt({
 			file: {
 				content: 'export const createDemoScene = () => ({ update() {}, dispose() {} });',
 				isDirty: false,
@@ -51,10 +51,10 @@ describe('buildPiEditorAgentPrompt', () => {
 	});
 });
 
-describe('toPiEditorAgentAppliedEdit', () => {
+describe('toEditorAgentAppliedEdit', () => {
 	it('maps valid tool details into an applied edit payload', () => {
 		expect(
-			toPiEditorAgentAppliedEdit({
+			toEditorAgentAppliedEdit({
 				changedLineRanges: [
 					{
 						endLine: 4,
@@ -79,6 +79,6 @@ describe('toPiEditorAgentAppliedEdit', () => {
 	});
 
 	it('returns undefined for invalid tool details', () => {
-		expect(toPiEditorAgentAppliedEdit({ path: 'cube.ts' })).toBeUndefined();
+		expect(toEditorAgentAppliedEdit({ path: 'cube.ts' })).toBeUndefined();
 	});
 });

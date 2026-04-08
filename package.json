@@ -39,6 +39,7 @@
 		"@codemirror/state": "^6.6.0",
 		"@codemirror/view": "^6.41.0",
 		"@jridgewell/trace-mapping": "^0.3.31",
+		"@lucide/svelte": "^1.7.0",
 		"@mariozechner/pi-coding-agent": "^0.65.2",
 		"@replit/codemirror-lang-svelte": "^6.0.0",
 		"biome": "^0.3.3",

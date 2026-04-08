@@ -65,84 +65,58 @@
 	}
 </script>
 
-<section class="panel">
-	<h2>New file</h2>
-
-	<label class="field">
-		<span>File name</span>
-		<input bind:value={fileName} type="text" placeholder="new-scene" />
-	</label>
-
-	<label class="field">
-		<span>Mode</span>
-		<select bind:value={mode}>
-			<option value="blank">Blank starter</option>
-			<option value="template">From template</option>
-		</select>
-	</label>
-
-	{#if mode === 'template'}
-		<label class="field">
-			<span>Template</span>
-			<select bind:value={selectedTemplatePath}>
-				{#each templates as template}
-					<option value={template.path}>{template.title}</option>
-				{/each}
-			</select>
-		</label>
-
-		{#if selectedTemplatePath}
-			{@const selectedTemplate = templates.find((template) => template.path === selectedTemplatePath)}
-			{#if selectedTemplate}
-				<p class="hint">{selectedTemplate.description}</p>
-			{/if}
-		{/if}
-	{/if}
-
-	<div class="actions">
-		<button type="button" onclick={handleCreate} disabled={isSubmitting || fileName.trim().length === 0}>
-			{isSubmitting ? 'Creating...' : 'Create file'}
-		</button>
+<section class="ui-pane">
+	<div class="ui-pane__header">
+		<p class="ui-surface-label">New file</p>
 	</div>
 
-	{#if errorMessage}
-		<p class="error">{errorMessage}</p>
-	{/if}
+	<div class="ui-pane__body">
+		<div class="ui-form-grid">
+			<label class="ui-form-row">
+				<span class="ui-form-label">File name</span>
+				<input bind:value={fileName} class="ui-input" type="text" placeholder="new-scene" />
+			</label>
+
+			<label class="ui-form-row">
+				<span class="ui-form-label">Mode</span>
+				<select bind:value={mode} class="ui-select">
+			<option value="blank">Blank starter</option>
+			<option value="template">From template</option>
+				</select>
+			</label>
+
+			{#if mode === 'template'}
+				<label class="ui-form-row">
+					<span class="ui-form-label">Template</span>
+					<select bind:value={selectedTemplatePath} class="ui-select">
+						{#each templates as template}
+							<option value={template.path}>{template.title}</option>
+						{/each}
+					</select>
+				</label>
+
+				{#if selectedTemplatePath}
+					{@const selectedTemplate = templates.find((template) => template.path === selectedTemplatePath)}
+					{#if selectedTemplate}
+						<p class="ui-status">{selectedTemplate.description}</p>
+					{/if}
+				{/if}
+			{/if}
+
+			<div class="ui-inline">
+				<button
+					class="ui-button"
+					type="button"
+					onclick={handleCreate}
+					disabled={isSubmitting || fileName.trim().length === 0}
+				>
+					{isSubmitting ? 'Creating...' : 'Create file'}
+				</button>
+			</div>
+
+			{#if errorMessage}
+				<p class="ui-status ui-status--danger">{errorMessage}</p>
+			{/if}
+		</div>
+	</div>
 </section>
-
-<style>
-	.panel {
-		border: 1px solid #d4d4d8;
-		border-radius: 0.75rem;
-		display: grid;
-		gap: 0.75rem;
-		padding: 1rem;
-	}
-
-	.field {
-		display: grid;
-		gap: 0.35rem;
-	}
-
-	.field input,
-	.field select {
-		font: inherit;
-		padding: 0.55rem 0.65rem;
-	}
-
-	.hint {
-		color: #52525b;
-		font-size: 0.95rem;
-		margin: 0;
-	}
-
-	.actions {
-		display: flex;
-		justify-content: flex-start;
-	}
-
-	.error {
-		color: #b91c1c;
-		margin: 0;
-	}
-</style>

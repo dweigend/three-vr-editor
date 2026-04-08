@@ -14,7 +14,7 @@ import { normalizeChangedLineRanges } from './editor-agent-line-ranges';
 
 export const APPLY_ACTIVE_FILE_EDIT_TOOL_NAME = 'apply_active_file_edit';
 
-export type PiEditorAgentToolDetails = {
+export type EditorAgentToolDetails = {
 	changedLineRanges: {
 		endLine: number;
 		startLine: number;
@@ -72,7 +72,7 @@ export function createApplyActiveFileEditTool(activeFileContext: ThreeEditorActi
 					path: activeFileContext.path,
 					summary: params.summary.trim(),
 					updatedContent: params.updatedContent
-				} satisfies PiEditorAgentToolDetails
+				} satisfies EditorAgentToolDetails
 			};
 		}
 	});

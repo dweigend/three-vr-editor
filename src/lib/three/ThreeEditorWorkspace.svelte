@@ -10,7 +10,7 @@
 	import { resolve } from '$app/paths';
 
 	import CodeEditor from '$lib/editor/CodeEditor.svelte';
-	import type { PiEditorAgentAppliedEdit } from '$lib/pi/pi-editor-agent-types';
+	import type { EditorAgentAppliedEdit } from '$lib/pi/editor-agent-types';
 	import FileSelect from '$lib/editor/FileSelect.svelte';
 	import ThreePreview from '$lib/three/ThreePreview.svelte';
 	import type {
@@ -26,7 +26,7 @@
 		files: ThreeSourceFileSummary[];
 		initialDocument: ThreeSourceDocument;
 		initialPreview: ThreePreviewBuildResult;
-		pendingAppliedEdit?: PiEditorAgentAppliedEdit | null;
+		pendingAppliedEdit?: EditorAgentAppliedEdit | null;
 		pendingAppliedEditToken?: number;
 		previewEntryPath: string;
 	};
@@ -46,12 +46,12 @@
 	const stableInitialPreview = untrack(() => initialPreview);
 	const stablePreviewEntryPath = untrack(() => previewEntryPath);
 	const workspaceState = createThreeEditorWorkspaceState({
-		createFileEndpoint: resolve('/demo/three/editor/file/create'),
-		fileEndpoint: resolve('/demo/three/editor/file'),
+		createFileEndpoint: resolve('/three/editor/file/create'),
+		fileEndpoint: resolve('/three/editor/file'),
 		files: stableFiles,
 		initialDocument: stableInitialDocument,
 		initialPreview: stableInitialPreview,
-		previewEndpoint: resolve('/demo/three/editor/preview'),
+		previewEndpoint: resolve('/three/editor/preview'),
 		previewEntryPath: stablePreviewEntryPath
 	});
 
@@ -76,53 +76,73 @@
 		);
 		void workspaceState.saveActiveDocument();
 	});
+
+	const toolbarStatus = $derived.by(() => {
+		if (workspaceState.saveError) {
+			return {
+				className: 'ui-toolbar-status ui-toolbar-status--danger',
+				text: workspaceState.saveError
+			};
+		}
+
+		if (workspaceState.saveState === 'saving') {
+			return {
+				className: 'ui-toolbar-status ui-toolbar-status--warning',
+				text: 'Saving'
+			};
+		}
+
+		if (workspaceState.isDirty) {
+			return {
+				className: 'ui-toolbar-status ui-toolbar-status--warning',
+				text: 'Unsaved changes'
+			};
+		}
+
+		return {
+			className: 'ui-toolbar-status ui-toolbar-status--success',
+			text: 'Saved'
+		};
+	});
 </script>
 
-<FileSelect files={workspaceState.files} bind:value={workspaceState.selectedPath} label="Static Three file" />
-
-{#if workspaceState.saveError}
-	<p>{workspaceState.saveError}</p>
-{:else if workspaceState.saveState === 'saved'}
-	<p>Saved.</p>
-{/if}
-
-<div class="workspace-grid">
-	<div class="workspace-column">
-		{#if workspaceState.activeDocument === undefined}
-			<p>Loading file...</p>
-		{:else}
-			{#key workspaceState.selectedPath}
-				<CodeEditor
-					changedLineRanges={workspaceState.changedLineRanges}
-					diagnostic={workspaceState.activeDiagnostic}
-					value={workspaceState.activeDocument}
-					onChange={workspaceState.handleSourceChange}
-					onSave={workspaceState.saveActiveDocument}
-					saveDisabled={!workspaceState.isDirty || workspaceState.saveState === 'saving'}
-				/>
-			{/key}
-		{/if}
+<section class="ui-screen ui-screen--workbench">
+	<div class="ui-toolbar">
+		<div class="ui-toolbar__group">
+			<FileSelect
+				files={workspaceState.files}
+				bind:value={workspaceState.selectedPath}
+				label="Static Three file"
+			/>
+		</div>
+		<div class="ui-toolbar__spacer"></div>
+		<p class={toolbarStatus.className}>{toolbarStatus.text}</p>
 	</div>
 
-	<div class="workspace-column">
-		<ThreePreview preview={workspaceState.preview} onErrorChange={workspaceState.handlePreviewErrorChange} />
+	<div class="ui-workbench ui-workbench--editor">
+		<section class="ui-pane">
+			<div class="ui-pane__body ui-pane__body--flush">
+				{#if workspaceState.activeDocument === undefined}
+					<div class="ui-pane__body">
+						<p class="ui-empty-state">Loading file...</p>
+					</div>
+				{:else}
+					{#key workspaceState.selectedPath}
+						<CodeEditor
+							changedLineRanges={workspaceState.changedLineRanges}
+							diagnostic={workspaceState.activeDiagnostic}
+							value={workspaceState.activeDocument}
+							onChange={workspaceState.handleSourceChange}
+							onSave={workspaceState.saveActiveDocument}
+							saveDisabled={!workspaceState.isDirty || workspaceState.saveState === 'saving'}
+						/>
+					{/key}
+				{/if}
+			</div>
+		</section>
+
+		<section class="ui-pane ui-pane--plain ui-pane--muted">
+			<ThreePreview preview={workspaceState.preview} onErrorChange={workspaceState.handlePreviewErrorChange} />
+		</section>
 	</div>
-</div>
-
-<style>
-	.workspace-grid {
-		display: grid;
-		gap: 1rem;
-		grid-template-columns: 1fr 1fr;
-	}
-
-	.workspace-column {
-		min-width: 0;
-	}
-
-	@media (max-width: 960px) {
-		.workspace-grid {
-			grid-template-columns: 1fr;
-		}
-	}
-</style>
+</section>

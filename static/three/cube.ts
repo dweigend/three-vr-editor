@@ -12,6 +12,7 @@ import {
 	Group,
 	Mesh,
 	MeshStandardMaterial,
+	PointLight,
 	SphereGeometry
 } from 'three';
 
@@ -29,6 +30,9 @@ const SPHERE_DISTANCE = 1.5;
 const DIRECTIONAL_LIGHT_INTENSITY = 2.8;
 const ORBIT_SPEED = 0.01;
 const SCENE_BACKGROUND = '#020617';
+const BLINK_SPEED = 2.5;
+const RED_PHASE = 0;
+const BLUE_PHASE = Math.PI;
 
 export const createDemoScene: ThreeDemoSceneFactory = ({ camera, scene }): ThreeDemoSceneController => {
 	const geometry = new SphereGeometry(SPHERE_SIZE, 32, 32);
@@ -50,6 +54,12 @@ export const createDemoScene: ThreeDemoSceneFactory = ({ camera, scene }): Three
 	redSphere.position.x = SPHERE_DISTANCE;
 	blueSphere.position.x = -SPHERE_DISTANCE;
 
+	const redLight = new PointLight(SPHERE_RED_COLOR, 1);
+	const blueLight = new PointLight(SPHERE_BLUE_COLOR, 1);
+
+	redSphere.add(redLight);
+	blueSphere.add(blueLight);
+
 	orbitGroup.add(redSphere);
 	orbitGroup.add(blueSphere);
 
@@ -64,9 +74,15 @@ export const createDemoScene: ThreeDemoSceneFactory = ({ camera, scene }): Three
 	scene.add(directionalLight);
 	scene.add(orbitGroup);
 
+	let time = 0;
+
 	return {
 		update: () => {
 			orbitGroup.rotation.y += ORBIT_SPEED;
+
+			time += 0.016; // roughly 60 FPS delta
+			redLight.intensity = 0.5 + 0.5 * Math.sin(time * BLINK_SPEED + RED_PHASE);
+			blueLight.intensity = 0.5 + 0.5 * Math.sin(time * BLINK_SPEED + BLUE_PHASE);
 		},
 		dispose: () => {
 			scene.remove(ambientLight);
@@ -75,6 +91,7 @@ export const createDemoScene: ThreeDemoSceneFactory = ({ camera, scene }): Three
 			geometry.dispose();
 			redMaterial.dispose();
 			blueMaterial.dispose();
+			// PointLight has no dispose method, removal handled by orbitGroup removal
 		}
 	};
 };

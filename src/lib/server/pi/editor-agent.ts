@@ -6,25 +6,25 @@
  */
 
 import type {
-	PiEditorAgentAppliedEdit,
-	PiEditorAgentPreviousTurn,
-	PiEditorAgentRequest,
-	PiEditorAgentResponse
-} from '$lib/pi/pi-editor-agent-types';
+	EditorAgentAppliedEdit,
+	EditorAgentPreviousTurn,
+	EditorAgentRequest,
+	EditorAgentResponse
+} from '$lib/pi/editor-agent-types';
 
 import { getConfiguredModel } from './models';
 import { getLastPiAssistantError, mapPiChatMessages } from './chat-messages';
 import {
 	APPLY_ACTIVE_FILE_EDIT_TOOL_NAME,
-	type PiEditorAgentToolDetails
+	type EditorAgentToolDetails
 } from './editor-agent-edit-tool';
-import { createPiEditorAgentSession } from './editor-agent-session';
+import { createEditorAgentSession } from './editor-agent-session';
 
-export async function runPiEditorAgentRequest(
-	request: PiEditorAgentRequest
-): Promise<PiEditorAgentResponse> {
-	const session = await createPiEditorAgentSession(request.file);
-	let appliedEdit: PiEditorAgentAppliedEdit | undefined;
+export async function runEditorAgentRequest(
+	request: EditorAgentRequest
+): Promise<EditorAgentResponse> {
+	const session = await createEditorAgentSession(request.file);
+	let appliedEdit: EditorAgentAppliedEdit | undefined;
 	const unsubscribe = session.subscribe((event) => {
 		if (
 			event.type !== 'tool_execution_end' ||
@@ -34,7 +34,7 @@ export async function runPiEditorAgentRequest(
 			return;
 		}
 
-		const nextAppliedEdit = toPiEditorAgentAppliedEdit(event.result?.details);
+		const nextAppliedEdit = toEditorAgentAppliedEdit(event.result?.details);
 
 		if (nextAppliedEdit) {
 			appliedEdit = nextAppliedEdit;
@@ -42,7 +42,7 @@ export async function runPiEditorAgentRequest(
 	});
 
 	try {
-		await session.prompt(buildPiEditorAgentPrompt(request));
+		await session.prompt(buildEditorAgentPrompt(request));
 		const assistantError = getLastPiAssistantError(session.messages);
 
 		if (assistantError) {
@@ -69,7 +69,7 @@ export async function runPiEditorAgentRequest(
 	}
 }
 
-export function buildPiEditorAgentPrompt(request: PiEditorAgentRequest): string {
+export function buildEditorAgentPrompt(request: EditorAgentRequest): string {
 	const prompt = request.prompt.trim();
 	const fileState = request.file.isDirty ? 'unsaved editor changes present' : 'saved editor state';
 	const sections = [
@@ -90,7 +90,7 @@ export function buildPiEditorAgentPrompt(request: PiEditorAgentRequest): string 
 	return sections.filter((section) => section.length > 0).join('\n\n');
 }
 
-function formatPreviousTurnSection(previousTurn: PiEditorAgentPreviousTurn | undefined): string {
+function formatPreviousTurnSection(previousTurn: EditorAgentPreviousTurn | undefined): string {
 	if (!previousTurn) {
 		return '';
 	}
@@ -110,8 +110,8 @@ function formatPreviousTurnSection(previousTurn: PiEditorAgentPreviousTurn | und
 	].join('\n');
 }
 
-export function toPiEditorAgentAppliedEdit(details: unknown): PiEditorAgentAppliedEdit | undefined {
-	if (!isPiEditorAgentToolDetails(details)) {
+export function toEditorAgentAppliedEdit(details: unknown): EditorAgentAppliedEdit | undefined {
+	if (!isEditorAgentToolDetails(details)) {
 		return undefined;
 	}
 
@@ -123,12 +123,12 @@ export function toPiEditorAgentAppliedEdit(details: unknown): PiEditorAgentAppli
 	};
 }
 
-function isPiEditorAgentToolDetails(details: unknown): details is PiEditorAgentToolDetails {
+function isEditorAgentToolDetails(details: unknown): details is EditorAgentToolDetails {
 	if (!details || typeof details !== 'object') {
 		return false;
 	}
 
-	const candidate = details as Partial<PiEditorAgentToolDetails>;
+	const candidate = details as Partial<EditorAgentToolDetails>;
 
 	return (
 		typeof candidate.path === 'string' &&

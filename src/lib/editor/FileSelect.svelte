@@ -17,9 +17,9 @@
 	let { files, label = 'File', value = $bindable('') }: Props = $props();
 </script>
 
-<label>
-	{label}
-	<select bind:value>
+<label class="ui-toolbar-field">
+	<span class="ui-form-label">{label}</span>
+	<select class="ui-select" bind:value>
 		{#each files as file}
 			<option value={file.path}>{file.path}</option>
 		{/each}

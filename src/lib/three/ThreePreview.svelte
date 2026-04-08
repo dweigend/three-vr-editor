@@ -132,7 +132,7 @@
 	{:else if preview}
 		<div class="preview-surface" bind:this={viewerRoot}></div>
 	{:else}
-		<p>No preview available.</p>
+		<p class="ui-empty-state">No preview available.</p>
 	{/if}
 
 	{#snippet failed(error)}
@@ -142,8 +142,10 @@
 
 <style>
 	.preview-surface {
+		height: 100%;
 		min-height: 24rem;
 		min-width: 0;
+		background: #030613;
 		overflow: hidden;
 	}
 

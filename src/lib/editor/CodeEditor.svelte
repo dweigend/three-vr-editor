@@ -164,28 +164,67 @@
 	});
 </script>
 
-<div>
-	<button type="button" onclick={handleSave} disabled={saveDisabled}>Save</button>
-	<button type="button" onclick={handleRedo} disabled={!canRedo}>Redo</button>
-</div>
+<div class="ui-code-editor">
+	<div class="ui-code-editor__toolbar">
+		<div class="ui-toolbar__group">
+			<button class="ui-button ui-button--sm" type="button" onclick={handleSave} disabled={saveDisabled}>
+				Save
+			</button>
+			<button
+				class="ui-button ui-button--ghost ui-button--sm"
+				type="button"
+				onclick={handleRedo}
+				disabled={!canRedo}
+			>
+				Redo
+			</button>
+		</div>
+	</div>
 
-<div class="editor-root" bind:this={editorRoot}></div>
+	<div class="ui-code-editor__body">
+		<div class="editor-root" bind:this={editorRoot}></div>
+	</div>
+</div>
 
 <style>
 	.editor-root {
+		height: 100%;
 		min-width: 0;
 	}
 
 	:global(.cm-editor) {
+		height: 100%;
 		max-width: 100%;
+		background: transparent;
+		color: var(--ui-color-text);
 	}
 
 	:global(.cm-scroller) {
 		overflow: auto;
+		font-family: var(--ui-font-mono);
 	}
-	
+
 	:global(.cm-lineWrapping) {
 		white-space: break-spaces;
 		word-break: break-word;
+	}
+
+	:global(.cm-gutters) {
+		border-right: 1px solid rgba(255, 255, 255, 0.08);
+		background: rgba(255, 255, 255, 0.03);
+		color: var(--ui-color-text-subtle);
+	}
+
+	:global(.cm-activeLine),
+	:global(.cm-activeLineGutter) {
+		background: rgba(255, 255, 255, 0.04);
+	}
+
+	:global(.cm-content) {
+		padding: 0.35rem 0;
+	}
+
+	:global(.cm-focused) {
+		outline: none;
 	}
 </style>
