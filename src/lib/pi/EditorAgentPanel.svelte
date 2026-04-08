@@ -1,13 +1,17 @@
 <!--
 	Purpose: Render a thin Pi editor panel for the Three editor demo.
 	Context: The nested `/three/editor/pi` route needs a file-aware assistant surface without embedding Pi SDK logic in the browser.
-	Responsibility: Collect prompts, call the server endpoint, render local turns, and show disabled or error states.
+	Responsibility: Collect prompts, call the server endpoint, render optimistic local turns, and show disabled or error states.
 	Boundaries: Pi session creation and prompt execution stay in server-only modules and route handlers.
 -->
 
 <script lang="ts">
 	import { resolve } from '$app/paths';
+	import Bot from '@lucide/svelte/icons/bot';
 	import { Button } from '$lib/components';
+	import { ConversationPanel, InputBar } from '$lib/blocks';
+	import { createConversationState } from '$lib/pi/conversation-state.svelte';
+	import { sendEditorAgentRequest } from '$lib/pi/editor-agent-client';
 
 	import type {
 		EditorAgentPreviousTurn,
@@ -39,12 +43,37 @@
 	}: Props = $props();
 
 	let prompt = $state('');
-	let errorMessage = $state<string | null>(null);
 	let isSubmitting = $state(false);
 	let turns = $state<EditorAgentTurn[]>([]);
+	const conversation = createConversationState();
+	let conversationFilePath = $state<string | null>(null);
 
 	const isDisabled = $derived(!hasActiveKey || !activeFileContext || isSubmitting);
 	const latestTurn = $derived(turns.at(-1) ?? null);
+	const promptPlaceholder = $derived.by(() => {
+		if (!hasActiveKey) {
+			return 'Configure an OpenRouter key in Settings to use Pi.';
+		}
+
+		if (!activeFileContext) {
+			return 'Open a file to ask Pi about the current editor context.';
+		}
+
+		return 'Ask Pi about the current file or request a targeted change suggestion.';
+	});
+
+	$effect(() => {
+		const nextFilePath = activeFileContext?.path ?? null;
+
+		if (nextFilePath === conversationFilePath) {
+			return;
+		}
+
+		conversationFilePath = nextFilePath;
+		prompt = '';
+		turns = [];
+		conversation.reset();
+	});
 
 	async function submitPrompt(): Promise<void> {
 		const normalizedPrompt = prompt.trim();
@@ -53,8 +82,10 @@
 			return;
 		}
 
+		const pendingAssistantId = conversation.beginAssistantTurn(normalizedPrompt);
+		prompt = '';
 		isSubmitting = true;
-		errorMessage = null;
+		conversation.clearError();
 
 		try {
 			const requestBody = {
@@ -62,21 +93,9 @@
 				previousTurn: latestTurn ?? undefined,
 				prompt: normalizedPrompt
 			} satisfies EditorAgentRequest;
-			const response = await fetch(endpoint, {
-				body: JSON.stringify(requestBody),
-				headers: {
-					'content-type': 'application/json'
-				},
-				method: 'POST'
-			});
+			const payload = await sendEditorAgentRequest(endpoint, requestBody);
 
-			if (!response.ok) {
-				const errorPayload = (await response.json().catch(() => null)) as { message?: string } | null;
-				throw new Error(errorPayload?.message ?? 'Pi request failed.');
-			}
-
-			const payload = (await response.json()) as EditorAgentResponse;
-
+			conversation.resolveAssistantTurn(pendingAssistantId, payload.answer);
 			turns = [
 				...turns,
 				{
@@ -84,13 +103,15 @@
 					prompt: normalizedPrompt
 				}
 			];
-			prompt = '';
 			onResponse?.({
 				request: requestBody,
 				response: payload
 			});
 		} catch (error) {
-			errorMessage = error instanceof Error ? error.message : 'Pi request failed.';
+			conversation.failAssistantTurn(
+				pendingAssistantId,
+				error instanceof Error ? error.message : 'Pi request failed.'
+			);
 		} finally {
 			isSubmitting = false;
 		}
@@ -103,72 +124,79 @@
 		<p class="ui-toolbar-status">{modelName ? modelName : 'No model configured'}</p>
 	</div>
 
-	<div class="ui-pane__body ui-pane__body--scroll">
-		<div class="ui-form-grid">
-			<div class="ui-stack ui-stack--tight">
-				{#if !activeFileContext}
-					<p class="ui-status">Waiting for the active file context.</p>
-				{:else}
-					<p class="ui-status">Active file: {activeFileContext.path}</p>
-					<p class="ui-status">
-						Editor state: {activeFileContext.isDirty ? 'unsaved changes' : 'saved'}
-					</p>
-				{/if}
-			</div>
+	<div class="ui-pane__body ui-pane__body--flush">
+		<ConversationPanel
+			class="editor-agent-panel__conversation"
+			emptyMessage="No local agent turns yet."
+			errorMessage={conversation.errorMessage}
+			messages={conversation.messages}
+		>
+			{#snippet composer()}
+				<form class="editor-agent-panel__composer" onsubmit={(event) => {
+					event.preventDefault();
+					void submitPrompt();
+				}}>
+					<InputBar
+						bind:value={prompt}
+						ariaLabel="Question for Pi"
+						disabled={isDisabled}
+						enterKeyHint="send"
+						inputMode="command"
+						placeholder={promptPlaceholder}
+						spellcheck={false}
+						variant="command-line"
+					>
+						{#snippet leading()}
+							<span class="editor-agent-panel__lead" aria-hidden="true">
+								<Bot aria-hidden="true" size={18} />
+							</span>
+						{/snippet}
 
-			{#if !hasActiveKey}
-				<div class="ui-form-grid">
-					<p class="ui-status ui-status--danger">
-						Pi stays disabled until an OpenRouter key is configured.
-					</p>
-					<div class="ui-inline">
-						<Button href={resolve('/pi')} size="sm">Keys</Button>
-						<Button href={resolve('/pi/models')} size="sm" variant="ghost">Models</Button>
-					</div>
-				</div>
-			{:else}
-				<div class="ui-form-grid">
-					<label class="ui-form-row">
-						<span class="ui-form-label">Question for Pi</span>
-						<textarea
-							bind:value={prompt}
-							class="ui-textarea"
-							rows="6"
-							placeholder="Ask about the active file, explain code, or request a targeted change suggestion."
-							disabled={!activeFileContext || isSubmitting}
-						></textarea>
-					</label>
-
-					<div class="ui-inline">
-						<Button type="button" onclick={submitPrompt} disabled={isDisabled || prompt.trim().length === 0}>
-							{isSubmitting ? 'Asking Pi...' : 'Ask Pi'}
-						</Button>
-					</div>
-				</div>
-			{/if}
-
-			{#if errorMessage}
-				<p class="ui-status ui-status--danger">{errorMessage}</p>
-			{/if}
-
-			<div class="ui-stack ui-stack--tight">
-				<p class="ui-surface-label">Conversation</p>
-
-				{#if turns.length === 0}
-					<p class="ui-empty-state">No local agent turns yet.</p>
-				{:else}
-					<div class="ui-panel-list">
-						{#each turns as turn (`${turn.prompt}-${turn.answer}`)}
-							<article class="ui-message">
-								<div class="ui-message__role">You</div>
-								<pre class="ui-message__body">{turn.prompt}</pre>
-								<div class="ui-message__role">Pi</div>
-								<pre class="ui-message__body">{turn.answer}</pre>
-							</article>
-						{/each}
-					</div>
-				{/if}
-			</div>
-		</div>
+						{#snippet trailing()}
+							{#if !hasActiveKey}
+								<Button href={resolve('/pi')} size="sm">Open settings</Button>
+							{:else}
+								<div class="editor-agent-panel__trailing">
+									<Button type="submit" disabled={isDisabled || prompt.trim().length === 0}>
+										{isSubmitting ? 'Asking Pi...' : 'Ask Pi'}
+									</Button>
+								</div>
+							{/if}
+						{/snippet}
+					</InputBar>
+				</form>
+			{/snippet}
+		</ConversationPanel>
 	</div>
 </section>
+
+<style>
+	:global(.editor-agent-panel__conversation) {
+		height: 100%;
+		min-height: 0;
+	}
+
+	.editor-agent-panel__composer {
+		width: 100%;
+	}
+
+	.editor-agent-panel__lead {
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		width: 1.5rem;
+		min-height: 2.4rem;
+		color: var(--ui-color-text-subtle);
+	}
+
+	.editor-agent-panel__trailing {
+		display: inline-flex;
+		align-items: center;
+		gap: 0.55rem;
+	}
+
+	:global(.editor-agent-panel__composer .input-bar__input) {
+		text-transform: none;
+		letter-spacing: 0.03em;
+	}
+</style>

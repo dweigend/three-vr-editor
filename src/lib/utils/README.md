@@ -12,6 +12,7 @@
 ## What Belongs Here
 
 - class-name helpers
+- safe markdown formatting helpers for reusable UI surfaces
 - lightweight presentation utilities with no product-specific behavior
 - low-level helpers reused by multiple primitives or blocks
 

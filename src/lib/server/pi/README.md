@@ -13,8 +13,10 @@ This folder contains the server-only Pi integration used by the editor-agent dem
 
 - auth and configuration
   `auth.ts`, `models.ts`, `paths.ts`
-- session and runtime setup
-  `session.ts`, `session-runtime.ts`, `resource-loader.ts`, `service.ts`
+- chat session and runtime setup
+  `chat-cookie.ts`, `chat-service.ts`, `chat-session-store.ts`, `session-runtime.ts`, `resource-loader.ts`
+- settings-side validation
+  `service.ts`
 - editor-agent flow
   `editor-agent.ts`, `editor-agent-session.ts`, `editor-agent-edit-tool.ts`, `editor-agent-line-ranges.ts`
 - chat message normalization
@@ -24,6 +26,7 @@ This folder contains the server-only Pi integration used by the editor-agent dem
 
 - keep Pi SDK usage on the server
 - configure authenticated sessions and model access
+- split persisted chat orchestration into cookie, session-store, and service helpers
 - define the narrow active-file edit tool used by the editor-agent demo
 - normalize session output into browser-safe response payloads
 

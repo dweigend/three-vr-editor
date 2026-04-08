@@ -1,26 +1,101 @@
 <!--
 	Purpose: Provide a minimal chat UI for the server-side Pi demo session.
-	Context: This page starts a Pi session and continues a simple dialogue through form posts.
-	Responsibility: Render the current transcript, the start button, and the message form.
+	Context: This page hydrates the persisted transcript and then continues the dialogue with immediate optimistic client-side updates.
+	Responsibility: Render the current transcript, clear the input immediately on submit, and show Pi working state while the backend responds.
 	Boundaries: The browser never imports Pi SDK modules or accesses secrets directly.
 -->
 
 <script lang="ts">
-	import Bot from '@lucide/svelte/icons/bot';
-	import Plus from '@lucide/svelte/icons/plus';
-	import Send from '@lucide/svelte/icons/send';
-	import Smile from '@lucide/svelte/icons/smile';
-	import { Button } from '$lib/components';
+	import { untrack } from 'svelte';
+	import Power from '@lucide/svelte/icons/power';
+	import { IconButton } from '$lib/components';
+	import { ConversationPanel, InputBar } from '$lib/blocks';
+	import { sendPiChatMessageClient, startPiChatSessionClient } from '$lib/pi/chat-client';
+	import { createConversationState } from '$lib/pi/conversation-state.svelte';
 
 	import type { PageProps } from './$types';
 
-	let { data, form }: PageProps = $props();
+	let { data }: PageProps = $props();
+	const initialData = untrack(() => data);
+	const hasActiveKey = initialData.hasActiveKey;
+	const initialMessages = initialData.messages;
+	const initialSessionReady = initialData.sessionReady;
 
-	const messages = $derived(form?.messages ?? data.messages);
-	const sessionReady = $derived(form?.sessionReady ?? data.sessionReady);
-	const feedbackClass = $derived(
-		form?.status === 'success' ? 'ui-status ui-status--success' : 'ui-status ui-status--danger'
-	);
+	const conversation = createConversationState(initialMessages);
+
+	let prompt = $state('');
+	let sessionReady = $state(initialSessionReady);
+	let isStartingSession = $state(false);
+	let isSending = $state(false);
+
+	const isComposerDisabled = $derived(!hasActiveKey || isStartingSession || isSending);
+	const placeholder = $derived.by(() => {
+		if (!hasActiveKey) {
+			return 'Configure a key in Settings, then start a Pi session.';
+		}
+
+		if (sessionReady) {
+			return 'Enter message...';
+		}
+
+		return 'Send a message to start a Pi session.';
+	});
+	function toErrorMessage(error: unknown): string {
+		return error instanceof Error ? error.message : 'Pi request failed.';
+	}
+
+	async function startSession(): Promise<boolean> {
+		if (sessionReady) {
+			return true;
+		}
+
+		if (!hasActiveKey || isStartingSession) {
+			return false;
+		}
+
+		isStartingSession = true;
+		conversation.clearError();
+
+		try {
+			const payload = await startPiChatSessionClient();
+			sessionReady = payload.sessionReady;
+			conversation.setMessages(payload.messages);
+
+			return true;
+		} catch (error) {
+			conversation.setError(toErrorMessage(error));
+			return false;
+		} finally {
+			isStartingSession = false;
+		}
+	}
+
+	async function handleStartSession(): Promise<void> {
+		await startSession();
+	}
+
+	async function handleSubmit(): Promise<void> {
+		const normalizedPrompt = prompt.trim();
+
+		if (!hasActiveKey || normalizedPrompt.length === 0 || isSending || isStartingSession) {
+			return;
+		}
+
+		const optimisticPrompt = normalizedPrompt;
+		const pendingAssistantId = conversation.beginAssistantTurn(optimisticPrompt);
+		prompt = '';
+		isSending = true;
+
+		try {
+			const payload = await sendPiChatMessageClient(optimisticPrompt);
+			sessionReady = payload.sessionReady;
+			conversation.setMessages(payload.messages);
+		} catch (error) {
+			conversation.failAssistantTurn(pendingAssistantId, toErrorMessage(error));
+		} finally {
+			isSending = false;
+		}
+	}
 </script>
 
 <svelte:head>
@@ -28,62 +103,73 @@
 </svelte:head>
 
 <section class="ui-chat-screen">
-	<div class="ui-chat-log">
-		<div class="ui-inline">
-			<Button type="submit" form="start-session-form" disabled={sessionReady}>
-				{sessionReady ? 'Session ready' : 'Start session'}
-			</Button>
-			<p class="ui-status">
-				Key: {data.hasActiveKey ? 'configured' : 'missing'}.
-				Model: {data.configuredModel.name}.
-			</p>
-		</div>
-
-		{#if form}
-			<p class={feedbackClass}>{form.message}</p>
-		{/if}
-
-		{#if messages.length === 0}
-			<p class="ui-empty-state">No messages yet.</p>
-		{:else}
-			{#each messages as message, index (`${message.role}-${message.text}-${index}`)}
-				<article class="ui-chat-message">
-					<div class="ui-chat-message__icon">
-						{#if message.role === 'user'}
-							<Smile size={22} />
+	<ConversationPanel
+		class="ui-chat-screen__conversation"
+		emptyMessage="No messages yet."
+		errorMessage={conversation.errorMessage}
+		messages={conversation.messages}
+	>
+		{#snippet composer()}
+			<form
+				method="POST"
+				onsubmit={(event) => {
+					event.preventDefault();
+					void handleSubmit();
+				}}
+			>
+				<InputBar
+					bind:value={prompt}
+					ariaLabel="Message"
+					autocomplete="off"
+					disabled={isComposerDisabled}
+					enterKeyHint="send"
+					inputId="message"
+					inputMode="command"
+					inputName="message"
+					{placeholder}
+					spellcheck={false}
+					variant="command-line"
+				>
+					{#snippet leading()}
+						{#if sessionReady}
+							<span class="ui-chat-command-line__prompt" aria-hidden="true">&gt;</span>
 						{:else}
-							<Bot size={22} />
+							<IconButton
+								ariaLabel="Start session"
+								disabled={!hasActiveKey || isStartingSession || isSending}
+								onclick={() => {
+									void handleStartSession();
+								}}
+							>
+								{#snippet children()}
+									<Power aria-hidden="true" size={18} />
+								{/snippet}
+							</IconButton>
 						{/if}
-					</div>
-					<div aria-hidden="true" class="ui-chat-message__rule"></div>
-					<div class="ui-chat-message__bubble">
-						<pre class="ui-chat-message__body">{message.text}</pre>
-					</div>
-				</article>
-			{/each}
-		{/if}
-	</div>
-
-	<form action="?/startSession" id="start-session-form" method="POST"></form>
-
-	<form action="?/sendMessage" class="ui-chat-composer" method="POST">
-		<button class="ui-chat-composer__button" type="button" disabled aria-label="Attachments unavailable">
-			<Plus size={20} />
-		</button>
-
-		<div class="ui-chat-composer__field">
-			<label class="sr-only" for="message">Message</label>
-			<textarea
-				class="ui-textarea"
-				id="message"
-				name="message"
-				placeholder={sessionReady ? 'Send a message to Pi.' : 'Start a session to chat with Pi.'}
-				disabled={!sessionReady}
-			></textarea>
-		</div>
-
-		<button class="ui-chat-composer__button ui-chat-composer__button--send" type="submit" disabled={!sessionReady}>
-			<Send size={20} />
-		</button>
-	</form>
+					{/snippet}
+				</InputBar>
+			</form>
+		{/snippet}
+	</ConversationPanel>
 </section>
+
+<style>
+	.ui-chat-screen {
+		height: 100%;
+		min-height: 0;
+	}
+
+	.ui-chat-command-line__prompt {
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		font-family: var(--ui-font-mono);
+		font-size: 0.82rem;
+		font-weight: 700;
+		letter-spacing: 0.12em;
+		text-transform: uppercase;
+		color: var(--ui-color-text-subtle);
+		white-space: nowrap;
+		width: 1.5rem;
+	}
+</style>

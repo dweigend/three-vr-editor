@@ -7,23 +7,21 @@
 
 # three-js-vr-builder
 
-`three-js-vr-builder` is a SvelteKit playground for building and iterating on Three.js editing workflows inside the app itself.
+`three-js-vr-builder` is a SvelteKit playground for building and iterating on a Three.js editor workflow inside the app itself.
 
-The repository currently focuses on four connected areas:
+The current app is intentionally centered on three user-facing surfaces:
 
-- a minimal viewer demo for a managed Three scene
-- a reusable CodeMirror-based Three editor with live preview
-- a Pi-assisted editor variant with server-only agent integration
-- a template workbench with optional source headers, dynamic parameter controls, and WebGL/WebGPU-aware previews
+- an editor workspace with live Three.js preview and Pi integration
+- a Pi chat surface that reuses the configured runtime settings
+- a consolidated settings page for OpenRouter keys and model selection
 
 ## Current Capabilities
 
 - Managed Three source files live under `static/three`.
-- The viewer path can render the stable default scene from `static/three/cube.ts`.
 - The editor path can load, edit, save, and preview managed Three scene files.
-- The Pi path can analyze or update the active editor file through server-only Pi tooling.
-- The template workbench can create new files from blank starters or managed templates under `static/three/templates`.
-- Template scenes can optionally expose a machine-readable header and `templateParameters` block for the dynamic parameter panel.
+- The editor Pi panel can analyze or update the active editor file through server-only Pi tooling.
+- The settings path can validate, store, activate, and remove multiple OpenRouter keys.
+- The settings path can also select the configured OpenRouter model.
 - The runtime supports both `WebGLRenderer` and `WebGPURenderer` through the shared `createDemoScene` contract.
 
 ## Quick Start
@@ -43,11 +41,9 @@ bun run dev
 Open the main demo index:
 
 - `/`
-- `/editor`
-- `/three`
-- `/three/editor`
 - `/three/editor/pi`
-- `/three/editor/templates`
+- `/pi/chat`
+- `/pi`
 
 ## Validation
 
@@ -70,7 +66,7 @@ bun run test
 
 ### `src/routes`
 
-Contains the route entrypoints that expose the repository milestones. The Three demos intentionally stay additive so earlier steps remain available while newer workbench layers build on top.
+Contains the three main app entrypoints plus the supporting editor endpoints under `src/routes/three/editor`.
 
 ### `src/lib/editor`
 
@@ -86,17 +82,14 @@ This layer should stay UI-focused and not absorb preview orchestration or filesy
 
 Contains the main client-side Three integration:
 
-- viewer components
 - editor workspace components
-- template workbench components
 - shared runtime and preview loader modules
-- shared scene, template, and workspace types
+- shared scene and workspace types
 
 Important contract:
 
 - managed scene modules export `createDemoScene`
 - scene modules may optionally export `demoRendererKind = 'webgl' | 'webgpu'`
-- template metadata is optional and should never be required for rendering
 
 ### `src/lib/pi`
 
@@ -129,51 +122,30 @@ This layer defines the rules for editable files, preview safety, and template di
 This is the managed source root for scene files and scene templates.
 
 - `cube.ts` is the stable minimal reference scene
-- `templates/` contains managed template sources for the workbench
-- generated editable files belong under `scenes/` when created through the workbench
+- `templates/` contains managed template sources used by the file services
+- generated editable files belong under `scenes/` when created through the editor workflow
 
 The folder is intentionally treated as application-managed input, not as a general asset dump.
 
-## Demo Map
+## App Surfaces
 
-The Three demos represent a progression rather than replacements:
+The app intentionally exposes only three primary screens:
 
-1. `/three`
-   Minimal viewer smoke test using the default managed scene.
-2. `/three/editor`
-   Plain editor and preview workspace without agent tooling.
-3. `/three/editor/pi`
-   Editor workspace plus Pi-assisted active-file workflow.
-4. `/three/editor/templates`
-   Template workbench with file creation, optional parameter headers, and WebGL/WebGPU-aware preview behavior.
-
-This additive structure is intentional. New work should prefer adding the next milestone instead of replacing an earlier demo.
-
-## Template Workbench
-
-The template workbench is designed to stay opportunistic and failure-tolerant.
-
-- A scene file may include an optional `@three-template` header comment.
-- A scene file may include an optional managed `templateParameters` block.
-- If the workbench finds that metadata, it renders matching controls.
-- If the metadata is missing, the file still behaves like a normal managed scene and no parameter UI is shown.
-
-Supported control shapes currently include:
-
-- `text`
-- `color`
-- `range`
-- `select`
-
-Templates are curated, app-compatible adaptations of official Three.js example ideas rather than full HTML-demo copies.
+1. `/`
+   Minimal launcher for the editor, chat, and settings surfaces.
+2. `/three/editor/pi`
+   The main Three.js editor workspace with preview and Pi-assisted active-file workflow.
+3. `/pi/chat`
+   A session-based Pi chat screen that uses the configured key and model.
+4. `/pi`
+   Consolidated settings for OpenRouter keys and model selection.
 
 ## Contribution Notes
 
-- Prefer additive changes over replacing existing demos or workflows.
+- Prefer additive changes inside the three main surfaces over reintroducing separate demo entrypoints.
 - Keep Pi imports in server-only modules, route handlers, and `.server.ts` files.
 - Keep editor modules UI-focused; put file or preview orchestration in shared workspace state or server services.
 - Reuse the shared `createDemoScene` contract instead of inventing route-specific scene APIs.
-- Treat template metadata as optional enhancement only.
 - Keep documentation current when folder responsibilities shift. Important architecture folders under `src/lib` and `src/lib/server` should have short local READMEs.
 
 ## Folder Guides

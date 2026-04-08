@@ -8,10 +8,12 @@
 <script lang="ts">
 	import { untrack } from 'svelte';
 	import { resolve } from '$app/paths';
+	import Monitor from '@lucide/svelte/icons/monitor';
+	import { Pane, PaneGroup, PaneResizer } from 'paneforge';
 
+	import { ToolbarButton } from '$lib/components';
 	import CodeEditor from '$lib/editor/CodeEditor.svelte';
 	import type { EditorAgentAppliedEdit } from '$lib/pi/editor-agent-types';
-	import FileSelect from '$lib/editor/FileSelect.svelte';
 	import ThreePreview from '$lib/three/ThreePreview.svelte';
 	import type {
 		ThreePreviewBuildResult,
@@ -20,6 +22,7 @@
 	} from '$lib/three/three-editor-types';
 	import type { ThreeEditorActiveFileContext } from '$lib/three/three-editor-workspace-types';
 	import { createThreeEditorWorkspaceState } from '$lib/three/three-editor-workspace-state.svelte';
+	import { joinClassNames } from '$lib/utils/class-names';
 
 	type Props = {
 		activeFileContext?: ThreeEditorActiveFileContext | null;
@@ -40,7 +43,16 @@
 		pendingAppliedEditToken = 0,
 		previewEntryPath
 	}: Props = $props();
+	type CollapsiblePaneApi = {
+		collapse: () => void;
+		expand: () => void;
+		isCollapsed: () => boolean;
+	};
+
+	let previewPane: CollapsiblePaneApi | null = null;
+	let isPreviewCollapsed = $state(false);
 	let lastAppliedEditToken = $state(0);
+	let workspaceMessage = $state<string | null>(null);
 	const stableFiles = untrack(() => files);
 	const stableInitialDocument = untrack(() => initialDocument);
 	const stableInitialPreview = untrack(() => initialPreview);
@@ -77,7 +89,40 @@
 		void workspaceState.saveActiveDocument();
 	});
 
+	async function handleCreateFile(fileName: string): Promise<void> {
+		try {
+			await workspaceState.createFile({
+				fileName,
+				mode: 'blank'
+			});
+			workspaceMessage = null;
+		} catch (error) {
+			workspaceMessage = error instanceof Error ? error.message : 'Create file failed.';
+			throw error;
+		}
+	}
+
+	function togglePane(pane: CollapsiblePaneApi | null): void {
+		if (!pane) {
+			return;
+		}
+
+		if (pane.isCollapsed()) {
+			pane.expand();
+			return;
+		}
+
+		pane.collapse();
+	}
+
 	const toolbarStatus = $derived.by(() => {
+		if (workspaceMessage) {
+			return {
+				className: 'ui-toolbar-status ui-toolbar-status--danger',
+				text: workspaceMessage
+			};
+		}
+
 		if (workspaceState.saveError) {
 			return {
 				className: 'ui-toolbar-status ui-toolbar-status--danger',
@@ -107,42 +152,87 @@
 </script>
 
 <section class="ui-screen ui-screen--workbench">
-	<div class="ui-toolbar">
-		<div class="ui-toolbar__group">
-			<FileSelect
-				files={workspaceState.files}
-				bind:value={workspaceState.selectedPath}
-				label="Static Three file"
-			/>
-		</div>
-		<div class="ui-toolbar__spacer"></div>
-		<p class={toolbarStatus.className}>{toolbarStatus.text}</p>
-	</div>
+	<PaneGroup autoSaveId="three-editor-layout" class="ui-pane-group ui-pane-group--workbench" direction="horizontal">
+		<Pane
+			class="ui-pane-slot"
+			defaultSize={52}
+			minSize={20}
+		>
+			<section class="ui-pane">
+				<div class="ui-pane__body ui-pane__body--flush">
+					{#if workspaceState.activeDocument === undefined}
+						<div class="ui-pane__body">
+							<p class="ui-empty-state">Loading file...</p>
+						</div>
+					{:else}
+						{#snippet editorToolbarActions()}
+							<ToolbarButton
+								aria-label={isPreviewCollapsed ? 'Expand preview pane' : 'Collapse preview pane'}
+								class={joinClassNames(
+									'ui-code-editor__toolbar-button ui-code-editor__toolbar-button--icon',
+									!isPreviewCollapsed && 'ui-toolbar-button--active'
+								)}
+								onclick={() => {
+									togglePane(previewPane);
+								}}
+								title={isPreviewCollapsed ? 'Expand preview pane' : 'Collapse preview pane'}
+							>
+								<Monitor aria-hidden="true" size={16} />
+							</ToolbarButton>
+						{/snippet}
 
-	<div class="ui-workbench ui-workbench--editor">
-		<section class="ui-pane">
-			<div class="ui-pane__body ui-pane__body--flush">
-				{#if workspaceState.activeDocument === undefined}
-					<div class="ui-pane__body">
-						<p class="ui-empty-state">Loading file...</p>
-					</div>
-				{:else}
-					{#key workspaceState.selectedPath}
-						<CodeEditor
-							changedLineRanges={workspaceState.changedLineRanges}
-							diagnostic={workspaceState.activeDiagnostic}
-							value={workspaceState.activeDocument}
-							onChange={workspaceState.handleSourceChange}
-							onSave={workspaceState.saveActiveDocument}
-							saveDisabled={!workspaceState.isDirty || workspaceState.saveState === 'saving'}
-						/>
-					{/key}
-				{/if}
-			</div>
-		</section>
+						{#key workspaceState.selectedPath}
+							<CodeEditor
+								changedLineRanges={workspaceState.changedLineRanges}
+								diagnostic={workspaceState.activeDiagnostic}
+								files={workspaceState.files}
+								bind:selectedPath={workspaceState.selectedPath}
+								onCreateFile={handleCreateFile}
+								value={workspaceState.activeDocument}
+								onChange={workspaceState.handleSourceChange}
+								onSave={workspaceState.saveActiveDocument}
+								saveDisabled={!workspaceState.isDirty || workspaceState.saveState === 'saving'}
+								statusClassName={toolbarStatus.className}
+								statusText={toolbarStatus.text}
+								toolbarActions={editorToolbarActions}
+							/>
+						{/key}
+					{/if}
+				</div>
+			</section>
+		</Pane>
 
-		<section class="ui-pane ui-pane--plain ui-pane--muted">
-			<ThreePreview preview={workspaceState.preview} onErrorChange={workspaceState.handlePreviewErrorChange} />
-		</section>
-	</div>
+		<PaneResizer
+			class={joinClassNames(
+				'ui-pane-resizer ui-pane-resizer--vertical',
+				isPreviewCollapsed && 'ui-pane-resizer--hidden'
+			)}
+		/>
+
+		<Pane
+			bind:this={previewPane}
+			class="ui-pane-slot"
+			collapsible={true}
+			collapsedSize={0}
+			defaultSize={48}
+			minSize={12}
+			onCollapse={() => {
+				isPreviewCollapsed = true;
+			}}
+			onExpand={() => {
+				isPreviewCollapsed = false;
+			}}
+		>
+			<section class="ui-pane ui-pane--muted">
+				<div class="ui-pane__header">
+					<p class="ui-surface-label">Preview</p>
+					<p class="ui-toolbar-status">Live render</p>
+				</div>
+
+				<div class="ui-pane__body ui-pane__body--flush">
+					<ThreePreview preview={workspaceState.preview} onErrorChange={workspaceState.handlePreviewErrorChange} />
+				</div>
+			</section>
+		</Pane>
+	</PaneGroup>
 </section>

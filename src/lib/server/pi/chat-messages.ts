@@ -6,14 +6,7 @@
  */
 
 import type { AssistantMessage, TextContent, UserMessage } from '@mariozechner/pi-ai';
-
-type ChatRole = 'user' | 'assistant';
-
-export type PiChatMessage = {
-	role: ChatRole;
-	text: string;
-	timestamp: number;
-};
+import type { PiChatConversationMessage } from '$lib/pi/chat-types';
 
 type PiMessageLike = {
 	role: string;
@@ -43,15 +36,20 @@ function extractAssistantText(message: AssistantMessage): string {
 		.join('\n\n');
 }
 
-export function mapPiChatMessages(messages: PiMessageLike[]): PiChatMessage[] {
-	const transcript: PiChatMessage[] = [];
+export function mapPiChatMessages(messages: PiMessageLike[]): PiChatConversationMessage[] {
+	const transcript: PiChatConversationMessage[] = [];
 
 	for (const message of messages) {
 		if (message.role === 'user' && message.content) {
 			const text = extractUserText(message as UserMessage);
 
 			if (text) {
-				transcript.push({ role: 'user', text, timestamp: message.timestamp });
+				transcript.push({
+					id: `user-${message.timestamp}-${transcript.length}`,
+					role: 'user',
+					text,
+					timestamp: message.timestamp
+				});
 			}
 		}
 
@@ -59,7 +57,12 @@ export function mapPiChatMessages(messages: PiMessageLike[]): PiChatMessage[] {
 			const text = extractAssistantText(message as AssistantMessage);
 
 			if (text) {
-				transcript.push({ role: 'assistant', text, timestamp: message.timestamp });
+				transcript.push({
+					id: `assistant-${message.timestamp}-${transcript.length}`,
+					role: 'assistant',
+					text,
+					timestamp: message.timestamp
+				});
 			}
 		}
 	}

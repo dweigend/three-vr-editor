@@ -6,11 +6,11 @@
 -->
 
 <script lang="ts">
-	import { afterNavigate } from '$app/navigation';
 	import { resolve } from '$app/paths';
 	import { page } from '$app/state';
 	import Menu from '@lucide/svelte/icons/menu';
 	import MessageSquareText from '@lucide/svelte/icons/message-square-text';
+	import Rotate3d from '@lucide/svelte/icons/rotate-3d';
 	import Settings2 from '@lucide/svelte/icons/settings-2';
 	import SquarePen from '@lucide/svelte/icons/square-pen';
 	import '../app.css';
@@ -19,10 +19,6 @@
 
 	let { children } = $props();
 	let isMenuOpen = $state(false);
-
-	afterNavigate(() => {
-		isMenuOpen = false;
-	});
 </script>
 
 <svelte:head><link rel="icon" href={favicon} /></svelte:head>
@@ -30,8 +26,9 @@
 <div class="ui-app-shell">
 	<div class="ui-frame">
 		<header class="ui-topbar">
-			<a aria-label="Open demos" class="ui-topbar__home" href={resolve('/')}>
-				<span aria-hidden="true" class="ui-topbar__home-mark"></span>
+			<a aria-label="Open workspace" class="ui-topbar__home" href={resolve('/')}>
+				<Rotate3d aria-hidden="true" class="ui-topbar__home-icon" size={20} />
+				<span class="ui-topbar__home-label">Three Editor</span>
 			</a>
 
 			<div aria-hidden="true" class="ui-topbar__rule"></div>
@@ -42,11 +39,12 @@
 					ariaExpanded={isMenuOpen}
 					ariaHaspopup={true}
 					ariaLabel="Toggle workspace menu"
+					class="ui-topbar__menu-button"
 					onclick={() => {
 						isMenuOpen = !isMenuOpen;
 					}}
 				>
-					<Menu size={18} />
+					<Menu aria-hidden="true" size={18} />
 				</IconButton>
 			</div>
 		</header>
@@ -63,22 +61,12 @@
 					<aside aria-label="Workspace menu" class="ui-page-shell__menu" id="app-shell-menu">
 						<nav class="ui-nav-panel">
 							<a
-								aria-current={page.url.pathname.startsWith('/pi') ? 'page' : undefined}
-								class="ui-nav-panel__link"
-								class:ui-nav-panel__link--active={page.url.pathname.startsWith('/pi')}
-								href={resolve('/pi')}
-							>
-								<Settings2 size={18} />
-								<span>Settings</span>
-							</a>
-
-							<a
 								aria-current={page.url.pathname.startsWith('/three/editor') ? 'page' : undefined}
 								class="ui-nav-panel__link"
 								class:ui-nav-panel__link--active={page.url.pathname.startsWith('/three/editor')}
 								href={resolve('/three/editor/pi')}
 							>
-								<SquarePen size={18} />
+								<SquarePen aria-hidden="true" size={18} />
 								<span>Editor</span>
 							</a>
 
@@ -88,8 +76,18 @@
 								class:ui-nav-panel__link--active={page.url.pathname.startsWith('/pi/chat')}
 								href={resolve('/pi/chat')}
 							>
-								<MessageSquareText size={18} />
+								<MessageSquareText aria-hidden="true" size={18} />
 								<span>Chat</span>
+							</a>
+
+							<a
+								aria-current={page.url.pathname === '/pi' ? 'page' : undefined}
+								class="ui-nav-panel__link"
+								class:ui-nav-panel__link--active={page.url.pathname === '/pi'}
+								href={resolve('/pi')}
+							>
+								<Settings2 aria-hidden="true" size={18} />
+								<span>Settings</span>
 							</a>
 						</nav>
 					</aside>

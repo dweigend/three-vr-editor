@@ -18,4 +18,7 @@ This folder contains composed UI families built from local primitives.
 
 ## Current Families
 
-No local block families are active in this pass. The current refactor stays centered on app shell composition plus primitive reuse.
+- `app-launcher`
+- `conversation-panel`
+- `input-bar`
+- `settings-section`

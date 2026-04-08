@@ -11,14 +11,23 @@ This folder contains the browser-side Pi UI surface and the small transport cont
 
 ## Main Modules
 
+- `chat-client.ts`
+  Thin browser transport helpers for starting a chat session and sending prompt turns.
+- `chat-types.ts`
+  Shared request and response contracts for the standalone chat route.
+- `conversation-state.svelte.ts`
+  Shared optimistic conversation state for chat-style Pi surfaces.
 - `EditorAgentPanel.svelte`
   Thin client panel for sending the active file context and local prompts to the server endpoint.
+- `editor-agent-client.ts`
+  Small fetch helper for the file-aware editor agent endpoint.
 - `editor-agent-types.ts`
   Shared request/response and applied-edit transport types.
 
 ## Responsibilities
 
 - render the Pi panel UI
+- keep optimistic conversation behavior shared between chat surfaces
 - collect prompt input and local panel state
 - send structured requests to the server
 - receive and apply structured edit payloads in the workspace flow

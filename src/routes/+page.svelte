@@ -1,65 +1,38 @@
 <!--
-	Purpose: Provide the top-level route hub for the current builder workflows.
-	Context: The former demo index now lives directly at the root so the page tree stays one level flatter.
-	Responsibility: Present the manual entrypoints for the Three, Pi, and editor smoke-test routes.
+	Purpose: Provide the simplified root launcher for the current builder workflows.
+	Context: The app now keeps only three primary user-facing surfaces: editor, chat, and settings.
+	Responsibility: Present the main launch destinations without exposing legacy demo structure.
 	Boundaries: The individual route pages still own their specific screen composition and behavior.
 -->
 
 <script lang="ts">
 	import { resolve } from '$app/paths';
+	import { AppLauncher } from '$lib/blocks';
 
-	import { Card, CardBody, CardHeader } from '$lib/components';
-
-	const routeGroups = [
+	const launcherItems = [
 		{
-			label: 'Three demos',
-			routes: [
-				{
-					href: resolve('/three'),
-					title: 'Viewer smoke test',
-					description: 'Managed cube scene and base runtime shell.'
-				},
-				{
-					href: resolve('/three/editor'),
-					title: 'Editor workspace',
-					description: 'CodeMirror editing with live preview.'
-				},
-				{
-					href: resolve('/three/editor/pi'),
-					title: 'Editor + Pi',
-					description: 'Shared editor workspace with Pi-assisted edits.'
-				},
-				{
-					href: resolve('/three/editor/templates'),
-					title: 'Template workbench',
-					description: 'Template-driven scene creation and preview.'
-				}
-			]
+			href: resolve('/three/editor/pi'),
+			title: 'Editor',
+			description: 'Three.js preview, managed files, and Pi-assisted editing in one workspace.',
+			actionLabel: 'Open editor',
+			kicker: 'Build',
+			meta: 'Preview + Pi'
 		},
 		{
-			label: 'Pi demos',
-			routes: [
-				{
-					href: resolve('/pi'),
-					title: 'OpenRouter keys',
-					description: 'Store, activate, and remove API keys.'
-				},
-				{
-					href: resolve('/pi/models'),
-					title: 'Model settings',
-					description: 'Select the configured OpenRouter model.'
-				},
-				{
-					href: resolve('/pi/chat'),
-					title: 'Chat demo',
-					description: 'Start a session and send prompt turns.'
-				},
-				{
-					href: resolve('/editor'),
-					title: 'Editor foundation',
-					description: 'Small isolated editor baseline powered by CodeMirror.'
-				}
-			]
+			href: resolve('/pi/chat'),
+			title: 'Chat',
+			description: 'Start a Pi session and continue prompt turns against the active configuration.',
+			actionLabel: 'Open chat',
+			kicker: 'Talk',
+			meta: 'Session-based'
+		},
+		{
+			href: resolve('/pi'),
+			title: 'Settings',
+			description: 'Manage OpenRouter keys and choose the active model on one consolidated page.',
+			actionLabel: 'Open settings',
+			kicker: 'Configure',
+			meta: 'Keys + model'
 		}
 	];
 </script>
@@ -68,28 +41,11 @@
 	<title>Three.js VR Builder</title>
 </svelte:head>
 
-<section class="ui-shell ui-grid">
-	<div class="ui-stack ui-stack--tight">
-		<p class="ui-surface-label">Route hub</p>
-		<h1 class="ui-page-title">Demos</h1>
-		<p class="ui-page-copy">Use this page as the primary manual entrypoint for all current builder routes.</p>
-	</div>
-
-	<div class="ui-grid ui-grid--cards">
-		{#each routeGroups as group (group.label)}
-			<Card>
-				<CardHeader class="ui-stack ui-stack--tight">
-					<p class="ui-surface-label">{group.label}</p>
-				</CardHeader>
-				<CardBody class="ui-panel-list">
-					{#each group.routes as route (route.href)}
-						<a class="ui-panel-link" href={route.href}>
-							<h2 class="ui-panel-link__title">{route.title}</h2>
-							<p class="ui-panel-link__copy">{route.description}</p>
-						</a>
-					{/each}
-				</CardBody>
-			</Card>
-		{/each}
-	</div>
+<section class="ui-shell">
+	<AppLauncher
+		items={launcherItems}
+		kicker="Start"
+		title="Workspace"
+		description="Choose one of the three core surfaces: editor, chat, or settings."
+	/>
 </section>

@@ -20,4 +20,10 @@ This folder contains ui-system-aligned primitive UI families.
 
 - `button`
 - `card`
+- `command-input`
+- `dropdown-menu`
 - `icon-button`
+- `scroll-area`
+- `table`
+- `textarea`
+- `toolbar`
