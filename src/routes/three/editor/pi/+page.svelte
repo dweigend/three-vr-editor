@@ -21,6 +21,8 @@
 	files={data.files}
 	hasActiveKey={data.hasActiveKey}
 	initialDocument={data.document}
+	initialEditorMessages={data.initialEditorMessages}
+	initialEditorSessionReady={data.initialEditorSessionReady}
 	initialPreview={data.preview}
 	modelName={data.configuredModel.name}
 	previewEntryPath={data.previewEntryPath}

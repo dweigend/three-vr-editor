@@ -10,10 +10,10 @@ import { json } from '@sveltejs/kit';
 import type { PiChatMessageRequest } from '$lib/pi/chat-types';
 import { hasActiveOpenRouterKey } from '$lib/server/pi/auth';
 import {
-	clearPiChatSessionCookie,
-	getPiChatSessionCookie,
-	setPiChatSessionCookie
-} from '$lib/server/pi/chat-cookie';
+	clearPiSessionCookie,
+	getPiSessionCookie,
+	setPiSessionCookie
+} from '$lib/server/pi/session-cookie';
 import { sendPiChatMessage } from '$lib/server/pi/chat-service';
 
 import type { RequestHandler } from './$types';
@@ -32,7 +32,7 @@ export const POST: RequestHandler = async ({ cookies, request }) => {
 	const prompt = body.prompt;
 
 	if (!hasActiveOpenRouterKey()) {
-		clearPiChatSessionCookie(cookies);
+		clearPiSessionCookie(cookies, 'chat');
 		return json(
 			{
 				message: 'Add and activate an OpenRouter key first.'
@@ -44,16 +44,16 @@ export const POST: RequestHandler = async ({ cookies, request }) => {
 	try {
 		const session = await sendPiChatMessage({
 			prompt,
-			sessionFile: getPiChatSessionCookie(cookies)
+			sessionFile: getPiSessionCookie(cookies, 'chat')
 		});
-		setPiChatSessionCookie(cookies, session.sessionFile);
+		setPiSessionCookie(cookies, 'chat', session.sessionFile);
 
 		return json({
 			messages: session.messages,
 			sessionReady: true
 		});
 	} catch (caughtError) {
-		clearPiChatSessionCookie(cookies);
+		clearPiSessionCookie(cookies, 'chat');
 		const message =
 			caughtError instanceof Error ? caughtError.message : 'Could not send the Pi message.';
 

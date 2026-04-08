@@ -8,8 +8,14 @@
 import { homedir } from 'node:os';
 import { join } from 'node:path';
 
+import type { PiSessionScope } from './session-cookie';
+
 export const PI_DEMO_APP_DIR = join(homedir(), '.three-js-vr-builder', 'pi');
 export const PI_DEMO_AUTH_PATH = join(PI_DEMO_APP_DIR, 'auth.json');
 export const PI_DEMO_SETTINGS_PATH = join(PI_DEMO_APP_DIR, 'settings.json');
-export const PI_DEMO_SESSION_DIR = join(PI_DEMO_APP_DIR, 'sessions');
+export const PI_DEMO_SESSION_ROOT_DIR = join(PI_DEMO_APP_DIR, 'sessions');
 export const PI_DEMO_CWD = process.cwd();
+
+export function getPiDemoSessionDir(scope: PiSessionScope): string {
+	return join(PI_DEMO_SESSION_ROOT_DIR, scope);
+}

@@ -26,3 +26,14 @@ export async function sendEditorAgentRequest(
 
 	return (await response.json()) as EditorAgentResponse;
 }
+
+export async function clearEditorAgentSession(endpoint: string): Promise<void> {
+	const response = await fetch(endpoint, {
+		method: 'DELETE'
+	});
+
+	if (!response.ok) {
+		const errorPayload = (await response.json().catch(() => null)) as { message?: string } | null;
+		throw new Error(errorPayload?.message ?? 'Could not clear the Pi editor session.');
+	}
+}

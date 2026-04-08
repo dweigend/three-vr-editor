@@ -8,8 +8,8 @@
 import { json } from '@sveltejs/kit';
 
 import { hasActiveOpenRouterKey } from '$lib/server/pi/auth';
-import { setPiChatSessionCookie } from '$lib/server/pi/chat-cookie';
 import { startPiChatSession } from '$lib/server/pi/chat-service';
+import { setPiSessionCookie } from '$lib/server/pi/session-cookie';
 
 import type { RequestHandler } from './$types';
 
@@ -25,7 +25,7 @@ export const POST: RequestHandler = async ({ cookies }) => {
 
 	try {
 		const session = await startPiChatSession();
-		setPiChatSessionCookie(cookies, session.sessionFile);
+		setPiSessionCookie(cookies, 'chat', session.sessionFile);
 
 		return json({
 			messages: session.messages,

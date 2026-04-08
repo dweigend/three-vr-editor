@@ -18,6 +18,7 @@ describe('buildEditorAgentPrompt', () => {
 				path: 'cube.ts',
 				savedContent: 'export const createDemoScene = () => null;'
 			},
+			mode: 'one-shot',
 			prompt: 'Was macht diese Datei?'
 		});
 
@@ -37,6 +38,7 @@ describe('buildEditorAgentPrompt', () => {
 				path: 'cube.ts',
 				savedContent: 'export const createDemoScene = () => ({ update() {}, dispose() {} });'
 			},
+			mode: 'one-shot',
 			previousTurn: {
 				answer: 'Sie rendert einen kleinen Demo-Controller.',
 				prompt: 'Was exportiert die Datei?'
@@ -48,6 +50,26 @@ describe('buildEditorAgentPrompt', () => {
 		expect(prompt).toContain('Vorherige Nutzerfrage: Was exportiert die Datei?');
 		expect(prompt).toContain('Sie rendert einen kleinen Demo-Controller.');
 		expect(prompt).toContain('Und wie koennte ich sie erweitern?');
+	});
+
+	it('skips the one-shot follow-up section in session mode', () => {
+		const prompt = buildEditorAgentPrompt({
+			file: {
+				content: 'export const createDemoScene = () => ({ update() {}, dispose() {} });',
+				isDirty: false,
+				path: 'cube.ts',
+				savedContent: 'export const createDemoScene = () => ({ update() {}, dispose() {} });'
+			},
+			mode: 'session',
+			previousTurn: {
+				answer: 'Vorige Antwort',
+				prompt: 'Vorige Frage'
+			},
+			prompt: 'Mach weiter.'
+		});
+
+		expect(prompt).toContain('Sitzungsmodus: fortlaufende Editor-Session.');
+		expect(prompt).not.toContain('Vorherige Runde fuer das aktuelle Follow-up:');
 	});
 });
 

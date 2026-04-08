@@ -6,7 +6,10 @@
  */
 
 import type { EditorLineRange } from '$lib/editor/editor-diagnostics';
+import type { PiChatConversationMessage } from '$lib/pi/chat-types';
 import type { ThreeEditorActiveFileContext } from '$lib/three/three-editor-workspace-types';
+
+export type EditorAgentMode = 'one-shot' | 'session';
 
 export type EditorAgentPreviousTurn = {
 	answer: string;
@@ -15,6 +18,7 @@ export type EditorAgentPreviousTurn = {
 
 export type EditorAgentRequest = {
 	file: ThreeEditorActiveFileContext;
+	mode: EditorAgentMode;
 	previousTurn?: EditorAgentPreviousTurn;
 	prompt: string;
 };
@@ -29,5 +33,12 @@ export type EditorAgentAppliedEdit = {
 export type EditorAgentResponse = {
 	answer: string;
 	appliedEdit?: EditorAgentAppliedEdit;
+	messages: PiChatConversationMessage[];
 	modelName?: string;
+	sessionReady: boolean;
 };
+
+export type EditorAgentSessionState = Pick<
+	EditorAgentResponse,
+	'messages' | 'modelName' | 'sessionReady'
+>;

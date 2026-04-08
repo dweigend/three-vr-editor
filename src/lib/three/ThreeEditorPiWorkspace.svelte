@@ -14,6 +14,7 @@
 
 	import { ToolbarButton } from '$lib/components';
 	import CodeEditor from '$lib/editor/CodeEditor.svelte';
+	import type { PiChatConversationMessage } from '$lib/pi/chat-types';
 	import EditorAgentPanel from '$lib/pi/EditorAgentPanel.svelte';
 	import type {
 		EditorAgentAppliedEdit,
@@ -34,6 +35,8 @@
 		files: ThreeSourceFileSummary[];
 		hasActiveKey: boolean;
 		initialDocument: ThreeSourceDocument;
+		initialEditorMessages: PiChatConversationMessage[];
+		initialEditorSessionReady: boolean;
 		initialPreview: ThreePreviewBuildResult;
 		modelName?: string | null;
 		previewEntryPath: string;
@@ -43,6 +46,8 @@
 		files,
 		hasActiveKey,
 		initialDocument,
+		initialEditorMessages,
+		initialEditorSessionReady,
 		initialPreview,
 		modelName = null,
 		previewEntryPath
@@ -271,14 +276,14 @@
 						isAgentCollapsed = false;
 					}}
 				>
-					{#key workspaceState.activeFileContext?.path ?? 'no-file'}
-						<EditorAgentPanel
-							activeFileContext={workspaceState.activeFileContext}
-							{hasActiveKey}
-							{modelName}
-							onResponse={handleAgentResponse}
-						/>
-					{/key}
+					<EditorAgentPanel
+						activeFileContext={workspaceState.activeFileContext}
+						{hasActiveKey}
+						initialMessages={initialEditorMessages}
+						initialSessionReady={initialEditorSessionReady}
+						{modelName}
+						onResponse={handleAgentResponse}
+					/>
 				</Pane>
 			</PaneGroup>
 		</Pane>

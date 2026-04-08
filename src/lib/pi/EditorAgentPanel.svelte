@@ -1,23 +1,25 @@
 <!--
-	Purpose: Render a thin Pi editor panel for the Three editor demo.
-	Context: The nested `/three/editor/pi` route needs a file-aware assistant surface without embedding Pi SDK logic in the browser.
-	Responsibility: Collect prompts, call the server endpoint, render optimistic local turns, and show disabled or error states.
-	Boundaries: Pi session creation and prompt execution stay in server-only modules and route handlers.
+	Purpose: Render the Pi editor panel with explicit one-shot and session modes.
+	Context: The editor surface needs a file-aware assistant without embedding Pi SDK logic in the browser.
+	Responsibility: Collect prompts, manage local conversation state per mode, and call the server endpoint.
+	Boundaries: Pi session creation and persistence stay in server-only modules and route handlers.
 -->
 
 <script lang="ts">
+	import { untrack } from 'svelte';
 	import { resolve } from '$app/paths';
-	import Bot from '@lucide/svelte/icons/bot';
 	import { Button } from '$lib/components';
 	import { ConversationPanel, InputBar } from '$lib/blocks';
 	import { createConversationState } from '$lib/pi/conversation-state.svelte';
-	import { sendEditorAgentRequest } from '$lib/pi/editor-agent-client';
+	import { clearEditorAgentSession, sendEditorAgentRequest } from '$lib/pi/editor-agent-client';
 
 	import type {
+		EditorAgentMode,
 		EditorAgentPreviousTurn,
 		EditorAgentRequest,
 		EditorAgentResponse
 	} from '$lib/pi/editor-agent-types';
+	import type { PiChatConversationMessage } from '$lib/pi/chat-types';
 	import type { ThreeEditorActiveFileContext } from '$lib/three/three-editor-workspace-types';
 
 	type EditorAgentTurn = EditorAgentPreviousTurn;
@@ -30,6 +32,8 @@
 		activeFileContext: ThreeEditorActiveFileContext | null;
 		endpoint?: string;
 		hasActiveKey: boolean;
+		initialMessages?: PiChatConversationMessage[];
+		initialSessionReady?: boolean;
 		modelName?: string | null;
 		onResponse?: ((event: EditorAgentResponseEvent) => void) | undefined;
 	};
@@ -38,18 +42,38 @@
 		activeFileContext,
 		endpoint = resolve('/three/editor/pi/agent'),
 		hasActiveKey,
+		initialMessages = [],
+		initialSessionReady = false,
 		modelName = null,
 		onResponse
 	}: Props = $props();
+	const stableInitialMessages = untrack(() => initialMessages);
+	const stableInitialSessionReady = untrack(() => initialSessionReady);
+	const stableInitialMode = stableInitialSessionReady ? 'session' : 'one-shot';
 
 	let prompt = $state('');
 	let isSubmitting = $state(false);
+	let isResettingSession = $state(false);
+	let mode = $state<EditorAgentMode>(stableInitialMode);
 	let turns = $state<EditorAgentTurn[]>([]);
-	const conversation = createConversationState();
+	let lastMode = $state<EditorAgentMode>(stableInitialMode);
+	let hasPersistedSession = $state(stableInitialSessionReady);
+	let sessionMessagesCache = $state<PiChatConversationMessage[]>([...stableInitialMessages]);
+	const conversation = createConversationState(stableInitialMessages);
 	let conversationFilePath = $state<string | null>(null);
 
-	const isDisabled = $derived(!hasActiveKey || !activeFileContext || isSubmitting);
+	const isDisabled = $derived(!hasActiveKey || !activeFileContext || isSubmitting || isResettingSession);
 	const latestTurn = $derived(turns.at(-1) ?? null);
+	const emptyMessage = $derived(
+		mode === 'session' ? 'No editor session messages yet.' : 'No local agent turns yet.'
+	);
+	const modeStatus = $derived.by(() => {
+		if (mode === 'session') {
+			return hasPersistedSession ? 'Session mode' : 'Session mode (new)';
+		}
+
+		return 'One-shot mode';
+	});
 	const promptPlaceholder = $derived.by(() => {
 		if (!hasActiveKey) {
 			return 'Configure an OpenRouter key in Settings to use Pi.';
@@ -59,7 +83,11 @@
 			return 'Open a file to ask Pi about the current editor context.';
 		}
 
-		return 'Ask Pi about the current file or request a targeted change suggestion.';
+		if (mode === 'session') {
+			return 'Continue the editor session.';
+		}
+
+		return 'Ask Pi about the current file.';
 	});
 
 	$effect(() => {
@@ -71,8 +99,30 @@
 
 		conversationFilePath = nextFilePath;
 		prompt = '';
-		turns = [];
+
+		if (mode === 'one-shot') {
+			turns = [];
+			conversation.reset();
+		}
+	});
+
+	$effect(() => {
+		if (mode === lastMode) {
+			return;
+		}
+
+		lastMode = mode;
+		prompt = '';
+		conversation.clearError();
+
+		if (mode === 'session') {
+			turns = [];
+			conversation.setMessages(sessionMessagesCache);
+			return;
+		}
+
 		conversation.reset();
+		turns = [];
 	});
 
 	async function submitPrompt(): Promise<void> {
@@ -90,19 +140,28 @@
 		try {
 			const requestBody = {
 				file: activeFileContext,
-				previousTurn: latestTurn ?? undefined,
+				mode,
+				previousTurn: mode === 'one-shot' ? latestTurn ?? undefined : undefined,
 				prompt: normalizedPrompt
 			} satisfies EditorAgentRequest;
 			const payload = await sendEditorAgentRequest(endpoint, requestBody);
 
-			conversation.resolveAssistantTurn(pendingAssistantId, payload.answer);
-			turns = [
-				...turns,
-				{
-					answer: payload.answer,
-					prompt: normalizedPrompt
-				}
-			];
+			if (mode === 'session') {
+				hasPersistedSession = payload.sessionReady;
+				sessionMessagesCache = [...payload.messages];
+				conversation.setMessages(payload.messages);
+				turns = [];
+			} else {
+				conversation.resolveAssistantTurn(pendingAssistantId, payload.answer);
+				turns = [
+					...turns,
+					{
+						answer: payload.answer,
+						prompt: normalizedPrompt
+					}
+				];
+			}
+
 			onResponse?.({
 				request: requestBody,
 				response: payload
@@ -116,18 +175,89 @@
 			isSubmitting = false;
 		}
 	}
+
+	async function resetSession(): Promise<void> {
+		if (isResettingSession) {
+			return;
+		}
+
+		isResettingSession = true;
+		conversation.clearError();
+
+		try {
+			await clearEditorAgentSession(endpoint);
+			hasPersistedSession = false;
+			sessionMessagesCache = [];
+			turns = [];
+
+			if (mode === 'session') {
+				conversation.reset();
+			}
+		} catch (error) {
+			conversation.setError(
+				error instanceof Error ? error.message : 'Could not clear the editor session.'
+			);
+		} finally {
+			isResettingSession = false;
+		}
+	}
 </script>
 
 <section class="ui-pane ui-pane--muted">
 	<div class="ui-pane__header">
-		<p class="ui-surface-label">Pi agent</p>
-		<p class="ui-toolbar-status">{modelName ? modelName : 'No model configured'}</p>
+		<div>
+			<p class="ui-surface-label">Pi agent</p>
+			<p class="ui-toolbar-status">
+				{modelName ? `${modelName} | ${modeStatus}` : 'No model configured'}
+			</p>
+		</div>
+
+		<div class="editor-agent-panel__header-actions">
+			<div aria-label="Pi mode" class="editor-agent-panel__mode-toggle" role="group">
+				<Button
+					size="sm"
+					type="button"
+					variant={mode === 'one-shot' ? 'primary' : 'ghost'}
+					onclick={() => {
+						mode = 'one-shot';
+					}}
+				>
+					{#snippet children()}One-shot{/snippet}
+				</Button>
+				<Button
+					size="sm"
+					type="button"
+					variant={mode === 'session' ? 'primary' : 'ghost'}
+					onclick={() => {
+						mode = 'session';
+					}}
+				>
+					{#snippet children()}Session{/snippet}
+				</Button>
+			</div>
+
+			{#if mode === 'session'}
+				<Button
+					disabled={!hasPersistedSession || isResettingSession}
+					size="sm"
+					type="button"
+					variant="secondary"
+					onclick={() => {
+						void resetSession();
+					}}
+				>
+					{#snippet children()}
+						{isResettingSession ? 'Resetting...' : 'New session'}
+					{/snippet}
+				</Button>
+			{/if}
+		</div>
 	</div>
 
 	<div class="ui-pane__body ui-pane__body--flush">
 		<ConversationPanel
 			class="editor-agent-panel__conversation"
-			emptyMessage="No local agent turns yet."
+			{emptyMessage}
 			errorMessage={conversation.errorMessage}
 			messages={conversation.messages}
 		>
@@ -146,19 +276,13 @@
 						spellcheck={false}
 						variant="command-line"
 					>
-						{#snippet leading()}
-							<span class="editor-agent-panel__lead" aria-hidden="true">
-								<Bot aria-hidden="true" size={18} />
-							</span>
-						{/snippet}
-
 						{#snippet trailing()}
 							{#if !hasActiveKey}
 								<Button href={resolve('/pi')} size="sm">Open settings</Button>
 							{:else}
 								<div class="editor-agent-panel__trailing">
 									<Button type="submit" disabled={isDisabled || prompt.trim().length === 0}>
-										{isSubmitting ? 'Asking Pi...' : 'Ask Pi'}
+										{isSubmitting ? 'Asking Pi...' : mode === 'session' ? 'Send' : 'Ask Pi'}
 									</Button>
 								</div>
 							{/if}
@@ -180,23 +304,22 @@
 		width: 100%;
 	}
 
-	.editor-agent-panel__lead {
+	.editor-agent-panel__header-actions {
 		display: inline-flex;
 		align-items: center;
-		justify-content: center;
-		width: 1.5rem;
-		min-height: 2.4rem;
-		color: var(--ui-color-text-subtle);
+		flex-wrap: wrap;
+		gap: var(--ui-space-2);
 	}
 
+	.editor-agent-panel__mode-toggle,
 	.editor-agent-panel__trailing {
 		display: inline-flex;
 		align-items: center;
-		gap: 0.55rem;
+		gap: var(--ui-space-2);
 	}
 
 	:global(.editor-agent-panel__composer .input-bar__input) {
 		text-transform: none;
-		letter-spacing: 0.03em;
+		letter-spacing: 0.02em;
 	}
 </style>

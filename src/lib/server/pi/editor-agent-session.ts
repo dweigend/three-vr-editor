@@ -1,16 +1,14 @@
 /**
  * Purpose: Create the specialized Pi session used by the Three editor agent panel.
- * Context: The editor workflow needs a stricter session than the plain chat demo so file changes target the active file by default.
- * Responsibility: Assemble the custom active-file edit tool, resource loader prompts, and in-memory Pi session.
+ * Context: The editor workflow needs a stricter session than plain chat so file changes target the active file by default.
+ * Responsibility: Assemble the custom active-file edit tool, resource loader prompts, and the requested session mode.
  * Boundaries: Request parsing and response shaping stay in the editor-agent service and route handler.
  */
-
-import { SessionManager } from '@mariozechner/pi-coding-agent';
 
 import type { ThreeEditorActiveFileContext } from '$lib/three/three-editor-workspace-types';
 
 import { createPiDemoResourceLoader } from './resource-loader';
-import { createConfiguredPiDemoAgentSession } from './session-runtime';
+import { createConfiguredPiDemoAgentSession, type PiSessionMode } from './session-runtime';
 import { createApplyActiveFileEditTool } from './editor-agent-edit-tool';
 
 const EDITOR_AGENT_SYSTEM_PROMPTS = [
@@ -19,14 +17,20 @@ const EDITOR_AGENT_SYSTEM_PROMPTS = [
 	'Beantworte nur dann rein erklaerend ohne Tool-Nutzung, wenn der Nutzer offensichtlich eine Analyse, Erklaerung oder Rueckfrage moechte.'
 ];
 
-export async function createEditorAgentSession(activeFileContext: ThreeEditorActiveFileContext) {
+export async function createEditorAgentSession(options: {
+	activeFileContext: ThreeEditorActiveFileContext;
+	mode: PiSessionMode;
+	sessionFile?: string | null;
+}) {
 	const resourceLoader = await createPiDemoResourceLoader({
 		appendSystemPrompts: EDITOR_AGENT_SYSTEM_PROMPTS
 	});
 
 	return createConfiguredPiDemoAgentSession({
-		customTools: [createApplyActiveFileEditTool(activeFileContext)],
+		customTools: [createApplyActiveFileEditTool(options.activeFileContext)],
+		mode: options.mode,
 		resourceLoader,
-		sessionManager: SessionManager.inMemory()
+		scope: 'editor',
+		sessionFile: options.sessionFile
 	});
 }

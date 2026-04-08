@@ -6,14 +6,14 @@
  */
 
 import { hasActiveOpenRouterKey } from '$lib/server/pi/auth';
-import { clearPiChatSessionCookie, getPiChatSessionCookie } from '$lib/server/pi/chat-cookie';
 import { readPiChatSession } from '$lib/server/pi/chat-service';
 import { getConfiguredModel } from '$lib/server/pi/models';
+import { clearPiSessionCookie, getPiSessionCookie } from '$lib/server/pi/session-cookie';
 
 import type { PageServerLoad } from './$types';
 
 export const load: PageServerLoad = async ({ cookies }) => {
-	const sessionFile = getPiChatSessionCookie(cookies);
+	const sessionFile = getPiSessionCookie(cookies, 'chat');
 	const hasActiveKey = hasActiveOpenRouterKey();
 	const configuredModel = getConfiguredModel();
 
@@ -36,7 +36,7 @@ export const load: PageServerLoad = async ({ cookies }) => {
 			messages: session.messages
 		};
 	} catch {
-		clearPiChatSessionCookie(cookies);
+		clearPiSessionCookie(cookies, 'chat');
 
 		return {
 			hasActiveKey,

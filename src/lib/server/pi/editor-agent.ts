@@ -1,16 +1,19 @@
 /**
- * Purpose: Execute one-shot Pi requests for the Three editor agent panel.
- * Context: The editor-agent demo needs a server-only Pi integration that can return either explanations or structured active-file edits.
+ * Purpose: Execute Pi requests for the Three editor agent panel across one-shot and session modes.
+ * Context: The editor surface needs a server-only Pi integration that can return explanations or structured active-file edits.
  * Responsibility: Build a file-aware prompt, run the specialized Pi session, and return the assistant answer plus any prepared edit.
  * Boundaries: HTTP parsing stays in the route handler, and the browser never imports Pi SDK modules from here.
  */
 
 import type {
+	EditorAgentMode,
 	EditorAgentAppliedEdit,
 	EditorAgentPreviousTurn,
 	EditorAgentRequest,
-	EditorAgentResponse
+	EditorAgentResponse,
+	EditorAgentSessionState
 } from '$lib/pi/editor-agent-types';
+import type { ThreeEditorActiveFileContext } from '$lib/three/three-editor-workspace-types';
 
 import { getConfiguredModel } from './models';
 import { getLastPiAssistantError, mapPiChatMessages } from './chat-messages';
@@ -21,9 +24,17 @@ import {
 import { createEditorAgentSession } from './editor-agent-session';
 
 export async function runEditorAgentRequest(
-	request: EditorAgentRequest
-): Promise<EditorAgentResponse> {
-	const session = await createEditorAgentSession(request.file);
+	request: EditorAgentRequest,
+	options?: {
+		sessionFile?: string | null;
+	}
+): Promise<{ response: EditorAgentResponse; sessionFile?: string }> {
+	const isSessionMode = request.mode === 'session';
+	const session = await createEditorAgentSession({
+		activeFileContext: request.file,
+		mode: isSessionMode ? 'persistent' : 'ephemeral',
+		sessionFile: isSessionMode ? options?.sessionFile : undefined
+	});
 	let appliedEdit: EditorAgentAppliedEdit | undefined;
 	const unsubscribe = session.subscribe((event) => {
 		if (
@@ -59,9 +70,14 @@ export async function runEditorAgentRequest(
 		}
 
 		return {
-			answer,
-			appliedEdit,
-			modelName: getConfiguredModel().name
+			response: {
+				answer,
+				appliedEdit,
+				messages: mapPiChatMessages(session.messages),
+				modelName: getConfiguredModel().name,
+				sessionReady: isSessionMode
+			},
+			sessionFile: session.sessionFile ?? undefined
 		};
 	} finally {
 		unsubscribe();
@@ -75,6 +91,7 @@ export function buildEditorAgentPrompt(request: EditorAgentRequest): string {
 	const sections = [
 		'Du bist ein pragmatischer Pair-Programming-Agent fuer einen Three.js-/SvelteKit-Editor.',
 		'Antworte auf Deutsch, konkret und dateibezogen.',
+		formatModeSection(request.mode),
 		'Wenn der Nutzer eine Code-Aenderung, Anpassung oder Umgestaltung verlangt, sollst Du die aktive Datei direkt ueber das bereitgestellte Tool aktualisieren statt nur Chat-Vorschlaege zurueckzugeben.',
 		'Wenn der Nutzer nur verstehen oder analysieren moechte, antworte ohne Tool-Nutzung.',
 		'Nutze den bereitgestellten Dateisnapshot als autoritative Quelle fuer die aktive Datei.',
@@ -82,12 +99,41 @@ export function buildEditorAgentPrompt(request: EditorAgentRequest): string {
 		'Wenn Du zusaetzlichen Projektkontext brauchst, darfst Du nur read-only Tools verwenden.',
 		`Aktive Datei: ${request.file.path}`,
 		`Dateistatus: ${fileState}`,
-		formatPreviousTurnSection(request.previousTurn),
+		request.mode === 'one-shot' ? formatPreviousTurnSection(request.previousTurn) : '',
 		['Aktueller Inhalt der aktiven Datei:', '```ts', request.file.content, '```'].join('\n'),
 		['Nutzerfrage:', prompt].join('\n')
 	];
 
 	return sections.filter((section) => section.length > 0).join('\n\n');
+}
+
+export async function readEditorAgentSession(options: {
+	activeFileContext: ThreeEditorActiveFileContext;
+	sessionFile: string;
+}): Promise<EditorAgentSessionState> {
+	const session = await createEditorAgentSession({
+		activeFileContext: options.activeFileContext,
+		mode: 'persistent',
+		sessionFile: options.sessionFile
+	});
+
+	try {
+		return {
+			messages: mapPiChatMessages(session.messages),
+			modelName: getConfiguredModel().name,
+			sessionReady: true
+		};
+	} finally {
+		session.dispose();
+	}
+}
+
+function formatModeSection(mode: EditorAgentMode): string {
+	if (mode === 'session') {
+		return 'Sitzungsmodus: fortlaufende Editor-Session. Vorherige Nachrichten sind bereits Teil des aktiven Gespraechsverlaufs.';
+	}
+
+	return 'Sitzungsmodus: one-shot ohne serverseitige Persistenz. Nutze fuer Follow-ups nur die mitgelieferte vorherige Runde.';
 }
 
 function formatPreviousTurnSection(previousTurn: EditorAgentPreviousTurn | undefined): string {

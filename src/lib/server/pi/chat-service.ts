@@ -1,14 +1,14 @@
 /**
  * Purpose: Orchestrate persisted Pi chat sessions for the standalone chat UI.
- * Context: The chat route needs simple start, read, and send operations built on the shared Pi runtime helpers.
- * Responsibility: Validate prompts, open or create managed sessions, run Pi prompts, and map transcript output.
+ * Context: The chat route keeps its own persistent scope while reusing the shared Pi runtime helpers.
+ * Responsibility: Validate prompts, open or create managed chat sessions, run Pi prompts, and map transcript output.
  * Boundaries: Cookie handling stays in route code and low-level session creation stays in dedicated session modules.
  */
 
 import type { PiChatConversationMessage } from '$lib/pi/chat-types';
 
+import { createConfiguredPiDemoAgentSession } from './session-runtime';
 import { getLastPiAssistantError, mapPiChatMessages } from './chat-messages';
-import { createManagedPiChatSession, openManagedPiChatSession } from './chat-session-store';
 
 export type PiChatState = {
 	messages: PiChatConversationMessage[];
@@ -20,29 +20,44 @@ type SendPiChatMessageOptions = {
 	sessionFile?: string | null;
 };
 
+async function createChatSession(sessionFile?: string | null) {
+	const session = await createConfiguredPiDemoAgentSession({
+		mode: 'persistent',
+		scope: 'chat',
+		sessionFile
+	});
+
+	if (!session.sessionFile) {
+		session.dispose();
+		throw new Error('Pi did not create a session file.');
+	}
+
+	return session;
+}
+
 export async function startPiChatSession(): Promise<PiChatState> {
-	const managedSession = await createManagedPiChatSession();
+	const session = await createChatSession();
 
 	try {
 		return {
-			sessionFile: managedSession.sessionFile,
-			messages: mapPiChatMessages(managedSession.session.messages)
+			sessionFile: session.sessionFile!,
+			messages: mapPiChatMessages(session.messages)
 		};
 	} finally {
-		managedSession.session.dispose();
+		session.dispose();
 	}
 }
 
 export async function readPiChatSession(sessionFile: string): Promise<PiChatState> {
-	const managedSession = await openManagedPiChatSession(sessionFile);
+	const session = await createChatSession(sessionFile);
 
 	try {
 		return {
-			sessionFile: managedSession.sessionFile,
-			messages: mapPiChatMessages(managedSession.session.messages)
+			sessionFile: session.sessionFile!,
+			messages: mapPiChatMessages(session.messages)
 		};
 	} finally {
-		managedSession.session.dispose();
+		session.dispose();
 	}
 }
 
@@ -55,23 +70,21 @@ export async function sendPiChatMessage(
 		throw new Error('Message must not be empty.');
 	}
 
-	const managedSession = options.sessionFile
-		? await openManagedPiChatSession(options.sessionFile)
-		: await createManagedPiChatSession();
+	const session = await createChatSession(options.sessionFile);
 
 	try {
-		await managedSession.session.prompt(normalizedPrompt);
-		const assistantError = getLastPiAssistantError(managedSession.session.messages);
+		await session.prompt(normalizedPrompt);
+		const assistantError = getLastPiAssistantError(session.messages);
 
 		if (assistantError) {
 			throw new Error(assistantError);
 		}
 
 		return {
-			sessionFile: managedSession.sessionFile,
-			messages: mapPiChatMessages(managedSession.session.messages)
+			sessionFile: session.sessionFile!,
+			messages: mapPiChatMessages(session.messages)
 		};
 	} finally {
-		managedSession.session.dispose();
+		session.dispose();
 	}
 }

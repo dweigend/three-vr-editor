@@ -11,17 +11,18 @@
 
 The current app is intentionally centered on three user-facing surfaces:
 
-- an editor workspace with live Three.js preview and Pi integration
-- a Pi chat surface that reuses the configured runtime settings
+- an editor workspace with live Three.js preview plus Pi one-shot and session modes
+- a Pi chat surface with its own persistent session scope
 - a consolidated settings page for OpenRouter keys and model selection
 
 ## Current Capabilities
 
 - Managed Three source files live under `static/three`.
 - The editor path can load, edit, save, and preview managed Three scene files.
-- The editor Pi panel can analyze or update the active editor file through server-only Pi tooling.
+- The editor Pi panel can analyze or update the active editor file through server-only Pi tooling in either one-shot or editor-session mode.
 - The settings path can validate, store, activate, and remove multiple OpenRouter keys.
 - The settings path can also select the configured OpenRouter model.
+- Chat and editor always share the same configured OpenRouter key and model, but they never share session state.
 - The runtime supports both `WebGLRenderer` and `WebGPURenderer` through the shared `createDemoScene` contract.
 
 ## Quick Start
@@ -95,14 +96,23 @@ Important contract:
 
 Contains browser-side Pi UI and transport-only types. This layer must stay free of Pi SDK imports and act as a thin client over server endpoints.
 
+- The standalone chat UI uses a persistent chat-scoped session.
+- The editor UI supports `one-shot` and `session` modes on the same endpoint contract.
+
 ### `src/lib/server/pi`
 
 Contains server-only Pi integration:
 
 - auth and model configuration
-- session bootstrapping
+- shared scoped session bootstrapping
 - resource loading
 - specialized active-file edit tooling
+
+The chat and editor routes share one backend session/runtime core, but they run in separate scopes:
+
+- `chat` sessions persist under the chat session directory
+- `editor` session mode persists under the editor session directory
+- editor `one-shot` uses in-memory sessions only
 
 All Pi SDK usage belongs here or in route handlers, never in browser components.
 
@@ -134,9 +144,9 @@ The app intentionally exposes only three primary screens:
 1. `/`
    Minimal launcher for the editor, chat, and settings surfaces.
 2. `/three/editor/pi`
-   The main Three.js editor workspace with preview and Pi-assisted active-file workflow.
+   The main Three.js editor workspace with preview plus Pi `one-shot` and `session` modes.
 3. `/pi/chat`
-   A session-based Pi chat screen that uses the configured key and model.
+   A chat-scoped persistent Pi chat screen that uses the configured key and model.
 4. `/pi`
    Consolidated settings for OpenRouter keys and model selection.
 
