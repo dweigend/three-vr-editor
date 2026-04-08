@@ -19,6 +19,7 @@
 		TableHeader,
 		TableRow
 	} from '$lib/components';
+	import { SettingsSection } from '$lib/blocks';
 	import KeyRound from '@lucide/svelte/icons/key-round';
 	import Save from '@lucide/svelte/icons/save';
 	import Trash2 from '@lucide/svelte/icons/trash-2';
@@ -50,18 +51,14 @@
 	<title>Settings</title>
 </svelte:head>
 
-<section class="settings-page">
-	<div class="settings-page__top-grid">
-		<section class="settings-panel settings-panel--compact">
-			<header class="settings-panel__header">
-				<div class="settings-panel__heading">
-					<KeyRound aria-hidden="true" size={16} />
-					<p class="settings-panel__title">Keys</p>
-				</div>
-				<p class="settings-panel__meta">{hasActiveKey ? 'Active key ready' : 'No active key'}</p>
-			</header>
+<section class="ui-screen ui-screen--stack settings-page">
+	<div class="ui-grid ui-grid--two ui-grid--compact">
+		<SettingsSection meta={hasActiveKey ? 'Active key ready' : 'No active key'} title="Keys">
+			{#snippet icon()}
+				<KeyRound aria-hidden="true" size={16} />
+			{/snippet}
 
-			<form action="?/addKey" class="settings-inline-form" method="POST">
+			<form action="?/addKey" class="ui-form-inline settings-inline-form" method="POST">
 				<label class="sr-only" for="apiKey">OpenRouter API key</label>
 				<div class="settings-inline-form__field">
 					<span class="settings-inline-form__icon">
@@ -80,7 +77,7 @@
 				</div>
 				<IconButton
 					ariaLabel="Store key"
-					class="settings-panel__action-button"
+					class="ui-icon-action"
 					title="Store key"
 					type="submit"
 					variant="primary"
@@ -90,16 +87,12 @@
 					{/snippet}
 				</IconButton>
 			</form>
-		</section>
+		</SettingsSection>
 
-		<section class="settings-panel settings-panel--compact">
-			<header class="settings-panel__header">
-				<div class="settings-panel__heading">
-					<Database aria-hidden="true" size={16} />
-					<p class="settings-panel__title">Stored keys</p>
-				</div>
-				<p class="settings-panel__meta">{keys.length} total</p>
-			</header>
+		<SettingsSection meta={`${keys.length} total`} title="Stored keys">
+			{#snippet icon()}
+				<Database aria-hidden="true" size={16} />
+			{/snippet}
 
 			{#if keys.length === 0}
 				<p class="ui-empty-state">No keys stored yet.</p>
@@ -121,7 +114,7 @@
 										<p class="settings-table__title">{key.maskedKey}</p>
 									</TableCell>
 									<TableCell>
-										<span class:settings-table__status--active={key.isActive} class="settings-table__status">
+										<span class="ui-pill" class:ui-pill--active={key.isActive}>
 											{key.isActive ? 'Active' : 'Stored'}
 										</span>
 									</TableCell>
@@ -131,7 +124,7 @@
 												<input type="hidden" name="keyId" value={key.id} />
 												<IconButton
 													ariaLabel={key.isActive ? 'Key already active' : 'Use key'}
-													class="settings-table__icon-action"
+													class="ui-icon-action"
 													disabled={key.isActive}
 													title={key.isActive ? 'Key already active' : 'Use key'}
 													type="submit"
@@ -146,7 +139,7 @@
 												<input type="hidden" name="keyId" value={key.id} />
 												<IconButton
 													ariaLabel="Delete key"
-													class="settings-table__icon-action"
+													class="ui-icon-action"
 													title="Delete key"
 													type="submit"
 													variant="danger"
@@ -164,39 +157,33 @@
 					</Table>
 				</ScrollArea>
 			{/if}
-		</section>
+		</SettingsSection>
 	</div>
 
 	{#if formMessage}
 		<p class={feedbackClass}>{formMessage}</p>
 	{/if}
 
-	<section class="settings-panel settings-panel--models">
-		<form action="?/saveModel" class="settings-model-form" method="POST">
-			<header class="settings-panel__header settings-panel__header--models">
-				<div class="settings-panel__header-copy">
-					<div class="settings-panel__heading">
-						<Cpu aria-hidden="true" size={16} />
-						<p class="settings-panel__title">Models</p>
-					</div>
-					<p class="settings-panel__meta">{draftSelectedModel.name}</p>
-				</div>
+	<form action="?/saveModel" class="settings-model-form" method="POST">
+		<input name="modelId" type="hidden" value={draftSelectedModelId} />
+		<SettingsSection class="settings-section--fill" meta={draftSelectedModel.name} title="Models">
+			{#snippet icon()}
+				<Cpu aria-hidden="true" size={16} />
+			{/snippet}
 
-				<div class="settings-panel__header-actions">
-					<input name="modelId" type="hidden" value={draftSelectedModelId} />
-					<IconButton
-						ariaLabel="Save model"
-						class="settings-panel__action-button"
-						title="Save model"
-						type="submit"
-						variant="primary"
-					>
-						{#snippet children()}
-							<Save aria-hidden="true" size={18} />
-						{/snippet}
-					</IconButton>
-				</div>
-			</header>
+			{#snippet headerActions()}
+				<IconButton
+					ariaLabel="Save model"
+					class="ui-icon-action"
+					title="Save model"
+					type="submit"
+					variant="primary"
+				>
+					{#snippet children()}
+						<Save aria-hidden="true" size={18} />
+					{/snippet}
+				</IconButton>
+			{/snippet}
 
 			<ScrollArea class="settings-scroll-shell settings-scroll-shell--models" viewportClass="settings-scroll-shell__viewport">
 				<Table ariaLabel="OpenRouter models" class="settings-table-shell" tableClass="settings-model-table">
@@ -238,15 +225,15 @@
 								<TableCell>
 									<div class="settings-capability-list">
 										{#each model.capabilities as capability (capability)}
-											<span class="settings-capability-chip">{capability}</span>
+											<span class="ui-pill">{capability}</span>
 										{/each}
 									</div>
 								</TableCell>
 								<TableCell>
 									<span
 										aria-label={model.id === draftSelectedModelId ? `${model.name} selected` : `Select ${model.name}`}
-										class:settings-table__picker--selected={model.id === draftSelectedModelId}
-										class="settings-table__picker"
+										class="ui-selection-indicator"
+										class:ui-selection-indicator--selected={model.id === draftSelectedModelId}
 									>
 										{#if model.id === draftSelectedModelId}
 											<Check aria-hidden="true" size={16} strokeWidth={2.4} />
@@ -258,108 +245,20 @@
 					</TableBody>
 				</Table>
 			</ScrollArea>
-		</form>
-	</section>
+		</SettingsSection>
+	</form>
 </section>
 
 <style>
 	.settings-page {
-		display: grid;
-		gap: var(--ui-space-3);
-		padding: var(--ui-space-3);
 		min-height: 100%;
 		align-content: start;
 	}
 
-	.settings-page__top-grid {
-		display: grid;
-		grid-template-columns: repeat(2, minmax(0, 1fr));
-		gap: var(--ui-space-3);
-		align-items: stretch;
-	}
-
-	.settings-panel {
-		display: grid;
-		gap: 0.8rem;
-		border: 1px solid var(--ui-color-border);
-		background: var(--ui-color-surface);
-		padding: 0.75rem 0.85rem 0.85rem;
-		min-width: 0;
-	}
-
-	.settings-panel--compact {
-		grid-template-rows: auto 1fr;
-	}
-
-	.settings-panel__header {
-		display: flex;
-		align-items: center;
-		justify-content: space-between;
-		gap: 0.65rem;
-		flex-wrap: wrap;
-		min-height: 1.4rem;
-	}
-
-	.settings-panel__heading {
-		display: inline-flex;
-		align-items: center;
-		gap: 0.42rem;
-		min-width: 0;
-	}
-
-	.settings-panel__heading :global(svg) {
-		color: var(--ui-color-accent-strong);
-		flex-shrink: 0;
-	}
-
-	.settings-panel__header--models {
-		padding-bottom: 0.05rem;
-	}
-
-	.settings-panel__header-copy,
-	.settings-panel__header-actions {
-		display: flex;
-		align-items: center;
-		gap: 0.65rem;
-		flex-wrap: wrap;
-	}
-
-	.settings-panel__header-copy {
-		min-width: 0;
-		flex: 1;
-		justify-content: space-between;
-	}
-
-	.settings-panel__title,
-	.settings-panel__meta,
-	.settings-table__title,
-	.settings-table__secondary {
-		margin: 0;
-	}
-
-	.settings-panel__title {
-		color: var(--ui-color-accent-strong);
-		font-size: 0.74rem;
-		font-weight: 700;
-		letter-spacing: 0.16em;
-		text-transform: uppercase;
-	}
-
-	.settings-panel__meta {
-		color: var(--ui-color-text-muted);
-		font-size: 0.74rem;
-		font-weight: 700;
-		letter-spacing: 0.16em;
-		text-transform: uppercase;
-		white-space: nowrap;
-		text-align: right;
-	}
-
-	.settings-inline-form {
-		display: grid;
-		grid-template-columns: minmax(0, 1fr) auto;
-		align-items: center;
-		gap: 0.65rem;
+	.settings-model-form,
+	:global(.settings-section--fill),
+	:global(.settings-section--fill .settings-section__body) {
+		min-height: 0;
 	}
 
 	.settings-inline-form__field {
@@ -380,18 +279,17 @@
 	}
 
 	.settings-inline-form__input {
+		min-height: var(--ui-control-size);
 		padding-left: 2.2rem;
 	}
 
 	.settings-model-form {
 		display: grid;
-		gap: var(--ui-space-3);
-		min-height: 0;
 	}
 
-	.settings-table__title {
-		font-size: 0.88rem;
-		font-weight: 700;
+	.settings-table__title,
+	.settings-table__secondary {
+		margin: 0;
 	}
 
 	.settings-table__identity {
@@ -399,8 +297,14 @@
 		gap: 0.15rem;
 	}
 
-	.settings-table__secondary--wrap {
-		white-space: normal;
+	.settings-table__title {
+		font-size: 0.88rem;
+		font-weight: 700;
+	}
+
+	.settings-table__secondary {
+		color: var(--ui-color-text-muted);
+		font-size: 0.74rem;
 	}
 
 	.settings-scroll-shell {
@@ -474,94 +378,15 @@
 		gap: 0.32rem;
 	}
 
-	.settings-capability-chip {
-		display: inline-flex;
-		align-items: center;
-		border: 1px solid rgba(255, 255, 255, 0.12);
-		padding: 0.18rem 0.36rem;
-		color: var(--ui-color-text-muted);
-		font-size: 0.62rem;
-		font-weight: 700;
-		letter-spacing: 0.06em;
-		text-transform: uppercase;
-	}
-
-	.settings-table__status {
-		display: inline-flex;
-		align-items: center;
-		border: 1px solid rgba(255, 255, 255, 0.12);
-		padding: 0.18rem 0.36rem;
-		font-size: 0.62rem;
-		font-weight: 700;
-		letter-spacing: 0.06em;
-		text-transform: uppercase;
-		color: var(--ui-color-text-muted);
-	}
-
-	.settings-table__status--active {
-		background: rgba(168, 85, 247, 0.16);
-		color: var(--ui-color-text);
-		border-color: rgba(168, 85, 247, 0.32);
-	}
-
-	.settings-table__picker {
-		display: inline-grid;
-		place-items: center;
-		width: 1.5rem;
-		height: 1.5rem;
-		border: 1px solid rgba(255, 255, 255, 0.2);
-		background: rgba(255, 255, 255, 0.04);
-		color: transparent;
-	}
-
-	.settings-table__picker--selected {
-		border-color: rgba(168, 85, 247, 0.8);
-		background: rgba(168, 85, 247, 0.95);
-		color: #060608;
-	}
-
 	.settings-table__actions {
 		display: flex;
-		justify-content: flex-start;
 		align-items: center;
 		gap: 0.35rem;
 	}
 
-	.settings-panel__action-button,
-	.settings-table__icon-action {
-		width: 2.05rem;
-		min-width: 2.05rem;
-		height: 2.05rem;
-		min-height: 2.05rem;
-		padding: 0;
-	}
-
-	.settings-panel__action-button :global(svg),
-	.settings-table__icon-action :global(svg) {
-		display: block;
-	}
-
-	@media (max-width: 960px) {
-		.settings-page__top-grid {
-			grid-template-columns: 1fr;
-		}
-	}
-
 	@media (max-width: 720px) {
-		.settings-page {
-			padding: 0.9rem;
-		}
-
-		.settings-inline-form {
-			grid-template-columns: 1fr;
-		}
-
-		.settings-panel {
-			padding: 0.9rem;
-		}
-
 		.settings-scroll-shell--models {
-			height: min(24rem, calc(100vh - 16rem));
+			height: min(24rem, calc(100vh - 15rem));
 		}
 	}
 </style>

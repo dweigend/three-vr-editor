@@ -56,8 +56,8 @@
 	}
 
 	.file-select__input {
-		min-height: 2.2rem;
-		padding: 0.4rem 1.8rem 0.4rem 0.65rem;
+		min-height: var(--ui-control-size);
+		padding: 0.4rem 1.8rem 0.4rem 0.7rem;
 		font-size: 0.72rem;
 		font-weight: 600;
 		letter-spacing: 0.08em;

@@ -348,7 +348,7 @@
 	}
 
 	.ui-toolbar__group--editor {
-		gap: 0.5rem;
+		gap: var(--ui-space-2);
 		flex-wrap: nowrap;
 		min-width: 0;
 	}
@@ -372,14 +372,14 @@
 	}
 
 	.ui-code-editor__toolbar-button--icon {
-		width: 2.2rem;
-		min-width: 2.2rem;
+		width: var(--ui-control-size);
+		min-width: var(--ui-control-size);
 		padding-inline: 0;
 	}
 
 	.ui-code-editor__create-menu {
 		width: 14rem;
-		padding: 0.35rem;
+		padding: var(--ui-space-1);
 	}
 
 	.ui-code-editor__create-menu-item {
@@ -389,7 +389,7 @@
 	.ui-code-editor__create-menu-copy {
 		display: grid;
 		gap: 0.22rem;
-		padding: 0.75rem 0.85rem;
+		padding: 0.7rem 0.8rem;
 	}
 
 	.ui-code-editor__create-menu-title {

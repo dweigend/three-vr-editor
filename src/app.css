@@ -61,6 +61,13 @@
 	--ui-focus-ring: 0 0 0 1px rgba(168, 85, 247, 0.95), 0 0 0 3px rgba(168, 85, 247, 0.2);
 	--ui-topbar-height: 3rem;
 	--ui-menu-width: 14rem;
+	--ui-shell-max-width: 1280px;
+	--ui-shell-gutter: 1rem;
+	--ui-screen-padding: 0.85rem;
+	--ui-panel-padding: 0.9rem;
+	--ui-panel-header-padding: 0.75rem 0.9rem;
+	--ui-control-size: 2.125rem;
+	--ui-section-gap: var(--ui-space-4);
 }
 
 /* ==========================================================================
@@ -273,13 +280,13 @@ select {
 }
 
 .ui-shell {
-	width: min(1120px, calc(100% - 3rem));
+	width: min(var(--ui-shell-max-width), calc(100% - (var(--ui-shell-gutter) * 2)));
 	margin: 0 auto;
 	padding: 1.5rem 0 2rem;
 }
 
 .ui-shell--wide {
-	width: calc(100% - 3rem);
+	width: calc(100% - (var(--ui-shell-gutter) * 2));
 }
 
 /* Screen And Spacing Helpers */
@@ -297,8 +304,8 @@ select {
 
 .ui-screen--stack {
 	align-content: start;
-	gap: var(--ui-space-4);
-	padding: var(--ui-space-4);
+	gap: var(--ui-section-gap);
+	padding: var(--ui-screen-padding);
 }
 
 .ui-screen--workbench {
@@ -310,7 +317,15 @@ select {
 
 .ui-grid {
 	display: grid;
-	gap: var(--ui-space-6);
+	gap: var(--ui-section-gap);
+}
+
+.ui-grid--two {
+	grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+}
+
+.ui-grid--compact {
+	gap: var(--ui-screen-padding);
 }
 
 .ui-grid--cards {
@@ -320,7 +335,11 @@ select {
 .ui-stack {
 	display: flex;
 	flex-direction: column;
-	gap: var(--ui-space-4);
+	gap: var(--ui-section-gap);
+}
+
+.ui-stack--fill {
+	min-height: 0;
 }
 
 .ui-stack--tight {
@@ -426,13 +445,13 @@ select {
 	justify-content: space-between;
 	flex-wrap: wrap;
 	gap: var(--ui-space-3);
-	padding: 0.8rem 1rem;
+	padding: var(--ui-panel-header-padding);
 	border-bottom: 1px solid rgba(255, 255, 255, 0.08);
 }
 
 .ui-pane__body {
 	min-height: 0;
-	padding: 1rem;
+	padding: var(--ui-panel-padding);
 }
 
 .ui-pane__body--flush {
@@ -516,7 +535,7 @@ select {
 	align-items: center;
 	flex-wrap: wrap;
 	gap: var(--ui-space-3);
-	padding: 0.8rem 1rem;
+	padding: var(--ui-panel-header-padding);
 	border: 1px solid var(--ui-color-border);
 	background: rgba(8, 8, 12, 0.92);
 }
@@ -725,6 +744,13 @@ select {
 	gap: var(--ui-space-4);
 }
 
+.ui-form-inline {
+	display: grid;
+	grid-template-columns: minmax(0, 1fr) auto;
+	align-items: center;
+	gap: var(--ui-space-2);
+}
+
 .ui-form-row {
 	display: grid;
 	gap: var(--ui-space-2);
@@ -800,6 +826,53 @@ select {
 .ui-empty-state {
 	margin: 0;
 	color: var(--ui-color-text-muted);
+	font-size: 0.92rem;
+}
+
+.ui-pill {
+	display: inline-flex;
+	align-items: center;
+	border: 1px solid rgba(255, 255, 255, 0.12);
+	padding: 0.18rem 0.36rem;
+	color: var(--ui-color-text-muted);
+	font-size: 0.62rem;
+	font-weight: 700;
+	letter-spacing: 0.06em;
+	text-transform: uppercase;
+}
+
+.ui-pill--active {
+	background: rgba(168, 85, 247, 0.16);
+	color: var(--ui-color-text);
+	border-color: rgba(168, 85, 247, 0.32);
+}
+
+.ui-selection-indicator {
+	display: inline-grid;
+	place-items: center;
+	width: 1.5rem;
+	height: 1.5rem;
+	border: 1px solid rgba(255, 255, 255, 0.2);
+	background: rgba(255, 255, 255, 0.04);
+	color: transparent;
+}
+
+.ui-selection-indicator--selected {
+	border-color: rgba(168, 85, 247, 0.8);
+	background: rgba(168, 85, 247, 0.95);
+	color: #060608;
+}
+
+.ui-icon-action {
+	width: var(--ui-control-size);
+	min-width: var(--ui-control-size);
+	height: var(--ui-control-size);
+	min-height: var(--ui-control-size);
+	padding: 0;
+}
+
+.ui-icon-action svg {
+	display: block;
 }
 
 /* ==========================================================================
@@ -926,6 +999,7 @@ select {
 	}
 
 	.ui-page-shell--menu-open,
+	.ui-grid--two,
 	.ui-workbench--editor,
 	.ui-workbench--template {
 		grid-template-columns: 1fr;
@@ -990,8 +1064,11 @@ select {
 		grid-template-columns: 3.25rem 1fr auto;
 	}
 
-	.ui-screen--stack,
-	.ui-chat-screen {
+	.ui-form-inline {
+		grid-template-columns: 1fr;
+	}
+
+	.ui-screen--stack {
 		padding: 0.9rem;
 	}
 

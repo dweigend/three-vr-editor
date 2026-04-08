@@ -10,59 +10,80 @@
 
 	import type { SettingsSectionProps } from './types';
 
-	let { children, class: className = '', meta, title }: SettingsSectionProps = $props();
+	let {
+		children,
+		class: className = '',
+		headerActions,
+		icon,
+		meta,
+		title
+	}: SettingsSectionProps = $props();
 </script>
 
-<section class={joinClassNames('settings-section', className)}>
-	<header class="settings-section__header">
-		<p class="settings-section__title">{title}</p>
+<section class={joinClassNames('ui-pane settings-section', className)}>
+	<header class="ui-pane__header settings-section__header">
+		<div class="settings-section__heading">
+			{#if icon}
+				<span class="settings-section__icon">
+					{@render icon()}
+				</span>
+			{/if}
 
-		{#if meta}
-			<p class="settings-section__meta">{meta}</p>
+			<p class="ui-surface-label">{title}</p>
+		</div>
+
+		{#if meta || headerActions}
+			<div class="settings-section__header-side">
+				{#if meta}
+					<p class="ui-toolbar-status">{meta}</p>
+				{/if}
+
+				{#if headerActions}
+					<div class="settings-section__actions">
+						{@render headerActions()}
+					</div>
+				{/if}
+			</div>
 		{/if}
 	</header>
 
-	<div class="settings-section__body">
+	<div class="ui-pane__body settings-section__body">
 		{@render children?.()}
 	</div>
 </section>
 
 <style>
 	.settings-section {
-		border: 1px solid var(--ui-color-border);
-		background: var(--ui-color-surface);
+		min-height: 0;
 	}
 
 	.settings-section__header {
-		display: flex;
+		min-height: 3rem;
+	}
+
+	.settings-section__heading,
+	.settings-section__header-side,
+	.settings-section__actions {
+		display: inline-flex;
 		align-items: center;
-		justify-content: space-between;
+		gap: var(--ui-space-2);
+		min-width: 0;
+	}
+
+	.settings-section__header-side {
 		flex-wrap: wrap;
-		gap: var(--ui-space-3);
-		padding: 0.95rem 1.25rem;
-		border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+		justify-content: flex-end;
 	}
 
-	.settings-section__title,
-	.settings-section__meta {
-		margin: 0;
-		font-size: 0.78rem;
-		font-weight: 700;
-		letter-spacing: 0.18em;
-		text-transform: uppercase;
-	}
-
-	.settings-section__title {
+	.settings-section__icon {
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
 		color: var(--ui-color-accent-strong);
-	}
-
-	.settings-section__meta {
-		color: var(--ui-color-text-muted);
 	}
 
 	.settings-section__body {
 		display: grid;
-		gap: var(--ui-space-5);
-		padding: 1.25rem;
+		gap: var(--ui-space-3);
 	}
 </style>

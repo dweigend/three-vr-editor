@@ -102,7 +102,7 @@
 	<title>Pi Chat</title>
 </svelte:head>
 
-<section class="ui-chat-screen">
+<section class="ui-screen ui-screen--fill">
 	<ConversationPanel
 		class="ui-chat-screen__conversation"
 		emptyMessage="No messages yet."
@@ -154,11 +154,6 @@
 </section>
 
 <style>
-	.ui-chat-screen {
-		height: 100%;
-		min-height: 0;
-	}
-
 	.ui-chat-command-line__prompt {
 		display: inline-flex;
 		align-items: center;

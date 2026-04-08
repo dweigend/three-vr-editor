@@ -41,7 +41,7 @@
 	<title>Three.js VR Builder</title>
 </svelte:head>
 
-<section class="ui-shell">
+<section class="ui-shell ui-stack">
 	<AppLauncher
 		items={launcherItems}
 		kicker="Start"

@@ -11,6 +11,12 @@ Reusable block family for vertically stacked settings sections.
 
 ## Public API
 
+- `title`
+- optional `meta`
+- optional `icon` snippet
+- optional `headerActions` snippet
+- default body snippet
+
 - Export public APIs only through `index.ts`.
 - Keep internal implementation details inside `components/`.
 
