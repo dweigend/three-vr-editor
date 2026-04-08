@@ -12,12 +12,16 @@
 	import { basicSetup, EditorView } from 'codemirror';
 
 	import {
+		createEditorLineRangeSignature,
 		editorDiagnosticExtensions,
+		setEditorChangedLineRanges,
 		setEditorDiagnostic,
-		type EditorDiagnostic
+		type EditorDiagnostic,
+		type EditorLineRange
 	} from './editor-diagnostics';
 
 	type Props = {
+		changedLineRanges?: EditorLineRange[];
 		diagnostic?: EditorDiagnostic | null;
 		onChange: (value: string) => void;
 		onRedo?: (() => void) | undefined;
@@ -26,12 +30,22 @@
 		value: string;
 	};
 
-	let { diagnostic = null, onChange, onRedo, onSave, saveDisabled = false, value }: Props = $props();
+	let {
+		changedLineRanges = [],
+		diagnostic = null,
+		onChange,
+		onRedo,
+		onSave,
+		saveDisabled = false,
+		value
+	}: Props = $props();
 
 	let canRedo = $state(false);
 	let editorRoot: HTMLDivElement | undefined = $state();
 	let appliedDiagnosticLine = $state<number | null>(null);
+	let appliedChangedLineRangeSignature = $state('');
 	let view: EditorView | null = null;
+	let isApplyingExternalValue = false;
 
 	function updateRedoState(nextView: EditorView): void {
 		canRedo = redoDepth(nextView.state) > 0;
@@ -73,7 +87,7 @@
 				EditorView.updateListener.of((update) => {
 					updateRedoState(update.view);
 
-					if (update.docChanged) {
+					if (update.docChanged && !isApplyingExternalValue) {
 						handleDocumentChange(update.state.doc.toString());
 					}
 				})
@@ -100,6 +114,30 @@
 			return;
 		}
 
+		const nextValue = value;
+		const currentValue = view.state.doc.toString();
+
+		if (nextValue === currentValue) {
+			return;
+		}
+
+		isApplyingExternalValue = true;
+		view.dispatch({
+			changes: {
+				from: 0,
+				insert: nextValue,
+				to: view.state.doc.length
+			}
+		});
+		updateRedoState(view);
+		isApplyingExternalValue = false;
+	});
+
+	$effect(() => {
+		if (!view) {
+			return;
+		}
+
 		const nextDiagnosticLine = diagnostic?.line ?? null;
 
 		if (appliedDiagnosticLine === nextDiagnosticLine) {
@@ -108,6 +146,21 @@
 
 		setEditorDiagnostic(view, diagnostic);
 		appliedDiagnosticLine = nextDiagnosticLine;
+	});
+
+	$effect(() => {
+		if (!view) {
+			return;
+		}
+
+		const nextSignature = createEditorLineRangeSignature(changedLineRanges);
+
+		if (appliedChangedLineRangeSignature === nextSignature) {
+			return;
+		}
+
+		setEditorChangedLineRanges(view, changedLineRanges);
+		appliedChangedLineRangeSignature = nextSignature;
 	});
 </script>
 

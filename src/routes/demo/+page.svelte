@@ -4,6 +4,7 @@
 
 <p><a href={resolve('/')}>back to start</a></p>
 <p><a href={resolve('/demo/three/editor')}>three.js editor demo</a></p>
+<p><a href={resolve('/demo/three/editor-agent')}>three.js editor + pi agent demo</a></p>
 <p><a href={resolve('/demo/pi')}>pi key setup</a></p>
 <p><a href={resolve('/demo/pi/chat')}>pi chat demo</a></p>
 <p><a href={resolve('/demo/pi/models')}>pi model settings</a></p>

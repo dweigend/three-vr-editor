@@ -11,10 +11,13 @@ import { PI_DEMO_CWD } from './paths';
 
 const PI_DEMO_SYSTEM_PROMPT = 'Sprich den Nutzer auf Deutsch und konsequent per Du an.';
 
-export async function createPiDemoResourceLoader(): Promise<DefaultResourceLoader> {
+export async function createPiDemoResourceLoader(options?: {
+	appendSystemPrompts?: string[];
+}): Promise<DefaultResourceLoader> {
+	const appendSystemPrompts = options?.appendSystemPrompts ?? [];
 	const resourceLoader = new DefaultResourceLoader({
 		cwd: PI_DEMO_CWD,
-		appendSystemPromptOverride: (base) => [...base, PI_DEMO_SYSTEM_PROMPT]
+		appendSystemPromptOverride: (base) => [...base, PI_DEMO_SYSTEM_PROMPT, ...appendSystemPrompts]
 	});
 
 	await resourceLoader.reload();

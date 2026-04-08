@@ -7,7 +7,14 @@
 
 import { resolve } from 'node:path';
 
-import { AuthStorage, createAgentSession, ModelRegistry, readOnlyTools, SessionManager } from '@mariozechner/pi-coding-agent';
+import {
+	AuthStorage,
+	createAgentSession,
+	ModelRegistry,
+	readOnlyTools,
+	SessionManager,
+	type ToolDefinition
+} from '@mariozechner/pi-coding-agent';
 
 import { getActiveOpenRouterKey, looksLikeOpenRouterApiKey } from './auth';
 import { getConfiguredModel } from './models';
@@ -50,7 +57,12 @@ export function assertManagedPiSessionFile(sessionFile: string): string {
 	return normalizedPath;
 }
 
-export async function createPiDemoAgentSession(sessionManager: SessionManager) {
+export async function createConfiguredPiDemoAgentSession(options: {
+	customTools?: ToolDefinition[];
+	resourceLoader?: Awaited<ReturnType<typeof createPiDemoResourceLoader>>;
+	sessionManager: SessionManager;
+	tools?: typeof readOnlyTools;
+}) {
 	const authStorage = createChatAuthStorage(requireActiveOpenRouterKey());
 	const modelRegistry = ModelRegistry.inMemory(authStorage);
 	const configuredModel = getConfiguredModel();
@@ -60,17 +72,25 @@ export async function createPiDemoAgentSession(sessionManager: SessionManager) {
 		throw new Error(`Configured model "${configuredModel.id}" is not available.`);
 	}
 
-	const resourceLoader = await createPiDemoResourceLoader();
+	const resourceLoader = options.resourceLoader ?? (await createPiDemoResourceLoader());
 	const { session } = await createAgentSession({
 		cwd: PI_DEMO_CWD,
 		authStorage,
+		customTools: options.customTools,
 		modelRegistry,
 		model,
 		resourceLoader,
 		thinkingLevel: CHAT_THINKING_LEVEL,
-		tools: readOnlyTools,
-		sessionManager
+		tools: options.tools ?? readOnlyTools,
+		sessionManager: options.sessionManager
 	});
 
 	return session;
+}
+
+export async function createPiDemoAgentSession(sessionManager: SessionManager) {
+	return createConfiguredPiDemoAgentSession({
+		sessionManager,
+		tools: readOnlyTools
+	});
 }

@@ -17,4 +17,5 @@
 <p><a href={resolve('/demo/pi/models')}>Pi model settings</a></p>
 <p><a href={resolve('/demo/codemirror')}>CodeMirror test</a></p>
 <p><a href={resolve('/demo/three/editor')}>Three.js editor demo</a></p>
+<p><a href={resolve('/demo/three/editor-agent')}>Three.js editor + Pi agent demo</a></p>
 <p><a href={resolve('/demo/three')}>Three.js demo viewer</a></p>
