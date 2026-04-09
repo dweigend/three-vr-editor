@@ -7,7 +7,7 @@
 
 import { error, json } from '@sveltejs/kit';
 
-import type { EditorAgentRequest } from '$lib/pi/editor-agent-types';
+import type { EditorAgentRequest } from '$lib/features/editor/editor-agent-types';
 import { runEditorAgentRequest } from '$lib/server/pi/editor-agent';
 import {
 	clearPiSessionCookie,

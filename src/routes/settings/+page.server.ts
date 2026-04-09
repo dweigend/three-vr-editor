@@ -2,7 +2,7 @@
  * Purpose: Power the consolidated Pi settings page.
  * Context: This route combines OpenRouter key management and model selection in one place.
  * Responsibility: Load masked key summaries, model metadata, and handle the small settings actions.
- * Boundaries: Pi chat sessions still live on the dedicated chat route.
+ * Boundaries: Pi chat sessions stay on the dedicated chat route.
  */
 
 import { fail } from '@sveltejs/kit';
@@ -14,8 +14,8 @@ import {
 	removeStoredOpenRouterKey,
 	saveValidatedOpenRouterKey
 } from '$lib/server/pi/auth';
-import { getConfiguredModelId, PI_DEMO_MODELS, setConfiguredModel } from '$lib/server/pi/models';
-import { validateOpenRouterKey } from '$lib/server/pi/service';
+import { getConfiguredModelId, PI_MODELS, setConfiguredModel } from '$lib/server/pi/models';
+import { validateOpenRouterKey } from '$lib/server/pi/openrouter-validation';
 
 import type { Actions, PageServerLoad } from './$types';
 
@@ -56,7 +56,7 @@ export const load: PageServerLoad = async () => {
 	return {
 		hasActiveKey: hasActiveOpenRouterKey(),
 		keys: listStoredOpenRouterKeys(),
-		models: PI_DEMO_MODELS,
+		models: PI_MODELS,
 		selectedModelId: getConfiguredModelId()
 	};
 };

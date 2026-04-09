@@ -7,8 +7,8 @@
 
 import { error, json } from '@sveltejs/kit';
 
-import type { ThreeCreateFileRequest } from '$lib/three/three-template-types';
-import { createThreeFileService } from '$lib/server/three/files';
+import type { ThreeCreateFileRequest } from '$lib/features/editor/three-template-types';
+import { createThreeFileService } from '$lib/server/editor/files';
 
 import type { RequestHandler } from './$types';
 

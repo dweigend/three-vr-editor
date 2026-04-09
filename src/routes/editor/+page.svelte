@@ -2,7 +2,7 @@
 	Purpose: Render the main editor workspace directly in the route layer.
 	Context: This is one of the three primary app pages and owns the page-specific composition of editor, Pi agent, and preview panes.
 	Responsibility: Wire the shared editor state to the route endpoints, apply Pi edits back into the active file, and keep the workspace layout explicit.
-	Boundaries: Reusable editor, preview, Pi, and state modules still live in src/lib.
+	Boundaries: Reusable editor, preview, Pi, and state modules stay in `src/lib`.
 -->
 
 <script lang="ts">
@@ -14,22 +14,22 @@
 	import { Pane, PaneGroup, PaneResizer } from 'paneforge';
 
 	import { ToolbarButton } from '$lib/components';
-	import CodeEditor from '$lib/editor/CodeEditor.svelte';
-	import EditorAgentPanel from '$lib/pi/EditorAgentPanel.svelte';
-	import type { PiChatConversationMessage } from '$lib/pi/chat-types';
+	import CodeEditor from '$lib/features/editor/CodeEditor.svelte';
+	import EditorAgentPanel from '$lib/features/editor/EditorAgentPanel.svelte';
+	import type { PiChatConversationMessage } from '$lib/features/chat/chat-types';
 	import type {
 		EditorAgentAppliedEdit,
 		EditorAgentRequest,
 		EditorAgentResponse
-	} from '$lib/pi/editor-agent-types';
-	import ThreePreview from '$lib/three/ThreePreview.svelte';
+	} from '$lib/features/editor/editor-agent-types';
+	import ThreePreview from '$lib/features/editor/ThreePreview.svelte';
 	import type {
 		ThreePreviewBuildResult,
 		ThreeSourceDocument,
 		ThreeSourceFileSummary
-	} from '$lib/three/three-editor-types';
-	import { createThreeEditorWorkspaceState } from '$lib/three/three-editor-workspace-state.svelte';
-	import type { ThreeCreateFileRequest, ThreeTemplateSummary } from '$lib/three/three-template-types';
+	} from '$lib/features/editor/three-editor-types';
+	import { createThreeEditorWorkspaceState } from '$lib/features/editor/three-editor-workspace-state.svelte';
+	import type { ThreeCreateFileRequest, ThreeTemplateSummary } from '$lib/features/editor/three-template-types';
 	import { joinClassNames } from '$lib/utils/class-names';
 
 	import type { PageProps } from './$types';

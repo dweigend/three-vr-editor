@@ -12,8 +12,8 @@
 
 	import { IconButton } from '$lib/components';
 	import { ConversationPanel, InputBar } from '$lib/blocks';
-	import { sendPiChatMessageClient, startPiChatSessionClient } from '$lib/pi/chat-client';
-	import { createConversationState } from '$lib/pi/conversation-state.svelte';
+	import { sendPiChatMessageClient, startPiChatSessionClient } from '$lib/features/chat/chat-client';
+	import { createConversationState } from '$lib/features/chat/conversation-state.svelte';
 
 	import type { PageProps } from './$types';
 
@@ -108,7 +108,7 @@
 <section class="ui-screen ui-screen--fill">
 	<ConversationPanel
 		class="ui-chat-screen__conversation"
-		emptyMessage="No messages yet."
+		emptyMessage="No messages."
 		errorMessage={conversation.errorMessage}
 		messages={conversation.messages}
 	>

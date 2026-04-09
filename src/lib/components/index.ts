@@ -1,4 +1,4 @@
-/** Public barrel for reusable primitive UI families in this repository. */
+/** Public entrypoint for reusable UI primitives. */
 export { Button } from './button';
 export type { ButtonProps } from './button';
 export { Card, CardBody, CardFooter, CardHeader } from './card';
@@ -19,6 +19,8 @@ export type {
 	TableRowProps,
 	TableSectionProps
 } from './table';
+export { TextInput } from './text-input';
+export type { TextInputProps } from './text-input';
 export { Textarea } from './textarea';
 export type { TextareaProps } from './textarea';
 export { ToolbarButton, ToolbarRoot } from './toolbar';

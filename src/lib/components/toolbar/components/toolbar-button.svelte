@@ -1,6 +1,6 @@
 <!--
 	Purpose: Render a toolbar-native action button with the shared local button styling.
-	Context: Toolbar actions should participate in Bits UI roving focus while staying visually aligned with existing controls.
+	Context: Toolbar actions should participate in Bits UI roving focus while matching the shared control styling.
 	Responsibility: Forward button props to Bits UI Toolbar.Button and attach the shared toolbar action classes.
 	Boundaries: This component stays presentational and does not own click behavior or command logic.
 -->

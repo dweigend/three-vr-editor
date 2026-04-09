@@ -18,7 +18,7 @@
 		children,
 		class: className = '',
 		composer,
-		emptyMessage = 'No messages yet.',
+		emptyMessage = 'No messages.',
 		errorMessage = null,
 		messages = [],
 		...restProps

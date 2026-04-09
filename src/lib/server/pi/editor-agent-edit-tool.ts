@@ -8,7 +8,7 @@
 import { Type } from '@mariozechner/pi-ai';
 import { defineTool } from '@mariozechner/pi-coding-agent';
 
-import type { ThreeEditorActiveFileContext } from '$lib/three/three-editor-workspace-types';
+import type { ThreeEditorActiveFileContext } from '$lib/features/editor/three-editor-workspace-types';
 
 import { normalizeChangedLineRanges } from './editor-agent-line-ranges';
 

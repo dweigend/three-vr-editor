@@ -1,6 +1,6 @@
 /**
  * Purpose: Define the allowed OpenRouter models and persist the active system model.
- * Context: The demo UI should offer a fixed shortlist instead of arbitrary model input.
+ * Context: The settings page should offer a fixed shortlist instead of arbitrary model input.
  * Responsibility: Expose model metadata for the table and read/write the selected model.
  * Boundaries: This module does not create sessions or render the model selection page.
  */
@@ -8,9 +8,9 @@
 import { chmodSync, existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { dirname } from 'node:path';
 
-import { PI_DEMO_SETTINGS_PATH } from './paths';
+import { PI_SETTINGS_PATH } from './paths';
 
-export type PiDemoModel = {
+export type PiModelDefinition = {
 	id: string;
 	name: string;
 	openRouterUrl: string;
@@ -20,11 +20,11 @@ export type PiDemoModel = {
 	capabilities: string[];
 };
 
-type PiDemoSettings = {
+type PiSettings = {
 	selectedModelId?: string;
 };
 
-export const PI_DEMO_MODELS: PiDemoModel[] = [
+export const PI_MODELS: PiModelDefinition[] = [
 	{
 		id: 'minimax/minimax-m2.7',
 		name: 'MiniMax M2.7',
@@ -72,46 +72,46 @@ export const PI_DEMO_MODELS: PiDemoModel[] = [
 	}
 ];
 
-const DEFAULT_MODEL_ID = PI_DEMO_MODELS[0].id;
+const DEFAULT_MODEL_ID = PI_MODELS[0].id;
 
 function ensureSettingsDir(): void {
-	const settingsDir = dirname(PI_DEMO_SETTINGS_PATH);
+	const settingsDir = dirname(PI_SETTINGS_PATH);
 
 	if (!existsSync(settingsDir)) {
 		mkdirSync(settingsDir, { recursive: true, mode: 0o700 });
 	}
 }
 
-function readSettings(): PiDemoSettings {
+function readSettings(): PiSettings {
 	try {
-		if (!existsSync(PI_DEMO_SETTINGS_PATH)) {
+		if (!existsSync(PI_SETTINGS_PATH)) {
 			return {};
 		}
 
-		return JSON.parse(readFileSync(PI_DEMO_SETTINGS_PATH, 'utf-8')) as PiDemoSettings;
+		return JSON.parse(readFileSync(PI_SETTINGS_PATH, 'utf-8')) as PiSettings;
 	} catch {
 		return {};
 	}
 }
 
-function writeSettings(settings: PiDemoSettings): void {
+function writeSettings(settings: PiSettings): void {
 	ensureSettingsDir();
-	writeFileSync(PI_DEMO_SETTINGS_PATH, JSON.stringify(settings, null, 2), 'utf-8');
-	chmodSync(PI_DEMO_SETTINGS_PATH, 0o600);
+	writeFileSync(PI_SETTINGS_PATH, JSON.stringify(settings, null, 2), 'utf-8');
+	chmodSync(PI_SETTINGS_PATH, 0o600);
 }
 
 export function getConfiguredModelId(): string {
 	const selectedModelId = readSettings().selectedModelId;
 
-	return PI_DEMO_MODELS.some((model) => model.id === selectedModelId) ? selectedModelId! : DEFAULT_MODEL_ID;
+	return PI_MODELS.some((model) => model.id === selectedModelId) ? selectedModelId! : DEFAULT_MODEL_ID;
 }
 
-export function getConfiguredModel(): PiDemoModel {
-	return getPiDemoModel(getConfiguredModelId());
+export function getConfiguredModel(): PiModelDefinition {
+	return getPiModel(getConfiguredModelId());
 }
 
-export function getPiDemoModel(modelId: string): PiDemoModel {
-	const model = PI_DEMO_MODELS.find((candidate) => candidate.id === modelId);
+export function getPiModel(modelId: string): PiModelDefinition {
+	const model = PI_MODELS.find((candidate) => candidate.id === modelId);
 
 	if (!model) {
 		throw new Error('Unknown model selection.');
@@ -120,8 +120,8 @@ export function getPiDemoModel(modelId: string): PiDemoModel {
 	return model;
 }
 
-export function setConfiguredModel(modelId: string): PiDemoModel {
-	const model = getPiDemoModel(modelId);
+export function setConfiguredModel(modelId: string): PiModelDefinition {
+	const model = getPiModel(modelId);
 	writeSettings({ selectedModelId: model.id });
 	return model;
 }

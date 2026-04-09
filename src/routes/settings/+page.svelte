@@ -21,7 +21,8 @@
 		TableCell,
 		TableHead,
 		TableHeader,
-		TableRow
+		TableRow,
+		TextInput
 	} from '$lib/components';
 	import { SettingsSection } from '$lib/blocks';
 
@@ -65,14 +66,14 @@
 					<span class="settings-inline-form__icon">
 						<KeyRound aria-hidden="true" size={16} />
 					</span>
-					<input
+					<TextInput
 						aria-label="OpenRouter API key"
 						autocomplete="off"
 						class="settings-inline-form__input ui-input"
 						id="apiKey"
 						name="apiKey"
 						placeholder="Paste OpenRouter API key"
-						spellcheck="false"
+						spellcheck={false}
 						type="password"
 					/>
 				</div>
@@ -96,7 +97,7 @@
 			{/snippet}
 
 			{#if keys.length === 0}
-				<p class="ui-empty-state">No keys stored yet.</p>
+				<p class="ui-empty-state">No stored keys.</p>
 			{:else}
 				<ScrollArea
 					class="settings-scroll-shell settings-scroll-shell--keys"

@@ -12,8 +12,8 @@ import type {
 	EditorAgentRequest,
 	EditorAgentResponse,
 	EditorAgentSessionState
-} from '$lib/pi/editor-agent-types';
-import type { ThreeEditorActiveFileContext } from '$lib/three/three-editor-workspace-types';
+} from '$lib/features/editor/editor-agent-types';
+import type { ThreeEditorActiveFileContext } from '$lib/features/editor/three-editor-workspace-types';
 
 import { getConfiguredModel } from './models';
 import { getLastPiAssistantError, mapPiChatMessages } from './chat-messages';

@@ -9,7 +9,7 @@ import { hasActiveOpenRouterKey } from '$lib/server/pi/auth';
 import { readEditorAgentSession } from '$lib/server/pi/editor-agent';
 import { getConfiguredModel } from '$lib/server/pi/models';
 import { clearPiSessionCookie, getPiSessionCookie } from '$lib/server/pi/session-cookie';
-import { loadEditorWorkspacePageData } from '$lib/server/three/editor-workspace-load';
+import { loadEditorWorkspacePageData } from '$lib/server/editor/editor-workspace-load';
 
 import type { PageServerLoad } from './$types';
 

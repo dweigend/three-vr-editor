@@ -1,12 +1,12 @@
 /**
- * Purpose: Normalize Pi SDK messages into the small chat transcript used by the demo UI.
+ * Purpose: Normalize Pi SDK messages into the small chat transcript used by the UI.
  * Context: The chat route only needs user and assistant text plus lightweight error detection.
  * Responsibility: Extract text from Pi messages and expose a stable transcript shape.
  * Boundaries: This module does not create sessions, load prompts, or touch filesystem state.
  */
 
 import type { AssistantMessage, TextContent, UserMessage } from '@mariozechner/pi-ai';
-import type { PiChatConversationMessage } from '$lib/pi/chat-types';
+import type { PiChatConversationMessage } from '$lib/features/chat/chat-types';
 
 type PiMessageLike = {
 	role: string;

@@ -7,9 +7,9 @@
 
 import { error, json } from '@sveltejs/kit';
 
-import { createThreePreviewBuilder } from '$lib/server/three/preview-build';
+import { createThreePreviewBuilder } from '$lib/server/editor/preview-build';
 
-import type { ThreePreviewBuildRequest } from '$lib/three/three-editor-types';
+import type { ThreePreviewBuildRequest } from '$lib/features/editor/three-editor-types';
 import type { RequestHandler } from './$types';
 
 const threePreviewBuilder = createThreePreviewBuilder();

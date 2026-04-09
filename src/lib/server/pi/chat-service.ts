@@ -5,9 +5,9 @@
  * Boundaries: Cookie handling stays in route code and low-level session creation stays in dedicated session modules.
  */
 
-import type { PiChatConversationMessage } from '$lib/pi/chat-types';
+import type { PiChatConversationMessage } from '$lib/features/chat/chat-types';
 
-import { createConfiguredPiDemoAgentSession } from './session-runtime';
+import { createConfiguredPiAgentSession } from './session-runtime';
 import { getLastPiAssistantError, mapPiChatMessages } from './chat-messages';
 
 export type PiChatState = {
@@ -21,7 +21,7 @@ type SendPiChatMessageOptions = {
 };
 
 async function createChatSession(sessionFile?: string | null) {
-	const session = await createConfiguredPiDemoAgentSession({
+	const session = await createConfiguredPiAgentSession({
 		mode: 'persistent',
 		scope: 'chat',
 		sessionFile

@@ -5,7 +5,7 @@
  * Boundaries: This module does not call Pi or mutate editor state directly.
  */
 
-import type { EditorLineRange } from '$lib/editor/editor-diagnostics';
+import type { EditorLineRange } from '$lib/features/editor/editor-diagnostics';
 
 export function normalizeChangedLineRanges(
 	ranges: EditorLineRange[] | undefined,

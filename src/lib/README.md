@@ -7,26 +7,26 @@
 
 # `src/lib`
 
-`src/lib` holds the reusable application code that sits behind the demo routes.
+`src/lib` holds the reusable application code behind the three main app surfaces: editor, chat, and settings.
 
 ## Main Areas
 
 - [`components`](./components/README.md)
   Reusable primitive families aligned with the local ui-system structure and Bits UI wrappers.
 - [`blocks`](./blocks/README.md)
-  Composed UI families that sit between primitives and route pages, including the launcher, chat transcript, prompt bar, and settings sections.
-- [`editor`](./editor/README.md)
-  Thin CodeMirror-oriented UI modules such as the editor shell, file picker, and line diagnostics.
-- [`three`](./three/README.md)
-  Client-side viewer, preview, runtime, editor workspace, template workbench, and shared Three contracts.
-- [`pi`](./pi/README.md)
-  Browser-side Pi panel UI and transport-only request/response types.
+  Composed UI families that sit between primitives and route pages.
+- [`features/editor`](./features/editor/README.md)
+  Editor-specific client modules such as CodeMirror integration, preview runtime wiring, and workspace state.
+- [`features/chat`](./features/chat/README.md)
+  Chat-specific client transport and conversation state.
 - [`server`](./server/README.md)
-  Server-only services for Pi integration and managed Three file/preview workflows.
+  Server-only services for Pi integration and managed editor file/preview workflows.
+- [`utils`](./utils/README.md)
+  Small shared technical helpers for reusable library code.
 
 ## Client and Server Split
 
-- Browser-facing UI modules belong in `components`, `blocks`, `editor`, `three`, and `pi`.
+- Browser-facing UI modules belong in `components`, `blocks`, and `features`.
 - Server-only logic belongs in `server`.
 - Pi SDK code must stay in server-only modules.
 - Shared serializable types can live in client-safe folders when they are needed on both sides.
@@ -35,7 +35,7 @@
 
 - reusable UI modules
 - shared primitive and block families
-- shared runtime and transport types
+- feature-local state, transport, and parser modules
 - client-safe helpers used by multiple routes
 - server-only services under the `server` subtree
 

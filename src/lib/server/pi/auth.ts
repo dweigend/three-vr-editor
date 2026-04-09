@@ -1,6 +1,6 @@
 /**
- * Purpose: Manage multiple stored OpenRouter API keys for the Pi demo.
- * Context: The demo needs one active system key plus a reusable list of validated keys.
+ * Purpose: Manage stored OpenRouter API keys for the app-wide Pi integration.
+ * Context: Chat, editor, and settings all rely on one active system key plus a reusable list of validated keys.
  * Responsibility: Persist keys through Pi's AuthStorage, expose masked summaries, and switch the active key.
  * Boundaries: This module does not validate keys against OpenRouter or create Pi sessions.
  */
@@ -9,7 +9,7 @@ import { createHash } from 'node:crypto';
 
 import { AuthStorage } from '@mariozechner/pi-coding-agent';
 
-import { PI_DEMO_AUTH_PATH } from './paths';
+import { PI_AUTH_PATH } from './paths';
 
 const ACTIVE_PROVIDER = 'openrouter';
 const STORED_KEY_PREFIX = 'openrouter:';
@@ -25,7 +25,7 @@ export function looksLikeOpenRouterApiKey(apiKey: string): boolean {
 }
 
 function createFileAuthStorage(): AuthStorage {
-	return AuthStorage.create(PI_DEMO_AUTH_PATH);
+	return AuthStorage.create(PI_AUTH_PATH);
 }
 
 function throwIfStorageErrored(authStorage: AuthStorage): void {

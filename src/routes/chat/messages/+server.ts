@@ -7,7 +7,7 @@
 
 import { json } from '@sveltejs/kit';
 
-import type { PiChatMessageRequest } from '$lib/pi/chat-types';
+import type { PiChatMessageRequest } from '$lib/features/chat/chat-types';
 import { hasActiveOpenRouterKey } from '$lib/server/pi/auth';
 import {
 	clearPiSessionCookie,
