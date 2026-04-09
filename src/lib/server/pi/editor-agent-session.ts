@@ -5,10 +5,10 @@
  * Boundaries: Request parsing and response shaping stay in the editor-agent service and route handler.
  */
 
-import type { ThreeEditorActiveFileContext } from '$lib/three/three-editor-workspace-types';
+import type { ThreeEditorActiveFileContext } from '$lib/features/editor/three-editor-workspace-types';
 
-import { createPiDemoResourceLoader } from './resource-loader';
-import { createConfiguredPiDemoAgentSession, type PiSessionMode } from './session-runtime';
+import { createPiResourceLoader } from './resource-loader';
+import { createConfiguredPiAgentSession, type PiSessionMode } from './session-runtime';
 import { createApplyActiveFileEditTool } from './editor-agent-edit-tool';
 
 const EDITOR_AGENT_SYSTEM_PROMPTS = [
@@ -22,11 +22,11 @@ export async function createEditorAgentSession(options: {
 	mode: PiSessionMode;
 	sessionFile?: string | null;
 }) {
-	const resourceLoader = await createPiDemoResourceLoader({
+	const resourceLoader = await createPiResourceLoader({
 		appendSystemPrompts: EDITOR_AGENT_SYSTEM_PROMPTS
 	});
 
-	return createConfiguredPiDemoAgentSession({
+	return createConfiguredPiAgentSession({
 		customTools: [createApplyActiveFileEditTool(options.activeFileContext)],
 		mode: options.mode,
 		resourceLoader,

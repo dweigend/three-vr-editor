@@ -10,8 +10,8 @@ import type { Cookies } from '@sveltejs/kit';
 export type PiSessionScope = 'chat' | 'editor';
 
 const PI_SESSION_COOKIE_NAMES: Record<PiSessionScope, string> = {
-	chat: 'pi_demo_chat_session',
-	editor: 'pi_demo_editor_session'
+	chat: 'pi_chat_session',
+	editor: 'pi_editor_session'
 };
 
 const PI_SESSION_COOKIE_OPTIONS = {

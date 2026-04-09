@@ -1,7 +1,7 @@
 <!--
 	Purpose: Provide the central project documentation for the Three.js VR builder repository.
-	Context: Contributors need one project-specific entrypoint that explains the demos, architecture, workflows, and important boundaries.
-	Responsibility: Summarize the repository purpose, module layout, demo progression, validation commands, and contribution guidance.
+	Context: Contributors need one project-specific entrypoint that explains the app surfaces, architecture, workflows, and important boundaries.
+	Responsibility: Summarize the repository purpose, module layout, validation commands, and contribution guidance.
 	Boundaries: This README is an overview, not a full API reference or a replacement for folder-local READMEs.
 -->
 
@@ -41,12 +41,11 @@ Run the development server:
 bun run dev
 ```
 
-Open the main demo index:
+Open the main app surfaces:
 
-- `/`
-- `/three/editor/pi`
-- `/pi/chat`
-- `/pi`
+- `/editor`
+- `/chat`
+- `/settings`
 
 ## Validation
 
@@ -69,37 +68,33 @@ bun run test
 
 ### `src/routes`
 
-Contains the three main app entrypoints plus the supporting editor endpoints under `src/routes/three/editor`.
+Contains the three main app pages plus the supporting child endpoints under `src/routes/editor` and `src/routes/chat`.
 
-### `src/lib/editor`
+### `src/lib/components`
 
-Holds thin CodeMirror-oriented UI primitives:
+Holds reusable primitive UI families aligned with the local `ui-system` structure.
 
-- `CodeEditor.svelte` mounts and manages the editor surface
-- `editor-diagnostics.ts` owns diagnostic and changed-line decorations
-- `FileSelect.svelte` keeps file selection UI simple and reusable
+### `src/lib/blocks`
 
-This layer should stay UI-focused and not absorb preview orchestration or filesystem access.
+Holds composed UI families built from local primitives.
 
-### `src/lib/three`
+### `src/lib/features/editor`
 
-Contains the main client-side Three integration:
+Contains editor-specific client modules:
 
-- editor workspace components
-- shared runtime and preview loader modules
-- shared scene and workspace types
+- `CodeEditor.svelte` mounts and manages the CodeMirror surface
+- `FileSelect.svelte` keeps file selection UI small and reusable
+- `ThreePreview.svelte` mounts the preview runtime
+- workspace state, template parsing, and editor-agent transport stay nearby
 
 Important contract:
 
 - managed scene modules export `createDemoScene`
 - scene modules may optionally export `demoRendererKind = 'webgl' | 'webgpu'`
 
-### `src/lib/pi`
+### `src/lib/features/chat`
 
-Contains browser-side Pi UI and transport-only types. This layer must stay free of Pi SDK imports and act as a thin client over server endpoints.
-
-- The standalone chat UI uses a persistent chat-scoped session.
-- The editor UI supports `one-shot` and `session` modes on the same endpoint contract.
+Contains browser-side chat transport and conversation state. This layer stays free of Pi SDK imports and acts as a thin client over server endpoints.
 
 ### `src/lib/server/pi`
 
@@ -118,13 +113,13 @@ The chat and editor routes share one backend session/runtime core, but they run 
 
 All Pi SDK usage belongs here or in route handlers, never in browser components.
 
-### `src/lib/server/three`
+### `src/lib/server/editor`
 
-Contains server-side Three workflow services:
+Contains server-side editor workflow services:
 
 - managed file access under `static/three`
 - preview bundling with `esbuild`
-- demo bootstrap loaders
+- workspace bootstrap loaders
 - managed template listing
 
 This layer defines the rules for editable files, preview safety, and template discovery.
@@ -150,18 +145,16 @@ This folder contains the teaching-oriented starter templates used by the editor 
 
 The app intentionally exposes only three primary screens:
 
-1. `/`
-   Minimal launcher for the editor, chat, and settings surfaces.
-2. `/three/editor/pi`
+1. `/editor`
    The main Three.js editor workspace with preview plus Pi `one-shot` and `session` modes.
-3. `/pi/chat`
+2. `/chat`
    A chat-scoped persistent Pi chat screen that uses the configured key and model.
-4. `/pi`
+3. `/settings`
    Consolidated settings for OpenRouter keys and model selection.
 
 ## Contribution Notes
 
-- Prefer additive changes inside the three main surfaces over reintroducing separate demo entrypoints.
+- Prefer changes inside the three main surfaces over reintroducing separate route stacks.
 - Keep Pi imports in server-only modules, route handlers, and `.server.ts` files.
 - Keep editor modules UI-focused; put file or preview orchestration in shared workspace state or server services.
 - Reuse the shared `createDemoScene` contract instead of inventing route-specific scene APIs.
@@ -173,9 +166,8 @@ The app intentionally exposes only three primary screens:
 For more focused documentation, see:
 
 - [`src/lib/README.md`](./src/lib/README.md)
-- [`src/lib/editor/README.md`](./src/lib/editor/README.md)
-- [`src/lib/three/README.md`](./src/lib/three/README.md)
-- [`src/lib/pi/README.md`](./src/lib/pi/README.md)
+- [`src/lib/features/editor/README.md`](./src/lib/features/editor/README.md)
+- [`src/lib/features/chat/README.md`](./src/lib/features/chat/README.md)
 - [`src/lib/server/README.md`](./src/lib/server/README.md)
 - [`src/lib/server/pi/README.md`](./src/lib/server/pi/README.md)
-- [`src/lib/server/three/README.md`](./src/lib/server/three/README.md)
+- [`src/lib/server/editor/README.md`](./src/lib/server/editor/README.md)

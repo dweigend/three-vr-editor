@@ -1,6 +1,6 @@
 <!--
 	Purpose: Provide the shared square application chrome for every route.
-	Context: The app now follows a single framed shell with a left home cell and a right navigation panel toggle.
+	Context: The app now follows a single framed shell around the three primary pages: editor, chat, and settings.
 	Responsibility: Render the persistent top bar, manage the simple side menu state, and host route content.
 	Boundaries: Route-specific screen composition stays in the individual pages and shared workbench modules.
 -->
@@ -26,7 +26,7 @@
 <div class="ui-app-shell">
 	<div class="ui-frame">
 		<header class="ui-topbar">
-			<a aria-label="Open workspace" class="ui-topbar__home" href={resolve('/')}>
+			<a aria-label="Open workspace" class="ui-topbar__home" href={resolve('/editor')}>
 				<Rotate3d aria-hidden="true" class="ui-topbar__home-icon" size={18} />
 				<span class="ui-topbar__home-label">Three Editor</span>
 			</a>
@@ -61,30 +61,30 @@
 					<aside aria-label="Workspace menu" class="ui-page-shell__menu" id="app-shell-menu">
 						<nav class="ui-nav-panel">
 							<a
-								aria-current={page.url.pathname.startsWith('/three/editor') ? 'page' : undefined}
+								aria-current={page.url.pathname.startsWith('/editor') ? 'page' : undefined}
 								class="ui-nav-panel__link"
-								class:ui-nav-panel__link--active={page.url.pathname.startsWith('/three/editor')}
-								href={resolve('/three/editor/pi')}
+								class:ui-nav-panel__link--active={page.url.pathname.startsWith('/editor')}
+								href={resolve('/editor')}
 							>
 								<SquarePen aria-hidden="true" size={16} />
 								<span>Editor</span>
 							</a>
 
 							<a
-								aria-current={page.url.pathname.startsWith('/pi/chat') ? 'page' : undefined}
+								aria-current={page.url.pathname.startsWith('/chat') ? 'page' : undefined}
 								class="ui-nav-panel__link"
-								class:ui-nav-panel__link--active={page.url.pathname.startsWith('/pi/chat')}
-								href={resolve('/pi/chat')}
+								class:ui-nav-panel__link--active={page.url.pathname.startsWith('/chat')}
+								href={resolve('/chat')}
 							>
 								<MessageSquareText aria-hidden="true" size={16} />
 								<span>Chat</span>
 							</a>
 
 							<a
-								aria-current={page.url.pathname === '/pi' ? 'page' : undefined}
+								aria-current={page.url.pathname.startsWith('/settings') ? 'page' : undefined}
 								class="ui-nav-panel__link"
-								class:ui-nav-panel__link--active={page.url.pathname === '/pi'}
-								href={resolve('/pi')}
+								class:ui-nav-panel__link--active={page.url.pathname.startsWith('/settings')}
+								href={resolve('/settings')}
 							>
 								<Settings2 aria-hidden="true" size={16} />
 								<span>Settings</span>

@@ -18,8 +18,8 @@ import {
 
 import { getActiveOpenRouterKey, looksLikeOpenRouterApiKey } from './auth';
 import { getConfiguredModel } from './models';
-import { PI_DEMO_CWD, getPiDemoSessionDir } from './paths';
-import { createPiDemoResourceLoader } from './resource-loader';
+import { PI_CWD, getPiSessionDir } from './paths';
+import { createPiResourceLoader } from './resource-loader';
 import type { PiSessionScope } from './session-cookie';
 
 const CHAT_THINKING_LEVEL = 'low';
@@ -51,40 +51,40 @@ function requireActiveOpenRouterKey(): string {
 
 export function assertManagedPiSessionFile(scope: PiSessionScope, sessionFile: string): string {
 	const normalizedPath = resolve(sessionFile);
-	const managedSessionDir = `${resolve(getPiDemoSessionDir(scope))}/`;
+	const managedSessionDir = `${resolve(getPiSessionDir(scope))}/`;
 
 	if (!normalizedPath.startsWith(managedSessionDir)) {
-		throw new Error('Session file is outside the managed Pi demo directory.');
+		throw new Error('Session file is outside the managed Pi scope directory.');
 	}
 
 	return normalizedPath;
 }
 
-function createPiDemoSessionManager(options: {
+function createPiSessionManager(options: {
 	mode: PiSessionMode;
 	scope: PiSessionScope;
 	sessionFile?: string | null;
 }): SessionManager {
 	if (options.mode === 'ephemeral') {
-		return SessionManager.inMemory(PI_DEMO_CWD);
+		return SessionManager.inMemory(PI_CWD);
 	}
 
-	const sessionDir = getPiDemoSessionDir(options.scope);
+	const sessionDir = getPiSessionDir(options.scope);
 	const normalizedSessionFile = options.sessionFile
 		? assertManagedPiSessionFile(options.scope, options.sessionFile)
 		: null;
 
 	if (normalizedSessionFile) {
-		return SessionManager.open(normalizedSessionFile, sessionDir, PI_DEMO_CWD);
+		return SessionManager.open(normalizedSessionFile, sessionDir, PI_CWD);
 	}
 
-	return SessionManager.create(PI_DEMO_CWD, sessionDir);
+	return SessionManager.create(PI_CWD, sessionDir);
 }
 
-export async function createConfiguredPiDemoAgentSession(options: {
+export async function createConfiguredPiAgentSession(options: {
 	customTools?: ToolDefinition[];
 	mode: PiSessionMode;
-	resourceLoader?: Awaited<ReturnType<typeof createPiDemoResourceLoader>>;
+	resourceLoader?: Awaited<ReturnType<typeof createPiResourceLoader>>;
 	scope: PiSessionScope;
 	sessionFile?: string | null;
 	tools?: typeof readOnlyTools;
@@ -98,14 +98,14 @@ export async function createConfiguredPiDemoAgentSession(options: {
 		throw new Error(`Configured model "${configuredModel.id}" is not available.`);
 	}
 
-	const resourceLoader = options.resourceLoader ?? (await createPiDemoResourceLoader());
-	const sessionManager = createPiDemoSessionManager({
+	const resourceLoader = options.resourceLoader ?? (await createPiResourceLoader());
+	const sessionManager = createPiSessionManager({
 		mode: options.mode,
 		scope: options.scope,
 		sessionFile: options.sessionFile
 	});
 	const { session } = await createAgentSession({
-		cwd: PI_DEMO_CWD,
+		cwd: PI_CWD,
 		authStorage,
 		customTools: options.customTools,
 		modelRegistry,

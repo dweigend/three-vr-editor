@@ -1,6 +1,6 @@
 <!--
-	Purpose: Describe the public button primitive family used by incremental ui-system adoption.
-	Context: The family provides the shared action surface for start-page and future app blocks.
+	Purpose: Describe the public button primitive family used across the app surfaces.
+	Context: The family provides the shared action surface for route pages, blocks, and feature panels.
 	Responsibility: Define the public boundary and keep implementation details private to the family.
 	Boundaries: The family stays presentational and must not absorb routing or product-specific behavior.
 -->

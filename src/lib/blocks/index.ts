@@ -1,6 +1,4 @@
-/** Public barrel for reusable block families in this repository. */
-export { AppLauncher } from './app-launcher';
-export type { AppLauncherItem, AppLauncherProps } from './app-launcher';
+/** Public entrypoint for composed UI blocks. */
 export { ConversationPanel } from './conversation-panel';
 export type { ConversationMessage, ConversationPanelProps } from './conversation-panel';
 export { InputBar } from './input-bar';

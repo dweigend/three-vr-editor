@@ -1,9 +1,22 @@
-# Next Steps
+## Änderungen 2026-04-09
 
-Purpose: Capture the next important implementation steps for the editor workbench in this repository.  
-Context: The repo already contains minimal `CodeMirror` and `Pi` demos, but not yet a unified editing and rendering workflow.  
-Responsibility: Keep the near-term roadmap focused on technical infrastructure first.  
-Boundaries: Detailed tutorial content, didactic planning, and curriculum design stay outside this file for now.
+
+### Tamplates
+
+### Einleitungstexte in taplates überarbeiten
+- statt: "Context: Students can use this template", "you can learn ..."
+
+### das  @three-template
+- das ist nur für three.js intern. es ist nicht für den nutzer. Daher sollte es immer nach ganz unten. 
+- Das Tamplate sollte am besten eine eigene Funktion sein, auf die von extern zugegriffen werden kann. die auskommentierte version ist nicht gut. Da zu fehleranfällig. Die Finktion sollte von der normalen three.js Vorschau ignoriert werden. 
+- Noch eleganter ist es, das Tamplate nach oben zu setzten und die darin gesetzten default werte direkt für die Darstellung zu nutzen. Damit würde eine Doppelung vermieden und der Code einfacher.
+- Zu dem @three-template Einstellungen fehlen im System noch 2x dinge: (1) eine erklärung als .md (sollte im Code auch immer verlinkt sein. "If you want to learn how to set the controlls see ...) (2) Die Controlls sind noch nicht angelegt.
+- 
+
+### Klare Aufteilung zwischen +page-datein und datein im lib:
+- nicht die vollen Seiten in die Lib schreiben. 
+- server-Logik in die lib, nicht in die Pfade. Hier gibt es zu viele Doppelstrukturen. Kleine datein. 
+- 
 
 ## Stand vom 2026-04-07
 
