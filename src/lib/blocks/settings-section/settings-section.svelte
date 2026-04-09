@@ -1,9 +1,4 @@
-<!--
-	Purpose: Render a reusable titled section shell for stacked settings screens.
-	Context: Settings-like pages should stay vertically organized and avoid repeating header and spacing markup.
-	Responsibility: Provide a consistent titled header, optional meta line, and padded content area.
-	Boundaries: This component stays presentational and does not manage form submission or domain logic.
--->
+<!-- Shared titled settings section. -->
 
 <script lang="ts">
 	import { joinClassNames } from '$lib/utils/class-names';

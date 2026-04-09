@@ -1,9 +1,4 @@
-<!--
-	Purpose: Render optional parameter controls from the active Three scene source when a recognized template header is present.
-	Context: The editor sidebar should opportunistically expose sliders, color pickers, selects, and text inputs without breaking plain files.
-	Responsibility: Parse the active source, show dynamic controls when available, and write updated template parameters back into the source text.
-	Boundaries: This panel does not persist files, infer arbitrary code structure, or require the header to exist.
--->
+<!-- Template-driven editor controls. -->
 
 <script lang="ts">
 	import { TextInput } from '$lib/components';
@@ -12,6 +7,7 @@
 		writeThreeTemplateParameters
 	} from '$lib/features/editor/three-template-source';
 	import type { ThreeTemplateParameterDefinition, ThreeTemplateParameterValue } from '$lib/features/editor/three-template-types';
+	import '$lib/features/editor/three-template-parameter-panel.css';
 
 	type Props = {
 		onSourceChange: (value: string) => void;

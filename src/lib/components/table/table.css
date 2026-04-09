@@ -1,0 +1,55 @@
+/* Table family styles. */
+
+.ui-data-table-shell {
+	border: 1px solid var(--ui-color-border);
+	background: rgba(255, 255, 255, 0.02);
+}
+
+.ui-data-table-scroll {
+	overflow-x: hidden;
+}
+
+.ui-data-table {
+	width: 100%;
+	min-width: 100%;
+	border-collapse: collapse;
+	table-layout: fixed;
+}
+
+.ui-data-table__header {
+	border-bottom: 1px solid var(--ui-color-border);
+}
+
+.ui-data-table__row {
+	border-bottom: 1px solid var(--ui-color-border);
+}
+
+.ui-data-table__body .ui-data-table__row:last-child {
+	border-bottom: 0;
+}
+
+.ui-data-table__row[data-selected='true'] {
+	background: rgba(168, 85, 247, 0.08);
+}
+
+.ui-data-table__head,
+.ui-data-table__cell {
+	padding: 0.6rem 0.72rem;
+	text-align: left;
+	vertical-align: middle;
+	word-break: break-word;
+}
+
+.ui-data-table__head {
+	color: var(--ui-color-text-subtle);
+	font-size: var(--ui-font-size-meta);
+	font-weight: 700;
+	letter-spacing: 0.12em;
+	text-transform: uppercase;
+}
+
+.ui-data-table__cell {
+	color: var(--ui-color-text);
+	font-size: var(--ui-font-size-body);
+	line-height: 1.45;
+}

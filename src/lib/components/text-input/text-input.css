@@ -1,0 +1,17 @@
+/* Text-input family styles. */
+
+.ui-input {
+	width: 100%;
+	min-height: var(--ui-control-size);
+	border: 1px solid var(--ui-color-border);
+	background: rgba(255, 255, 255, 0.02);
+	color: var(--ui-color-text);
+	padding: 0.55rem 0.75rem;
+	font-size: var(--ui-font-size-body);
+	line-height: 1.45;
+}
+
+.ui-input:focus-visible {
+	outline: none;
+	box-shadow: var(--ui-focus-ring);
+}

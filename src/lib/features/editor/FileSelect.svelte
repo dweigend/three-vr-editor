@@ -1,14 +1,10 @@
-<!--
-	Purpose: Render a reusable file picker for local editor-driven demos.
-	Context: The Three editor toolbar should use the shared dropdown-menu primitive instead of a native select.
-	Responsibility: Display editable files, bind the active file path, and expose the current selection in compact or labeled form.
-	Boundaries: This component does not load file contents or know anything about preview behavior.
--->
+<!-- File picker for editor-managed files. -->
 
 <script lang="ts">
 	import { DropdownMenu } from '$lib/components';
 	import { joinClassNames } from '$lib/utils/class-names';
 	import type { ThreeSourceFileSummary } from '$lib/features/editor/three-editor-types';
+	import '$lib/features/editor/file-select.css';
 
 	type Props = {
 		class?: string;

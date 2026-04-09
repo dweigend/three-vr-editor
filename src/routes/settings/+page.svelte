@@ -1,9 +1,4 @@
-<!--
-	Purpose: Provide the consolidated Pi settings page for the app.
-	Context: Users should configure keys and the active model in one place instead of navigating through multiple settings routes.
-	Responsibility: Render key management, model selection, and the stored-key list.
-	Boundaries: Pi SDK code stays server-side; this page only submits forms and renders results.
--->
+<!-- Consolidated Pi settings screen. -->
 
 <script lang="ts">
 	import Check from '@lucide/svelte/icons/check';
@@ -12,6 +7,7 @@
 	import KeyRound from '@lucide/svelte/icons/key-round';
 	import Save from '@lucide/svelte/icons/save';
 	import Trash2 from '@lucide/svelte/icons/trash-2';
+	import './settings.css';
 
 	import {
 		IconButton,

@@ -1,9 +1,4 @@
-<!--
-	Purpose: Render a shared transcript-and-composer layout for chat-style interactions.
-	Context: Standalone Pi chat and the embedded editor agent should reuse the same conversation shell instead of maintaining parallel transcript CSS.
-	Responsibility: Render messages with safe Markdown, keep the composer pinned to the bottom, and own transcript scrolling.
-	Boundaries: This block does not fetch messages, submit prompts, or decide feature-specific composer controls.
--->
+<!-- Shared transcript and composer block. -->
 
 <script lang="ts">
 	import Bot from '@lucide/svelte/icons/bot';

@@ -1,9 +1,4 @@
-<!--
-	Purpose: Render the editor-side Pi panel with one-shot and session modes.
-	Context: The editor workspace needs a file-aware assistant without importing Pi SDK code into the browser.
-	Responsibility: Collect prompts, manage local session state, and call the editor agent endpoint.
-	Boundaries: Session creation, model selection, and tool execution stay in server-only modules.
--->
+<!-- Editor-side Pi panel. -->
 
 <script lang="ts">
 	import { untrack } from 'svelte';
@@ -12,6 +7,7 @@
 	import { ConversationPanel, InputBar } from '$lib/blocks';
 	import { createConversationState } from '$lib/features/chat/conversation-state.svelte';
 	import { clearEditorAgentSession, sendEditorAgentRequest } from '$lib/features/editor/editor-agent-client';
+	import '$lib/features/editor/editor-agent-panel.css';
 
 	import type {
 		EditorAgentMode,

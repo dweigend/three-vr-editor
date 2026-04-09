@@ -1,9 +1,4 @@
-<!--
-	Purpose: Render the CodeMirror editor shell for the workspace.
-	Context: The editor feature needs one reusable surface for file selection, document editing, and local editor actions.
-	Responsibility: Mount CodeMirror, emit document changes, and trigger save, redo, and file-creation actions.
-	Boundaries: This component does not read files, build previews, or persist changes by itself.
--->
+<!-- CodeEditor surface. -->
 
 <script lang="ts">
 	import type { Snippet } from 'svelte';
@@ -21,6 +16,7 @@
 		ThreeCreateFileRequest,
 		ThreeTemplateSummary
 	} from '$lib/features/editor/three-template-types';
+	import '$lib/features/editor/code-editor.css';
 
 	import FileSelect from './FileSelect.svelte';
 

@@ -1,9 +1,4 @@
-<!--
-	Purpose: Render a reusable input row with optional action rails around a shared textarea primitive.
-	Context: Chat and editor prompts should reuse one compact composer shell adapted from the ui-system chat composer.
-	Responsibility: Lay out leading controls, the main text field, and trailing actions with responsive width behavior.
-	Boundaries: This block stays presentational and does not own submission, shortcuts, or async effects.
--->
+<!-- Shared prompt/composer row. -->
 
 <script lang="ts">
 	import { CommandInput, Textarea } from '$lib/components';

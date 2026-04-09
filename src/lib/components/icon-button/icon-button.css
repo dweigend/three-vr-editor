@@ -1,0 +1,23 @@
+/* Icon-button family styles. */
+
+.ui-icon-button {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	width: var(--ui-control-size);
+	height: var(--ui-control-size);
+	border: 0;
+	background: transparent;
+	color: var(--ui-color-text-muted);
+	cursor: pointer;
+	transition:
+		background var(--ui-transition-fast),
+		color var(--ui-transition-fast);
+}
+
+.ui-icon-button:hover,
+.ui-icon-button:focus-visible {
+	background: transparent;
+	color: var(--ui-color-accent-strong);
+	outline: none;
+}

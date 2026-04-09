@@ -1,0 +1,71 @@
+/* Button family styles. */
+
+.ui-button {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	gap: var(--ui-space-2);
+	min-height: var(--ui-control-size);
+	border: 1px solid var(--ui-color-border);
+	padding: 0.55rem 0.9rem;
+	background: var(--ui-color-surface-raised);
+	color: var(--ui-color-text);
+	font-family: var(--ui-font-mono);
+	font-size: var(--ui-font-size-meta);
+	font-weight: 700;
+	letter-spacing: 0.12em;
+	line-height: 1;
+	text-transform: uppercase;
+	cursor: pointer;
+	transition:
+		border-color var(--ui-transition-fast),
+		background var(--ui-transition-fast),
+		color var(--ui-transition-fast);
+}
+
+.ui-button:hover,
+.ui-button:focus-visible {
+	border-color: var(--ui-color-accent);
+	background: rgba(168, 85, 247, 0.12);
+	outline: none;
+}
+
+.ui-button:disabled,
+.ui-button[aria-disabled='true'],
+.ui-icon-button:disabled,
+.ui-icon-button[aria-disabled='true'] {
+	cursor: not-allowed;
+	opacity: 0.56;
+}
+
+.ui-button--primary {
+	border-color: rgba(168, 85, 247, 0.52);
+	background: rgba(168, 85, 247, 0.18);
+}
+
+.ui-button--secondary {
+	background: var(--ui-color-surface-raised);
+}
+
+.ui-button--ghost {
+	background: transparent;
+	color: var(--ui-color-text-muted);
+}
+
+.ui-button--danger {
+	border-color: rgba(251, 113, 133, 0.45);
+	background: rgba(251, 113, 133, 0.08);
+	color: #ffd7de;
+}
+
+.ui-button--sm {
+	min-height: var(--ui-control-size);
+	padding: 0.55rem 0.8rem;
+	font-size: var(--ui-font-size-meta);
+}
+
+.ui-button--lg {
+	min-height: calc(var(--ui-control-size) + 0.3rem);
+	padding: 0.7rem 1rem;
+	font-size: var(--ui-font-size-meta);
+}

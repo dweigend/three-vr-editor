@@ -16,6 +16,9 @@ This folder contains ui-system-aligned primitive UI families.
 - Primitives stay generic and never import from `src/lib/blocks`.
 - Shared implementation helpers come from `src/lib/utils`.
 - Family roots and `components/` folders keep their own `README.md` files.
+- Family-owned presentation should live in a colocated `<family>.css` file imported by the family `index.ts`.
+- `src/app.css` is reserved for global foundations such as tokens, reset, shell layout, and a few true app-wide helpers.
+- Route or feature code should avoid restyling primitive internals through global context selectors when a family variant or local wrapper style can own the change.
 
 ## Current Families
 

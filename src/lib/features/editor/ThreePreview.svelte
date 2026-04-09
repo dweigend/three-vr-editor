@@ -1,9 +1,4 @@
-<!--
-	Purpose: Render the live Three preview for the editor workspace.
-	Context: The editor rebuilds scene modules on the server and swaps them in the browser without a full page reload.
-	Responsibility: Load the bundled module, mount it into the shared runtime, and surface build or runtime failures.
-	Boundaries: This component does not fetch source files or decide when preview rebuilds should happen.
--->
+<!-- Live Three preview surface. -->
 
 <script lang="ts">
 	import { untrack } from 'svelte';
@@ -15,6 +10,7 @@
 	import { toPreviewRuntimeError } from '$lib/features/editor/preview-runtime-errors';
 	import type { ThreePreviewBuildResult } from '$lib/features/editor/three-editor-types';
 	import { toViewerError, type ViewerError } from '$lib/features/editor/three-viewer-errors';
+	import '$lib/features/editor/three-preview.css';
 
 	import ThreeViewerErrorPanel from './ThreeViewerErrorPanel.svelte';
 

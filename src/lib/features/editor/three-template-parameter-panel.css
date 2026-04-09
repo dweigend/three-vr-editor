@@ -1,0 +1,36 @@
+/* ThreeTemplateParameterPanel feature styles. */
+
+.parameter-list {
+	display: grid;
+	gap: 0.9rem;
+}
+
+.parameter-color {
+	width: 100%;
+	min-height: 2.6rem;
+	padding: 0.2rem;
+}
+
+.range-field {
+	display: grid;
+	align-items: center;
+	gap: 0.5rem;
+	grid-template-columns: minmax(0, 1fr) auto;
+}
+
+.parameter-color,
+.range-field input {
+	border: 1px solid var(--ui-color-border);
+	background: rgba(255, 255, 255, 0.02);
+	color: var(--ui-color-text);
+	padding: 0.2rem;
+}
+
+.range-field input {
+	width: 100%;
+}
+
+.range-field output {
+	color: var(--ui-color-text);
+	font-variant-numeric: tabular-nums;
+}

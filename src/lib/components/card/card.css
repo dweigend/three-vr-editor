@@ -1,0 +1,36 @@
+/* Card family styles. */
+
+.ui-card {
+	position: relative;
+	border: 1px solid var(--ui-color-border);
+	background: var(--ui-color-surface-raised);
+	overflow: hidden;
+}
+
+.ui-card::before {
+	content: '';
+	position: absolute;
+	inset: 0 0 auto 0;
+	height: 1px;
+	background: linear-gradient(90deg, transparent, var(--ui-color-accent), transparent);
+	opacity: 0.5;
+}
+
+.ui-card__header,
+.ui-card__body,
+.ui-card__footer {
+	padding: var(--ui-space-5);
+}
+
+.ui-card__header {
+	border-bottom: 1px solid var(--ui-color-border);
+}
+
+@media (max-width: 720px) {
+	.ui-card__header,
+	.ui-card__body,
+	.ui-card__footer {
+		padding-left: 0.9rem;
+		padding-right: 0.9rem;
+	}
+}
