@@ -1,13 +1,15 @@
 <!--
-	Purpose: Provide a minimal chat UI for the server-side Pi demo session.
-	Context: This page hydrates the persisted transcript and then continues the dialogue with immediate optimistic client-side updates.
-	Responsibility: Render the current transcript, clear the input immediately on submit, and show Pi working state while the backend responds.
+	Purpose: Provide the persistent Pi chat page for the app.
+	Context: This route hydrates the stored transcript and continues the conversation through child JSON endpoints.
+	Responsibility: Render chat history, clear the input optimistically, and show Pi working state while the backend responds.
 	Boundaries: The browser never imports Pi SDK modules or accesses secrets directly.
 -->
 
 <script lang="ts">
 	import { untrack } from 'svelte';
+
 	import Power from '@lucide/svelte/icons/power';
+
 	import { IconButton } from '$lib/components';
 	import { ConversationPanel, InputBar } from '$lib/blocks';
 	import { sendPiChatMessageClient, startPiChatSessionClient } from '$lib/pi/chat-client';
@@ -40,6 +42,7 @@
 
 		return 'Send a message to start a Pi session.';
 	});
+
 	function toErrorMessage(error: unknown): string {
 		return error instanceof Error ? error.message : 'Pi request failed.';
 	}
@@ -99,7 +102,7 @@
 </script>
 
 <svelte:head>
-	<title>Pi Chat</title>
+	<title>Chat</title>
 </svelte:head>
 
 <section class="ui-screen ui-screen--fill">
@@ -132,7 +135,7 @@
 				>
 					{#snippet leading()}
 						{#if sessionReady}
-							<span class="ui-command-prompt" aria-hidden="true">&gt;</span>
+							<span aria-hidden="true" class="ui-command-prompt">&gt;</span>
 						{:else}
 							<IconButton
 								ariaLabel="Start session"

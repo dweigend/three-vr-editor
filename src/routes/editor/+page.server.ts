@@ -1,20 +1,20 @@
 /**
- * Purpose: Load the initial state for the Three editor demo with the Pi agent panel.
- * Context: The route combines the shared editor bootstrap data with Pi availability metadata.
- * Responsibility: Return editor workspace data plus the active Pi key, model, and editor-session status.
- * Boundaries: Pi requests run through the dedicated JSON endpoint, not through this page load.
+ * Purpose: Load the Three editor workspace page.
+ * Context: The editor route combines managed file editing, live preview, template creation, and the Pi editor panel.
+ * Responsibility: Return editor bootstrap data plus the active Pi key, model, and editor-session status.
+ * Boundaries: Pi requests run through dedicated child JSON endpoints, not through this page load.
  */
 
 import { hasActiveOpenRouterKey } from '$lib/server/pi/auth';
 import { readEditorAgentSession } from '$lib/server/pi/editor-agent';
 import { getConfiguredModel } from '$lib/server/pi/models';
 import { clearPiSessionCookie, getPiSessionCookie } from '$lib/server/pi/session-cookie';
-import { loadThreeEditorTemplatePageData } from '$lib/server/three/editor-template-page-load';
+import { loadEditorWorkspacePageData } from '$lib/server/three/editor-workspace-load';
 
 import type { PageServerLoad } from './$types';
 
 export const load: PageServerLoad = async ({ cookies }) => {
-	const editorData = await loadThreeEditorTemplatePageData();
+	const editorData = await loadEditorWorkspacePageData();
 	const hasActiveKey = hasActiveOpenRouterKey();
 	const configuredModel = getConfiguredModel();
 	const editorSessionFile = getPiSessionCookie(cookies, 'editor');

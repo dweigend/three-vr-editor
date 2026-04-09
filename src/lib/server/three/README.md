@@ -1,7 +1,7 @@
 <!--
 	Purpose: Document the server-side Three workflow services that power managed files, previews, and template discovery.
-	Context: The editor and template workbench demos depend on a small set of server-only helpers instead of route-local ad hoc logic.
-	Responsibility: Explain the file service, preview builder, demo loaders, template service, and the split between editable scenes and template sources.
+	Context: The editor workspace depends on a small set of server-only helpers instead of route-local ad hoc logic.
+	Responsibility: Explain the file service, preview builder, editor page loader, template service, and the split between editable scenes and template sources.
 	Boundaries: This README does not describe client-side Three runtime or editor UI behavior in detail.
 -->
 
@@ -15,8 +15,8 @@ This folder contains the server-side services behind the Three viewer, editor, a
   `files.ts`, `paths.ts`
 - preview building
   `preview-build.ts`, `preview-errors.ts`, `preview-source-map.ts`
-- demo bootstrap loaders
-  `editor-page-load.ts`, `editor-template-page-load.ts`
+- editor workspace bootstrap loader
+  `editor-workspace-load.ts`
 - template discovery
   `templates.ts`
 
@@ -25,7 +25,7 @@ This folder contains the server-side services behind the Three viewer, editor, a
 - guard managed file paths under `static/three`
 - list, read, save, and create managed scene files
 - build browser-runnable preview bundles with `esbuild`
-- expose initial page bootstrap data for editor-style routes
+- expose the initial page bootstrap data for the editor route
 - list valid templates by parsing optional template headers under `static/templates`
 
 ## `static/three` Conventions

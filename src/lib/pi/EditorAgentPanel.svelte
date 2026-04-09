@@ -40,7 +40,7 @@
 
 	let {
 		activeFileContext,
-		endpoint = resolve('/three/editor/pi/agent'),
+		endpoint = resolve('/editor/agent'),
 		hasActiveKey,
 		initialMessages = [],
 		initialSessionReady = false,
@@ -278,7 +278,7 @@
 					>
 						{#snippet trailing()}
 							{#if !hasActiveKey}
-								<Button href={resolve('/pi')} size="sm">Open settings</Button>
+								<Button href={resolve('/settings')} size="sm">Open settings</Button>
 							{:else}
 								<div class="editor-agent-panel__trailing">
 									<Button type="submit" disabled={isDisabled || prompt.trim().length === 0}>

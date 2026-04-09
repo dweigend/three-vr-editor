@@ -15,7 +15,7 @@ async function readTransportError(response: Response, fallbackMessage: string): 
 }
 
 export async function startPiChatSessionClient(
-	endpoint = resolve('/api/pi/chat/session')
+	endpoint = resolve('/chat/session')
 ): Promise<PiChatSessionPayload> {
 	const response = await fetch(endpoint, {
 		method: 'POST'
@@ -30,7 +30,7 @@ export async function startPiChatSessionClient(
 
 export async function sendPiChatMessageClient(
 	prompt: string,
-	endpoint = resolve('/api/pi/chat/messages')
+	endpoint = resolve('/chat/messages')
 ): Promise<PiChatSessionPayload> {
 	const requestBody = {
 		prompt

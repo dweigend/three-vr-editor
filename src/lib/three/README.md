@@ -1,7 +1,7 @@
 <!--
 	Purpose: Document the client-side Three integration layer that powers the viewer, editor, and template workbench demos.
-	Context: This folder now contains both the original viewer path and the newer template-aware editing workflow.
-	Responsibility: Explain the main modules, shared contracts, and the boundaries between runtime, workspace, and template metadata logic.
+	Context: This folder contains the reusable client-side Three integration that sits underneath the editor page.
+	Responsibility: Explain the main modules, shared contracts, and the boundaries between runtime, editor state, and template metadata logic.
 	Boundaries: This README does not replace the source-level comments in individual scene or runtime modules.
 -->
 
@@ -16,9 +16,9 @@ This folder contains the client-side Three.js integration used by the demo route
 - preview and runtime modules
   `ThreePreview.svelte`, `create-three-runtime.ts`, `load-three-preview-module.ts`
 - editor workspace modules
-  `ThreeEditorWorkspace.svelte`, `ThreeEditorPiWorkspace.svelte`, `three-editor-workspace-state.svelte.ts`, `three-editor-types.ts`, `three-editor-workspace-types.ts`
+  `three-editor-workspace-state.svelte.ts`, `three-editor-types.ts`, `three-editor-workspace-types.ts`
 - template workbench modules
-  `ThreeEditorTemplateWorkspace.svelte`, `ThreeTemplateParameterPanel.svelte`, `ThreeFileCreatePanel.svelte`, `three-template-types.ts`, `three-template-source.ts`
+  `ThreeTemplateParameterPanel.svelte`, `ThreeFileCreatePanel.svelte`, `three-template-types.ts`, `three-template-source.ts`
 - shared scene and error contracts
   `three-demo-scene.ts`, `three-viewer-errors.ts`, `preview-runtime-errors.ts`
 
@@ -36,16 +36,14 @@ The optional metadata powers the dynamic parameter panel. If the metadata is mis
 ## Screen Composition
 
 - The framed app shell and right-side menu live in `src/routes/+layout.svelte` and `src/app.css`.
-- `ThreeEditorWorkspace.svelte` owns the plain two-pane editor and preview surface.
-- `ThreeEditorPiWorkspace.svelte` owns the three-pane editor, Pi, and preview layout.
-- `ThreeEditorTemplateWorkspace.svelte` owns the template sidebar plus editor and preview layout.
-- Route files under `src/routes/three` should stay thin and delegate pane layout to these shared modules.
+- The main editor page composition now lives in `src/routes/editor/+page.svelte`.
+- This folder provides the reusable building blocks below that page: preview rendering, editor state, template metadata, and runtime helpers.
 
 ## Responsibilities
 
 - mount and dispose Three runtimes safely
 - swap preview modules from server-built code
-- keep viewer/editor/template workbench UI modular
+- keep viewer, preview, and editor state modular
 - expose shared types that are safe for client and server reuse
 
 ## Boundaries

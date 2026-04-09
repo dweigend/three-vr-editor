@@ -1,6 +1,6 @@
 /**
  * Purpose: Start a persisted Pi chat session for the browser chat UI.
- * Context: The chat page uses client-side fetch for modern optimistic updates instead of form actions.
+ * Context: The chat page uses client-side fetch for optimistic updates instead of form actions.
  * Responsibility: Validate chat availability, create a managed session, set the session cookie, and return transcript state.
  * Boundaries: UI state and optimistic rendering stay on the client, and Pi SDK setup stays in library modules.
  */
@@ -15,12 +15,7 @@ import type { RequestHandler } from './$types';
 
 export const POST: RequestHandler = async ({ cookies }) => {
 	if (!hasActiveOpenRouterKey()) {
-		return json(
-			{
-				message: 'Add and activate an OpenRouter key first.'
-			},
-			{ status: 400 }
-		);
+		return json({ message: 'Add and activate an OpenRouter key first.' }, { status: 400 });
 	}
 
 	try {

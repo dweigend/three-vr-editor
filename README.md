@@ -41,12 +41,11 @@ Run the development server:
 bun run dev
 ```
 
-Open the main demo index:
+Open the main app surfaces:
 
-- `/`
-- `/three/editor/pi`
-- `/pi/chat`
-- `/pi`
+- `/editor`
+- `/chat`
+- `/settings`
 
 ## Validation
 
@@ -69,7 +68,7 @@ bun run test
 
 ### `src/routes`
 
-Contains the three main app entrypoints plus the supporting editor endpoints under `src/routes/three/editor`.
+Contains the three main app pages plus the supporting child endpoints under `src/routes/editor` and `src/routes/chat`.
 
 ### `src/lib/editor`
 
@@ -150,13 +149,11 @@ This folder contains the teaching-oriented starter templates used by the editor 
 
 The app intentionally exposes only three primary screens:
 
-1. `/`
-   Minimal launcher for the editor, chat, and settings surfaces.
-2. `/three/editor/pi`
+1. `/editor`
    The main Three.js editor workspace with preview plus Pi `one-shot` and `session` modes.
-3. `/pi/chat`
+2. `/chat`
    A chat-scoped persistent Pi chat screen that uses the configured key and model.
-4. `/pi`
+3. `/settings`
    Consolidated settings for OpenRouter keys and model selection.
 
 ## Contribution Notes

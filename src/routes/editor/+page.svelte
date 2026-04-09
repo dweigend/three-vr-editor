@@ -1,66 +1,60 @@
 <!--
-	Purpose: Compose the shared Three editor state with a dedicated Pi pane and a preview pane.
-	Context: The nested editor Pi route needs a stable three-pane workbench that matches the wireframe without route-level layout glue.
-	Responsibility: Manage the editor state, pass active-file context into Pi, and apply returned edits back into the active document.
-	Boundaries: Pi transport stays inside the Pi panel and server routes, while route-level data loading stays outside this component.
+	Purpose: Render the main editor workspace directly in the route layer.
+	Context: This is one of the three primary app pages and owns the page-specific composition of editor, Pi agent, and preview panes.
+	Responsibility: Wire the shared editor state to the route endpoints, apply Pi edits back into the active file, and keep the workspace layout explicit.
+	Boundaries: Reusable editor, preview, Pi, and state modules still live in src/lib.
 -->
 
 <script lang="ts">
 	import { untrack } from 'svelte';
 	import { resolve } from '$app/paths';
+
 	import Bot from '@lucide/svelte/icons/bot';
 	import Monitor from '@lucide/svelte/icons/monitor';
 	import { Pane, PaneGroup, PaneResizer } from 'paneforge';
 
 	import { ToolbarButton } from '$lib/components';
 	import CodeEditor from '$lib/editor/CodeEditor.svelte';
-	import type { PiChatConversationMessage } from '$lib/pi/chat-types';
 	import EditorAgentPanel from '$lib/pi/EditorAgentPanel.svelte';
+	import type { PiChatConversationMessage } from '$lib/pi/chat-types';
 	import type {
 		EditorAgentAppliedEdit,
 		EditorAgentRequest,
 		EditorAgentResponse
 	} from '$lib/pi/editor-agent-types';
+	import ThreePreview from '$lib/three/ThreePreview.svelte';
 	import type {
 		ThreePreviewBuildResult,
 		ThreeSourceDocument,
 		ThreeSourceFileSummary
 	} from '$lib/three/three-editor-types';
-	import type { ThreeCreateFileRequest, ThreeTemplateSummary } from '$lib/three/three-template-types';
 	import { createThreeEditorWorkspaceState } from '$lib/three/three-editor-workspace-state.svelte';
+	import type { ThreeCreateFileRequest, ThreeTemplateSummary } from '$lib/three/three-template-types';
 	import { joinClassNames } from '$lib/utils/class-names';
 
-	import ThreePreview from './ThreePreview.svelte';
-
-	type Props = {
-		files: ThreeSourceFileSummary[];
-		hasActiveKey: boolean;
-		initialDocument: ThreeSourceDocument;
-		initialEditorMessages: PiChatConversationMessage[];
-		initialEditorSessionReady: boolean;
-		initialPreview: ThreePreviewBuildResult;
-		modelName?: string | null;
-		previewEntryPath: string;
-		templates: ThreeTemplateSummary[];
-	};
-
-	let {
-		files,
-		hasActiveKey,
-		initialDocument,
-		initialEditorMessages,
-		initialEditorSessionReady,
-		initialPreview,
-		modelName = null,
-		previewEntryPath,
-		templates
-	}: Props = $props();
+	import type { PageProps } from './$types';
 
 	type CollapsiblePaneApi = {
 		collapse: () => void;
 		expand: () => void;
 		isCollapsed: () => boolean;
 	};
+
+	let { data }: PageProps = $props();
+
+	const stableData = untrack(() => {
+		return {
+			files: data.files as ThreeSourceFileSummary[],
+			hasActiveKey: data.hasActiveKey,
+			initialDocument: data.document as ThreeSourceDocument,
+			initialEditorMessages: data.initialEditorMessages as PiChatConversationMessage[],
+			initialEditorSessionReady: data.initialEditorSessionReady,
+			initialPreview: data.preview as ThreePreviewBuildResult,
+			modelName: data.configuredModel.name,
+			previewEntryPath: data.previewEntryPath,
+			templates: data.templates as ThreeTemplateSummary[]
+		};
+	});
 
 	let agentPane: CollapsiblePaneApi | null = null;
 	let previewPane: CollapsiblePaneApi | null = null;
@@ -71,19 +65,14 @@
 	let lastAppliedEditToken = $state(0);
 	let workspaceMessage = $state<string | null>(null);
 
-	const stableFiles = untrack(() => files);
-	const stableInitialDocument = untrack(() => initialDocument);
-	const stableInitialPreview = untrack(() => initialPreview);
-	const stablePreviewEntryPath = untrack(() => previewEntryPath);
-
 	const workspaceState = createThreeEditorWorkspaceState({
-		createFileEndpoint: resolve('/three/editor/file/create'),
-		fileEndpoint: resolve('/three/editor/file'),
-		files: stableFiles,
-		initialDocument: stableInitialDocument,
-		initialPreview: stableInitialPreview,
-		previewEndpoint: resolve('/three/editor/preview'),
-		previewEntryPath: stablePreviewEntryPath,
+		createFileEndpoint: resolve('/editor/file/create'),
+		fileEndpoint: resolve('/editor/file'),
+		files: stableData.files,
+		initialDocument: stableData.initialDocument,
+		initialPreview: stableData.initialPreview,
+		previewEndpoint: resolve('/editor/preview'),
+		previewEntryPath: stableData.previewEntryPath,
 		previewMode: 'selected'
 	});
 
@@ -185,19 +174,23 @@
 	});
 </script>
 
+<svelte:head>
+	<title>Editor</title>
+</svelte:head>
+
 <section class="ui-screen ui-screen--workbench">
-	<PaneGroup autoSaveId="three-editor-pi-layout" class="ui-pane-group ui-pane-group--workbench" direction="horizontal">
+	<PaneGroup
+		autoSaveId="editor-page-layout"
+		class="ui-pane-group ui-pane-group--workbench"
+		direction="horizontal"
+	>
 		<Pane class="ui-pane-slot" defaultSize={56} minSize={24}>
 			<PaneGroup
-				autoSaveId="three-editor-pi-stack-layout"
+				autoSaveId="editor-page-stack-layout"
 				class="ui-pane-group ui-pane-group--stack"
 				direction="vertical"
 			>
-				<Pane
-					class="ui-pane-slot"
-					defaultSize={68}
-					minSize={18}
-				>
+				<Pane class="ui-pane-slot" defaultSize={68} minSize={18}>
 					<section class="ui-pane">
 						<div class="ui-pane__body ui-pane__body--flush">
 							{#if workspaceState.activeDocument === undefined}
@@ -242,7 +235,7 @@
 										files={workspaceState.files}
 										bind:selectedPath={workspaceState.selectedPath}
 										onCreateFile={handleCreateFile}
-										{templates}
+										templates={stableData.templates}
 										value={workspaceState.activeDocument}
 										onChange={workspaceState.handleSourceChange}
 										onSave={workspaceState.saveActiveDocument}
@@ -280,10 +273,11 @@
 				>
 					<EditorAgentPanel
 						activeFileContext={workspaceState.activeFileContext}
-						{hasActiveKey}
-						initialMessages={initialEditorMessages}
-						initialSessionReady={initialEditorSessionReady}
-						{modelName}
+						endpoint={resolve('/editor/agent')}
+						hasActiveKey={stableData.hasActiveKey}
+						initialMessages={stableData.initialEditorMessages}
+						initialSessionReady={stableData.initialEditorSessionReady}
+						modelName={stableData.modelName}
 						onResponse={handleAgentResponse}
 					/>
 				</Pane>
@@ -318,7 +312,10 @@
 				</div>
 
 				<div class="ui-pane__body ui-pane__body--flush">
-					<ThreePreview preview={workspaceState.preview} onErrorChange={workspaceState.handlePreviewErrorChange} />
+					<ThreePreview
+						preview={workspaceState.preview}
+						onErrorChange={workspaceState.handlePreviewErrorChange}
+					/>
 				</div>
 			</section>
 		</Pane>

@@ -1,6 +1,6 @@
 /**
  * Purpose: Expose managed file reads and saves for the editable `static/three` source files.
- * Context: The Three editor page loads documents on selection and persists them through this endpoint.
+ * Context: The editor page loads documents on selection and persists them through this endpoint.
  * Responsibility: Return one file document on GET and save one file document on POST.
  * Boundaries: Preview bundling is handled by the dedicated preview endpoint.
  */

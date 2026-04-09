@@ -29,21 +29,14 @@ export const POST: RequestHandler = async ({ cookies, request }) => {
 		return json({ message: 'Invalid chat message request.' }, { status: 400 });
 	}
 
-	const prompt = body.prompt;
-
 	if (!hasActiveOpenRouterKey()) {
 		clearPiSessionCookie(cookies, 'chat');
-		return json(
-			{
-				message: 'Add and activate an OpenRouter key first.'
-			},
-			{ status: 400 }
-		);
+		return json({ message: 'Add and activate an OpenRouter key first.' }, { status: 400 });
 	}
 
 	try {
 		const session = await sendPiChatMessage({
-			prompt,
+			prompt: body.prompt,
 			sessionFile: getPiSessionCookie(cookies, 'chat')
 		});
 		setPiSessionCookie(cookies, 'chat', session.sessionFile);

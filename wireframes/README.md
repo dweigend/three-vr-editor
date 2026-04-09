@@ -25,6 +25,6 @@ This folder holds the layout wireframes used for the current UI cleanup pass.
 ## How They Map To Code
 
 - Global shell and menu: `src/routes/+layout.svelte` and `src/app.css`
-- Editor workbenches: `src/lib/three/ThreeEditorWorkspace.svelte` and `src/lib/three/ThreeEditorAgentWorkbench.svelte`
-- Settings screens: `src/routes/demo/pi/+page.svelte` and `src/routes/demo/pi/models/+page.svelte`
-- Chat screen: `src/routes/demo/pi/chat/+page.svelte`
+- Editor workspace: `src/routes/editor/+page.svelte`
+- Settings screen: `src/routes/settings/+page.svelte`
+- Chat screen: `src/routes/chat/+page.svelte`

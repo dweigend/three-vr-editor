@@ -1,15 +1,15 @@
 /**
- * Purpose: Expose managed file creation for the additive Three template workbench.
- * Context: The new editor route can create blank scene files or copy a managed template into `static/three/scenes`.
+ * Purpose: Expose managed file creation for the editor workspace.
+ * Context: The editor route can create blank scene files or copy a managed template into `static/three/scenes`.
  * Responsibility: Validate the incoming create payload and delegate the actual write to the managed file service.
  * Boundaries: Reading, saving, and preview bundling stay in the dedicated sibling modules.
  */
 
 import { error, json } from '@sveltejs/kit';
 
+import type { ThreeCreateFileRequest } from '$lib/three/three-template-types';
 import { createThreeFileService } from '$lib/server/three/files';
 
-import type { ThreeCreateFileRequest } from '$lib/three/three-template-types';
 import type { RequestHandler } from './$types';
 
 const threeFileService = createThreeFileService();

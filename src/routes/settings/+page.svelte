@@ -9,6 +9,10 @@
 	import Check from '@lucide/svelte/icons/check';
 	import Cpu from '@lucide/svelte/icons/cpu';
 	import Database from '@lucide/svelte/icons/database';
+	import KeyRound from '@lucide/svelte/icons/key-round';
+	import Save from '@lucide/svelte/icons/save';
+	import Trash2 from '@lucide/svelte/icons/trash-2';
+
 	import {
 		IconButton,
 		ScrollArea,
@@ -20,9 +24,6 @@
 		TableRow
 	} from '$lib/components';
 	import { SettingsSection } from '$lib/blocks';
-	import KeyRound from '@lucide/svelte/icons/key-round';
-	import Save from '@lucide/svelte/icons/save';
-	import Trash2 from '@lucide/svelte/icons/trash-2';
 
 	import type { PageProps } from './$types';
 
@@ -51,14 +52,14 @@
 	<title>Settings</title>
 </svelte:head>
 
-<section class="ui-screen ui-screen--stack settings-page">
+<section class="settings-page ui-screen ui-screen--stack">
 	<div class="ui-grid ui-grid--two ui-grid--compact">
 		<SettingsSection meta={hasActiveKey ? 'Active key ready' : 'No active key'} title="Keys">
 			{#snippet icon()}
 				<KeyRound aria-hidden="true" size={16} />
 			{/snippet}
 
-			<form action="?/addKey" class="ui-form-inline settings-inline-form" method="POST">
+			<form action="?/addKey" class="settings-inline-form ui-form-inline" method="POST">
 				<label class="sr-only" for="apiKey">OpenRouter API key</label>
 				<div class="settings-inline-form__field">
 					<span class="settings-inline-form__icon">
@@ -67,7 +68,7 @@
 					<input
 						aria-label="OpenRouter API key"
 						autocomplete="off"
-						class="ui-input settings-inline-form__input"
+						class="settings-inline-form__input ui-input"
 						id="apiKey"
 						name="apiKey"
 						placeholder="Paste OpenRouter API key"
@@ -97,8 +98,14 @@
 			{#if keys.length === 0}
 				<p class="ui-empty-state">No keys stored yet.</p>
 			{:else}
-				<ScrollArea class="settings-scroll-shell settings-scroll-shell--keys" viewportClass="settings-scroll-shell__viewport">
-					<Table ariaLabel="Stored OpenRouter keys" class="settings-table-shell settings-table-shell--compact">
+				<ScrollArea
+					class="settings-scroll-shell settings-scroll-shell--keys"
+					viewportClass="settings-scroll-shell__viewport"
+				>
+					<Table
+						ariaLabel="Stored OpenRouter keys"
+						class="settings-table-shell settings-table-shell--compact"
+					>
 						<TableHeader>
 							<TableRow>
 								<TableHead scope="col">Key</TableHead>
@@ -120,8 +127,8 @@
 									</TableCell>
 									<TableCell>
 										<div class="settings-table__actions">
-											<form method="POST" action="?/activateKey">
-												<input type="hidden" name="keyId" value={key.id} />
+											<form action="?/activateKey" method="POST">
+												<input name="keyId" type="hidden" value={key.id} />
 												<IconButton
 													ariaLabel={key.isActive ? 'Key already active' : 'Use key'}
 													class="ui-icon-action"
@@ -135,8 +142,8 @@
 												</IconButton>
 											</form>
 
-											<form method="POST" action="?/deleteKey">
-												<input type="hidden" name="keyId" value={key.id} />
+											<form action="?/deleteKey" method="POST">
+												<input name="keyId" type="hidden" value={key.id} />
 												<IconButton
 													ariaLabel="Delete key"
 													class="ui-icon-action"
@@ -185,7 +192,10 @@
 				</IconButton>
 			{/snippet}
 
-			<ScrollArea class="settings-scroll-shell settings-scroll-shell--models" viewportClass="settings-scroll-shell__viewport">
+			<ScrollArea
+				class="settings-scroll-shell settings-scroll-shell--models"
+				viewportClass="settings-scroll-shell__viewport"
+			>
 				<Table ariaLabel="OpenRouter models" class="settings-table-shell" tableClass="settings-model-table">
 					<TableHeader>
 						<TableRow>
@@ -231,7 +241,9 @@
 								</TableCell>
 								<TableCell>
 									<span
-										aria-label={model.id === draftSelectedModelId ? `${model.name} selected` : `Select ${model.name}`}
+										aria-label={model.id === draftSelectedModelId
+											? `${model.name} selected`
+											: `Select ${model.name}`}
 										class="ui-selection-indicator"
 										class:ui-selection-indicator--selected={model.id === draftSelectedModelId}
 									>
