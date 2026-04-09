@@ -229,7 +229,7 @@ export function createThreeEditorWorkspaceState(options: CreateThreeEditorWorksp
 			});
 
 			if (!response.ok) {
-				throw new Error('Create file request failed.');
+				throw new Error(await readRequestError(response, 'Create file request failed.'));
 			}
 
 			const createdFile = (await response.json()) as ThreeCreateFileResult;
@@ -292,6 +292,29 @@ export function createThreeEditorWorkspaceState(options: CreateThreeEditorWorksp
 			}
 		}
 	};
+}
+
+async function readRequestError(response: Response, fallbackMessage: string): Promise<string> {
+	const errorText = await response.text();
+	const normalizedErrorText = errorText.trim();
+
+	if (normalizedErrorText.length === 0) {
+		return fallbackMessage;
+	}
+
+	try {
+		const parsedError = JSON.parse(normalizedErrorText) as {
+			message?: string;
+		};
+
+		if (typeof parsedError.message === 'string' && parsedError.message.trim().length > 0) {
+			return parsedError.message;
+		}
+	} catch {
+		return normalizedErrorText;
+	}
+
+	return fallbackMessage;
 }
 
 async function persistDocument(

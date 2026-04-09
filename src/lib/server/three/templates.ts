@@ -1,6 +1,6 @@
 /**
  * Purpose: List the managed Three scene templates that power the additive workbench file-creation flow.
- * Context: The new editor route needs a reusable server-side view of optional template headers under `static/three/templates`.
+ * Context: The new editor route needs a reusable server-side view of optional template headers under `static/templates`.
  * Responsibility: Read template files, parse their optional headers, and expose only valid template summaries.
  * Boundaries: This module does not write files, build previews, or render client-side controls.
  */
@@ -14,27 +14,21 @@ import {
 import type { ThreeTemplateSummary } from '$lib/three/three-template-types';
 
 import { listManagedFiles, resolveManagedFilePath } from './files';
-import { STATIC_THREE_DIR, toManagedRelativePath } from './paths';
+import { STATIC_TEMPLATES_DIR } from './paths';
 
 export type ThreeTemplateService = {
 	listTemplates: () => Promise<ThreeTemplateSummary[]>;
 };
 
-export function createThreeTemplateService(rootDir: string = STATIC_THREE_DIR): ThreeTemplateService {
+export function createThreeTemplateService(rootDir: string = STATIC_TEMPLATES_DIR): ThreeTemplateService {
 	const normalizedRootDir = resolve(rootDir);
-	const templateDir = resolve(normalizedRootDir, 'templates');
 
 	return {
 		listTemplates: async () => {
-			const templateRootPath = toManagedRelativePath(normalizedRootDir, templateDir);
-			const templatePaths = await listManagedFiles(normalizedRootDir, templateDir);
+			const templatePaths = await listManagedFiles(normalizedRootDir, normalizedRootDir);
 			const templates: ThreeTemplateSummary[] = [];
 
 			for (const templatePath of templatePaths) {
-				if (!templatePath.startsWith(`${templateRootPath}/`)) {
-					continue;
-				}
-
 				const source = await readFile(resolveManagedFilePath(normalizedRootDir, templatePath), 'utf-8');
 				const header = readThreeTemplateHeader(source);
 

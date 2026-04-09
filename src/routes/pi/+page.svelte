@@ -83,7 +83,7 @@
 					variant="primary"
 				>
 					{#snippet children()}
-						<Save aria-hidden="true" size={18} />
+						<Save aria-hidden="true" size={16} />
 					{/snippet}
 				</IconButton>
 			</form>
@@ -130,7 +130,7 @@
 													type="submit"
 												>
 													{#snippet children()}
-														<Check aria-hidden="true" size={18} />
+														<Check aria-hidden="true" size={16} />
 													{/snippet}
 												</IconButton>
 											</form>
@@ -145,7 +145,7 @@
 													variant="danger"
 												>
 													{#snippet children()}
-														<Trash2 aria-hidden="true" size={18} />
+														<Trash2 aria-hidden="true" size={16} />
 													{/snippet}
 												</IconButton>
 											</form>
@@ -180,7 +180,7 @@
 					variant="primary"
 				>
 					{#snippet children()}
-						<Save aria-hidden="true" size={18} />
+						<Save aria-hidden="true" size={16} />
 					{/snippet}
 				</IconButton>
 			{/snippet}
@@ -236,7 +236,7 @@
 										class:ui-selection-indicator--selected={model.id === draftSelectedModelId}
 									>
 										{#if model.id === draftSelectedModelId}
-											<Check aria-hidden="true" size={16} strokeWidth={2.4} />
+											<Check aria-hidden="true" size={16} />
 										{/if}
 									</span>
 								</TableCell>
@@ -268,7 +268,7 @@
 
 	.settings-inline-form__icon {
 		position: absolute;
-		left: 0.78rem;
+		left: 0.72rem;
 		top: 50%;
 		display: inline-flex;
 		align-items: center;
@@ -279,8 +279,7 @@
 	}
 
 	.settings-inline-form__input {
-		min-height: var(--ui-control-size);
-		padding-left: 2.2rem;
+		padding-left: 2rem;
 	}
 
 	.settings-model-form {
@@ -294,17 +293,20 @@
 
 	.settings-table__identity {
 		display: grid;
-		gap: 0.15rem;
+		gap: 0.1rem;
 	}
 
 	.settings-table__title {
-		font-size: 0.88rem;
+		font-size: var(--ui-font-size-heading);
 		font-weight: 700;
+		letter-spacing: 0.04em;
+		text-transform: uppercase;
 	}
 
 	.settings-table__secondary {
 		color: var(--ui-color-text-muted);
-		font-size: 0.74rem;
+		font-size: var(--ui-font-size-meta);
+		letter-spacing: 0.04em;
 	}
 
 	.settings-scroll-shell {
@@ -321,6 +323,7 @@
 
 	.settings-scroll-shell__viewport {
 		height: 100%;
+		overflow-x: hidden;
 	}
 
 	.settings-table-shell:global(.ui-data-table-shell) {
@@ -330,18 +333,14 @@
 
 	:global(.settings-table-shell--compact .ui-data-table__head),
 	:global(.settings-table-shell--compact .ui-data-table__cell) {
-		padding-top: 0.42rem;
-		padding-bottom: 0.42rem;
+		padding-top: 0.45rem;
+		padding-bottom: 0.45rem;
 	}
 
 	:global(.settings-table-shell .ui-data-table__head),
 	:global(.settings-table-shell .ui-data-table__cell) {
-		padding-left: 0.72rem;
-		padding-right: 0.72rem;
-	}
-
-	.settings-model-table:global(.ui-data-table) {
-		min-width: 60rem;
+		padding-left: 0.65rem;
+		padding-right: 0.65rem;
 	}
 
 	:global(.settings-model-table .ui-data-table__row) {
@@ -361,17 +360,6 @@
 		box-shadow: inset 2px 0 0 var(--ui-color-accent);
 	}
 
-	:global(.settings-model-table .ui-data-table__head:nth-child(2)),
-	:global(.settings-model-table .ui-data-table__head:nth-child(3)),
-	:global(.settings-model-table .ui-data-table__head:nth-child(4)),
-	:global(.settings-model-table .ui-data-table__head:nth-child(6)),
-	:global(.settings-model-table .ui-data-table__cell:nth-child(2)),
-	:global(.settings-model-table .ui-data-table__cell:nth-child(3)),
-	:global(.settings-model-table .ui-data-table__cell:nth-child(4)),
-	:global(.settings-model-table .ui-data-table__cell:nth-child(6)) {
-		white-space: nowrap;
-	}
-
 	.settings-capability-list {
 		display: flex;
 		flex-wrap: wrap;
@@ -381,7 +369,7 @@
 	.settings-table__actions {
 		display: flex;
 		align-items: center;
-		gap: 0.35rem;
+		gap: var(--ui-space-1);
 	}
 
 	@media (max-width: 720px) {

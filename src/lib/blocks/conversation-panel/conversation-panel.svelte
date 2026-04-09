@@ -69,9 +69,9 @@
 				>
 					<div class="conversation-panel__icon">
 						{#if message.role === 'user'}
-							<Smile aria-hidden="true" size={18} />
+							<Smile aria-hidden="true" size={16} />
 						{:else}
-							<Bot aria-hidden="true" size={18} />
+							<Bot aria-hidden="true" size={16} />
 						{/if}
 					</div>
 					<div class="conversation-panel__bubble">
@@ -114,7 +114,7 @@
 
 	.conversation-panel__log {
 		display: grid;
-		gap: 0.95rem;
+		gap: var(--ui-space-4);
 		align-content: start;
 		min-height: 0;
 		overflow-y: auto;
@@ -124,8 +124,8 @@
 
 	.conversation-panel__message {
 		display: grid;
-		grid-template-columns: 1.45rem minmax(0, 1fr);
-		column-gap: 0.85rem;
+		grid-template-columns: var(--ui-control-size) minmax(0, 1fr);
+		column-gap: var(--ui-space-2);
 		row-gap: 0;
 		width: 100%;
 		max-width: 100%;
@@ -134,10 +134,10 @@
 
 	.conversation-panel__icon {
 		display: inline-flex;
-		align-items: flex-start;
+		align-items: center;
 		justify-content: center;
-		width: 1.45rem;
-		padding-top: 0.72rem;
+		width: var(--ui-control-size);
+		min-height: var(--ui-control-size);
 		color: var(--ui-color-text-muted);
 	}
 
@@ -148,7 +148,7 @@
 	.conversation-panel__bubble {
 		width: 100%;
 		min-width: 0;
-		padding: 0.72rem 0.9rem;
+		padding: 0.55rem 0.72rem;
 		background: rgba(255, 255, 255, 0.04);
 	}
 
@@ -168,8 +168,8 @@
 	.conversation-panel__body {
 		margin: 0;
 		color: var(--ui-color-text);
-		font-size: 0.92rem;
-		line-height: 1.62;
+		font-size: var(--ui-font-size-body);
+		line-height: 1.55;
 		word-break: break-word;
 	}
 
@@ -223,21 +223,25 @@
 	.conversation-panel__markdown :global(* + ul),
 	.conversation-panel__markdown :global(* + ol),
 	.conversation-panel__markdown :global(* + pre) {
-		margin-top: 0.9rem;
+		margin-top: var(--ui-space-3);
 	}
 
 	.conversation-panel__markdown :global(h1),
 	.conversation-panel__markdown :global(h2) {
-		font-size: 1rem;
+		font-size: var(--ui-font-size-heading);
 		line-height: 1.3;
+		letter-spacing: 0.04em;
+		text-transform: uppercase;
 	}
 
 	.conversation-panel__markdown :global(h3),
 	.conversation-panel__markdown :global(h4),
 	.conversation-panel__markdown :global(h5),
 	.conversation-panel__markdown :global(h6) {
-		font-size: 0.95rem;
-		line-height: 1.35;
+		font-size: var(--ui-font-size-heading);
+		line-height: 1.3;
+		letter-spacing: 0.04em;
+		text-transform: uppercase;
 	}
 
 	.conversation-panel__markdown :global(ul),
@@ -253,13 +257,15 @@
 		padding: 0.1rem 0.32rem;
 		background: rgba(255, 255, 255, 0.08);
 		font-family: var(--ui-font-mono);
-		font-size: 0.9em;
+		font-size: 1em;
 	}
 
 	.conversation-panel__markdown :global(pre) {
-		overflow-x: auto;
+		overflow-x: hidden;
 		padding: 0.9rem 1rem;
 		background: rgba(0, 0, 0, 0.32);
+		white-space: pre-wrap;
+		word-break: break-word;
 	}
 
 	.conversation-panel__markdown :global(pre code) {
@@ -276,7 +282,7 @@
 	}
 
 	.conversation-panel__composer {
-		border-top: 1px solid rgba(255, 255, 255, 0.05);
+		border-top: 1px solid var(--ui-color-border);
 		padding: 0.55rem var(--ui-space-4) var(--ui-space-4);
 		background:
 			linear-gradient(
@@ -289,7 +295,7 @@
 
 	@media (max-width: 720px) {
 		.conversation-panel__log {
-			padding: 0.9rem;
+			padding: var(--ui-space-4);
 		}
 
 		.conversation-panel__composer {

@@ -26,4 +26,5 @@
 	initialPreview={data.preview}
 	modelName={data.configuredModel.name}
 	previewEntryPath={data.previewEntryPath}
+	templates={data.templates}
 />

@@ -11,12 +11,10 @@ import { basename, dirname, extname, resolve } from 'node:path';
 import type { ThreeSourceDocument, ThreeSourceFileSummary } from '$lib/three/three-editor-types';
 import type { ThreeCreateFileRequest, ThreeCreateFileResult } from '$lib/three/three-template-types';
 
-import { STATIC_THREE_DIR, toManagedRelativePath } from './paths';
+import { STATIC_TEMPLATES_DIR, STATIC_THREE_DIR, toManagedRelativePath } from './paths';
 
 const DEFAULT_PREVIEW_ENTRY_PATH = 'cube.ts';
 const DEFAULT_LIST_EXCLUDE_PREFIXES = ['shared/', 'templates/'];
-const TEMPLATE_PREFIX = 'templates/';
-
 export type ThreeFileService = {
 	createManagedFile: (request: ThreeCreateFileRequest) => Promise<ThreeCreateFileResult>;
 	listFiles: () => Promise<ThreeSourceFileSummary[]>;
@@ -29,10 +27,12 @@ export function createThreeFileService(
 	previewEntryPath: string = DEFAULT_PREVIEW_ENTRY_PATH,
 	options?: {
 		listExcludePrefixes?: string[];
+		templateRootDir?: string;
 	}
 ): ThreeFileService {
 	const normalizedRootDir = resolve(rootDir);
 	const listExcludePrefixes = options?.listExcludePrefixes ?? DEFAULT_LIST_EXCLUDE_PREFIXES;
+	const templateRootDir = resolve(options?.templateRootDir ?? STATIC_TEMPLATES_DIR);
 
 	return {
 		listFiles: async () => {
@@ -56,10 +56,10 @@ export function createThreeFileService(
 		createManagedFile: async (request) => {
 			const outputPath = await createUniqueScenePath(normalizedRootDir, request.fileName);
 			const absolutePath = resolveManagedFilePath(normalizedRootDir, outputPath);
-			const content =
-				request.mode === 'blank'
-					? createBlankManagedSceneSource(request.fileName)
-					: await readTemplateSource(normalizedRootDir, request.templatePath);
+				const content =
+					request.mode === 'blank'
+						? createBlankManagedSceneSource(request.fileName)
+						: await readTemplateSource(templateRootDir, request.templatePath);
 
 			await mkdir(dirname(absolutePath), { recursive: true });
 			await writeFile(absolutePath, content, 'utf-8');
@@ -90,14 +90,9 @@ export function createThreeFileService(
 	};
 }
 
-async function readTemplateSource(rootDir: string, templatePath: string): Promise<string> {
+async function readTemplateSource(templateRootDir: string, templatePath: string): Promise<string> {
 	const normalizedTemplatePath = normalizeRequestedPath(templatePath);
-
-	if (!normalizedTemplatePath.startsWith(TEMPLATE_PREFIX)) {
-		throw new Error('Template path must point to a file under static/three/templates.');
-	}
-
-	return readFile(resolveManagedFilePath(rootDir, normalizedTemplatePath), 'utf-8');
+	return readFile(resolveManagedFilePath(templateRootDir, normalizedTemplatePath), 'utf-8');
 }
 
 export async function listManagedFiles(

@@ -58,7 +58,7 @@
 	}
 
 	.settings-section__header {
-		min-height: 3rem;
+		min-height: calc(var(--ui-control-size) + var(--ui-space-4));
 	}
 
 	.settings-section__heading,
@@ -80,6 +80,8 @@
 		align-items: center;
 		justify-content: center;
 		color: var(--ui-color-accent-strong);
+		width: 1rem;
+		height: 1rem;
 	}
 
 	.settings-section__body {

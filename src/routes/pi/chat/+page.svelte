@@ -132,7 +132,7 @@
 				>
 					{#snippet leading()}
 						{#if sessionReady}
-							<span class="ui-chat-command-line__prompt" aria-hidden="true">&gt;</span>
+							<span class="ui-command-prompt" aria-hidden="true">&gt;</span>
 						{:else}
 							<IconButton
 								ariaLabel="Start session"
@@ -142,7 +142,7 @@
 								}}
 							>
 								{#snippet children()}
-									<Power aria-hidden="true" size={18} />
+									<Power aria-hidden="true" size={16} />
 								{/snippet}
 							</IconButton>
 						{/if}
@@ -152,19 +152,3 @@
 		{/snippet}
 	</ConversationPanel>
 </section>
-
-<style>
-	.ui-chat-command-line__prompt {
-		display: inline-flex;
-		align-items: center;
-		justify-content: center;
-		font-family: var(--ui-font-mono);
-		font-size: 0.82rem;
-		font-weight: 700;
-		letter-spacing: 0.12em;
-		text-transform: uppercase;
-		color: var(--ui-color-text-subtle);
-		white-space: nowrap;
-		width: 1.5rem;
-	}
-</style>

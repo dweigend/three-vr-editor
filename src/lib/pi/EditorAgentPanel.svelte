@@ -8,7 +8,7 @@
 <script lang="ts">
 	import { untrack } from 'svelte';
 	import { resolve } from '$app/paths';
-	import { Button } from '$lib/components';
+	import { Button, ToolbarButton, ToolbarRoot } from '$lib/components';
 	import { ConversationPanel, InputBar } from '$lib/blocks';
 	import { createConversationState } from '$lib/pi/conversation-state.svelte';
 	import { clearEditorAgentSession, sendEditorAgentRequest } from '$lib/pi/editor-agent-client';
@@ -205,53 +205,53 @@
 
 <section class="ui-pane ui-pane--muted">
 	<div class="ui-pane__header">
-		<div>
-			<p class="ui-surface-label">Pi agent</p>
-			<p class="ui-toolbar-status">
-				{modelName ? `${modelName} | ${modeStatus}` : 'No model configured'}
-			</p>
-		</div>
+		<ToolbarRoot aria-label="Pi agent toolbar" class="editor-agent-panel__toolbar">
+			<div class="ui-toolbar__group ui-toolbar__group--editor">
+				<div class="ui-stack ui-stack--tight">
+					<p class="ui-surface-label">Pi agent</p>
+					<p class="ui-toolbar-status">
+						{modelName ? `${modelName} | ${modeStatus}` : 'No model configured'}
+					</p>
+				</div>
+			</div>
 
-		<div class="editor-agent-panel__header-actions">
-			<div aria-label="Pi mode" class="editor-agent-panel__mode-toggle" role="group">
-				<Button
-					size="sm"
+			<div class="ui-toolbar__group ui-toolbar__group--editor">
+				<ToolbarButton
+					aria-pressed={mode === 'one-shot'}
+					class={mode === 'one-shot' ? 'ui-button--primary' : 'ui-button--ghost'}
 					type="button"
-					variant={mode === 'one-shot' ? 'primary' : 'ghost'}
 					onclick={() => {
 						mode = 'one-shot';
 					}}
 				>
-					{#snippet children()}One-shot{/snippet}
-				</Button>
-				<Button
-					size="sm"
+					One-shot
+				</ToolbarButton>
+
+				<ToolbarButton
+					aria-pressed={mode === 'session'}
+					class={mode === 'session' ? 'ui-button--primary' : 'ui-button--ghost'}
 					type="button"
-					variant={mode === 'session' ? 'primary' : 'ghost'}
 					onclick={() => {
 						mode = 'session';
 					}}
 				>
-					{#snippet children()}Session{/snippet}
-				</Button>
-			</div>
+					Session
+				</ToolbarButton>
 
-			{#if mode === 'session'}
-				<Button
-					disabled={!hasPersistedSession || isResettingSession}
-					size="sm"
-					type="button"
-					variant="secondary"
-					onclick={() => {
-						void resetSession();
-					}}
-				>
-					{#snippet children()}
+				{#if mode === 'session'}
+					<ToolbarButton
+						class="ui-button--secondary"
+						disabled={!hasPersistedSession || isResettingSession}
+						type="button"
+						onclick={() => {
+							void resetSession();
+						}}
+					>
 						{isResettingSession ? 'Resetting...' : 'New session'}
-					{/snippet}
-				</Button>
-			{/if}
-		</div>
+					</ToolbarButton>
+				{/if}
+			</div>
+		</ToolbarRoot>
 	</div>
 
 	<div class="ui-pane__body ui-pane__body--flush">
@@ -304,14 +304,13 @@
 		width: 100%;
 	}
 
-	.editor-agent-panel__header-actions {
-		display: inline-flex;
-		align-items: center;
-		flex-wrap: wrap;
-		gap: var(--ui-space-2);
+	:global(.editor-agent-panel__toolbar) {
+		width: 100%;
+		padding: 0;
+		border: 0;
+		background: transparent;
 	}
 
-	.editor-agent-panel__mode-toggle,
 	.editor-agent-panel__trailing {
 		display: inline-flex;
 		align-items: center;

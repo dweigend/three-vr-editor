@@ -16,10 +16,11 @@ export type ThreeEditorTemplatePageData = ThreeEditorPageData & {
 
 export async function loadThreeEditorTemplatePageData(options?: {
 	rootDir?: string;
+	templateRootDir?: string;
 }): Promise<ThreeEditorTemplatePageData> {
 	const [editorData, templates] = await Promise.all([
 		loadThreeEditorPageData(options),
-		createThreeTemplateService(options?.rootDir).listTemplates()
+		createThreeTemplateService(options?.templateRootDir).listTemplates()
 	]);
 
 	return {

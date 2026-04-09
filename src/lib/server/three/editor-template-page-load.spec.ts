@@ -5,7 +5,7 @@
  * Boundaries: These tests do not exercise the browser workspace UI or the create/save endpoints.
  */
 
-import { mkdtemp, mkdir, rm, writeFile } from 'node:fs/promises';
+import { mkdtemp, rm, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
 import { tmpdir } from 'node:os';
 import { afterEach, describe, expect, it } from 'vitest';
@@ -21,14 +21,14 @@ afterEach(async () => {
 describe('loadThreeEditorTemplatePageData', () => {
 	it('returns managed files plus parsed template summaries', async () => {
 		const rootDir = await createFixtureDir();
+		const templateRootDir = await createFixtureDir();
 		await writeFile(
 			join(rootDir, 'cube.ts'),
 			'export const createDemoScene = () => ({ update() {}, dispose() {} });',
 			'utf-8'
 		);
-		await mkdir(join(rootDir, 'templates'));
 		await writeFile(
-			join(rootDir, 'templates', 'template.ts'),
+			join(templateRootDir, 'template.ts'),
 			`/* @three-template
 {
 \t"id": "template",
@@ -43,14 +43,14 @@ export const createDemoScene = () => ({ update() {}, dispose() {} });`,
 			'utf-8'
 		);
 
-		const result = await loadThreeEditorTemplatePageData({ rootDir });
+		const result = await loadThreeEditorTemplatePageData({ rootDir, templateRootDir });
 
 		expect(result.document.path).toBe('cube.ts');
 		expect(result.files.map((file) => file.path)).toEqual(['cube.ts']);
 		expect(result.templates).toEqual([
 			expect.objectContaining({
 				id: 'template',
-				path: 'templates/template.ts',
+				path: 'template.ts',
 				title: 'Template'
 			})
 		]);

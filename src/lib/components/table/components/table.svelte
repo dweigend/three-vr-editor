@@ -30,27 +30,27 @@
 
 <style>
 	:global(.ui-data-table-shell) {
-		border: 1px solid rgba(255, 255, 255, 0.08);
+		border: 1px solid var(--ui-color-border);
 		background: rgba(255, 255, 255, 0.02);
 	}
 
 	:global(.ui-data-table-scroll) {
-		overflow-x: auto;
+		overflow-x: hidden;
 	}
 
 	:global(.ui-data-table) {
 		width: 100%;
-		min-width: 42rem;
+		min-width: 100%;
 		border-collapse: collapse;
 		table-layout: fixed;
 	}
 
 	:global(.ui-data-table__header) {
-		border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+		border-bottom: 1px solid var(--ui-color-border);
 	}
 
 	:global(.ui-data-table__row) {
-		border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+		border-bottom: 1px solid var(--ui-color-border);
 	}
 
 	:global(.ui-data-table__body .ui-data-table__row:last-child) {
@@ -63,22 +63,23 @@
 
 	:global(.ui-data-table__head),
 	:global(.ui-data-table__cell) {
-		padding: 0.7rem 0.9rem;
+		padding: 0.6rem 0.72rem;
 		text-align: left;
-		vertical-align: top;
+		vertical-align: middle;
+		word-break: break-word;
 	}
 
 	:global(.ui-data-table__head) {
 		color: var(--ui-color-text-subtle);
-		font-size: 0.68rem;
+		font-size: var(--ui-font-size-meta);
 		font-weight: 700;
-		letter-spacing: 0.16em;
+		letter-spacing: 0.12em;
 		text-transform: uppercase;
 	}
 
 	:global(.ui-data-table__cell) {
 		color: var(--ui-color-text);
-		font-size: 0.84rem;
+		font-size: var(--ui-font-size-body);
 		line-height: 1.45;
 	}
 	</style>

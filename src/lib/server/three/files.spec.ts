@@ -90,13 +90,15 @@ describe('createThreeFileService', () => {
 
 	it('creates a scene file from a managed template', async () => {
 		const rootDir = await createFixtureDir();
-		await mkdir(join(rootDir, 'templates'));
+		const templateDir = await createFixtureDir();
 		await writeFile(
-			join(rootDir, 'templates', 'template.ts'),
+			join(templateDir, 'template.ts'),
 			'export const createDemoScene = () => ({ update() {}, dispose() {} });',
 			'utf-8'
 		);
-		const service = createThreeFileService(rootDir);
+		const service = createThreeFileService(rootDir, 'cube.ts', {
+			templateRootDir: templateDir
+		});
 
 		const createdFile = await service.createManagedFile({
 			fileName: 'Template Clone',
@@ -121,7 +123,7 @@ describe('createThreeFileService', () => {
 				mode: 'template',
 				templatePath: 'cube.ts'
 			})
-		).rejects.toThrow('Template path must point to a file under static/three/templates.');
+		).rejects.toThrow('File path is outside the managed static/three directory.');
 	});
 });
 

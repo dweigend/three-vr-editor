@@ -61,7 +61,7 @@
 			>
 				{selectedLabel}
 			</span>
-			<ChevronDown aria-hidden="true" size={18} strokeWidth={2} />
+			<ChevronDown aria-hidden="true" size={16} />
 		</Trigger>
 
 		<Portal>
@@ -88,7 +88,7 @@
 								</div>
 
 								{#if option.value === value}
-									<Check aria-hidden="true" class="ui-dropdown-field__check" size={16} strokeWidth={2.2} />
+									<Check aria-hidden="true" class="ui-dropdown-field__check" size={16} />
 								{/if}
 							</div>
 						</Item>
@@ -111,18 +111,17 @@
 		align-items: center;
 		gap: 0.75rem;
 		width: 100%;
-		min-height: 2.65rem;
-		padding: 0.7rem 0.9rem;
+		min-height: var(--ui-control-size);
+		padding: 0.55rem 0.75rem;
 		border: 1px solid var(--ui-color-border-strong, rgba(255, 255, 255, 0.12));
 		background: rgba(4, 4, 6, 0.98);
 		color: var(--ui-color-text);
 		font: inherit;
-		font-size: 0.82rem;
+		font-size: var(--ui-font-size-body);
 		font-weight: 700;
-		letter-spacing: 0.06em;
+		letter-spacing: 0.04em;
 		line-height: 1;
 		text-align: left;
-		text-transform: uppercase;
 	}
 
 	:global(.ui-dropdown-field__trigger:hover) {
@@ -169,7 +168,7 @@
 		align-items: center;
 		gap: 0.85rem;
 		width: 100%;
-		padding: 0.8rem 0.9rem;
+		padding: 0.55rem 0.72rem;
 		color: var(--ui-color-text);
 	}
 
@@ -187,19 +186,18 @@
 	:global(.ui-dropdown-field__item-label) {
 		overflow: hidden;
 		color: var(--ui-color-text);
-		font-size: 0.8rem;
+		font-size: var(--ui-font-size-body);
 		font-weight: 700;
-		letter-spacing: 0.06em;
+		letter-spacing: 0.02em;
 		line-height: 1.1;
 		text-overflow: ellipsis;
-		text-transform: uppercase;
 		white-space: nowrap;
 	}
 
 	:global(.ui-dropdown-field__item-meta) {
 		overflow: hidden;
 		color: var(--ui-color-text-muted);
-		font-size: 0.72rem;
+		font-size: var(--ui-font-size-meta);
 		letter-spacing: 0.04em;
 		text-overflow: ellipsis;
 		white-space: nowrap;

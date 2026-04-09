@@ -17,6 +17,10 @@
 
 	import { DropdownMenu, ToolbarButton, ToolbarRoot } from '$lib/components';
 	import type { ThreeSourceFileSummary } from '$lib/three/three-editor-types';
+	import type {
+		ThreeCreateFileRequest,
+		ThreeTemplateSummary
+	} from '$lib/three/three-template-types';
 
 	import FileSelect from './FileSelect.svelte';
 
@@ -34,13 +38,14 @@
 		diagnostic?: EditorDiagnostic | null;
 		files?: ThreeSourceFileSummary[];
 		onChange: (value: string) => void;
-		onCreateFile?: ((fileName: string) => Promise<void>) | undefined;
+		onCreateFile?: ((request: ThreeCreateFileRequest) => Promise<void>) | undefined;
 		onRedo?: (() => void) | undefined;
 		onSave?: (() => void | Promise<void>) | undefined;
 		saveDisabled?: boolean;
 		selectedPath?: string;
 		statusClassName?: string;
 		statusText?: string;
+		templates?: ThreeTemplateSummary[];
 		toolbarActions?: Snippet;
 		value: string;
 	};
@@ -57,6 +62,7 @@
 		selectedPath = $bindable(''),
 		statusClassName = 'ui-toolbar-status',
 		statusText = '',
+		templates = [],
 		toolbarActions,
 		value
 	}: Props = $props();
@@ -133,6 +139,27 @@
 		},
 		{ dark: true }
 	);
+	const createMenuItems = $derived([
+		{
+			description: 'Create a blank editable scene under static/three/scenes',
+			request: {
+				fileName: 'new-scene',
+				mode: 'blank'
+			} satisfies ThreeCreateFileRequest,
+			textValue: 'Blank starter',
+			title: 'Blank starter'
+		},
+		...templates.map((template) => ({
+			description: template.description,
+			request: {
+				fileName: template.title,
+				mode: 'template',
+				templatePath: template.path
+			} satisfies ThreeCreateFileRequest,
+			textValue: template.title,
+			title: template.title
+		}))
+	]);
 
 	function updateRedoState(nextView: EditorView): void {
 		canRedo = redoDepth(nextView.state) > 0;
@@ -157,15 +184,8 @@
 		await onSave?.();
 	}
 
-	async function handleCreateFile(): Promise<void> {
+	async function handleCreateFile(request: ThreeCreateFileRequest): Promise<void> {
 		if (!onCreateFile || isCreatingFile) {
-			return;
-		}
-
-		const requestedFileName = window.prompt('New Three file name', 'new-scene');
-		const normalizedFileName = requestedFileName?.trim() ?? '';
-
-		if (normalizedFileName.length === 0) {
 			return;
 		}
 
@@ -173,7 +193,7 @@
 		isCreateMenuOpen = false;
 
 		try {
-			await onCreateFile(normalizedFileName);
+			await onCreateFile(request);
 		} catch (error) {
 			window.alert(error instanceof Error ? error.message : 'Create file failed.');
 		} finally {
@@ -297,18 +317,20 @@
 
 					<DropdownMenu.Portal>
 						<DropdownMenu.Content class="ui-code-editor__create-menu" sideOffset={8}>
-							<DropdownMenu.Item
-								class="ui-code-editor__create-menu-item"
-								onSelect={() => {
-									void handleCreateFile();
-								}}
-								textValue="Blank file"
-							>
-								<div class="ui-code-editor__create-menu-copy">
-									<span class="ui-code-editor__create-menu-title">Blank file</span>
-									<span class="ui-code-editor__create-menu-meta">Prompt for a new scene name</span>
-								</div>
-							</DropdownMenu.Item>
+							{#each createMenuItems as item (item.textValue)}
+								<DropdownMenu.Item
+									class="ui-code-editor__create-menu-item"
+									onSelect={() => {
+										void handleCreateFile(item.request);
+									}}
+									textValue={item.textValue}
+								>
+									<div class="ui-code-editor__create-menu-copy">
+										<span class="ui-code-editor__create-menu-title">{item.title}</span>
+										<span class="ui-code-editor__create-menu-meta">{item.description}</span>
+									</div>
+								</DropdownMenu.Item>
+							{/each}
 						</DropdownMenu.Content>
 					</DropdownMenu.Portal>
 				</DropdownMenu.Root>
@@ -358,7 +380,7 @@
 		grid-template-columns: minmax(0, 1fr) auto;
 		align-items: center;
 		gap: var(--ui-space-3);
-		overflow-x: auto;
+		overflow-x: hidden;
 		overflow-y: hidden;
 		white-space: nowrap;
 	}
@@ -371,15 +393,28 @@
 		justify-content: flex-end;
 	}
 
-	.ui-code-editor__toolbar-button--icon {
+	:global(.ui-code-editor__toolbar-button--icon) {
 		width: var(--ui-control-size);
 		min-width: var(--ui-control-size);
 		padding-inline: 0;
+		border: 0;
+		background: transparent;
+	}
+
+	:global(.ui-code-editor__toolbar-button--icon:hover),
+	:global(.ui-code-editor__toolbar-button--icon:focus-visible) {
+		border: 0;
+		background: transparent;
+		color: var(--ui-color-accent-strong);
 	}
 
 	.ui-code-editor__create-menu {
 		width: 14rem;
+		max-height: min(24rem, calc(100vh - 8rem));
+		overflow-x: hidden;
+		overflow-y: auto;
 		padding: var(--ui-space-1);
+		scrollbar-gutter: stable;
 	}
 
 	.ui-code-editor__create-menu-item {
@@ -394,7 +429,7 @@
 
 	.ui-code-editor__create-menu-title {
 		color: var(--ui-color-text);
-		font-size: 0.78rem;
+		font-size: var(--ui-font-size-meta);
 		font-weight: 700;
 		letter-spacing: 0.08em;
 		line-height: 1.1;
@@ -403,7 +438,7 @@
 
 	.ui-code-editor__create-menu-meta {
 		color: var(--ui-color-text-muted);
-		font-size: 0.7rem;
+		font-size: var(--ui-font-size-meta);
 		letter-spacing: 0.04em;
 		line-height: 1.2;
 	}

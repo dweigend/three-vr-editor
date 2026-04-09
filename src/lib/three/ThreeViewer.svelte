@@ -97,8 +97,8 @@
 
 	.viewer-surface {
 		background: #020617;
-		border: 1px solid #1e293b;
-		border-radius: 1rem;
+		border: 1px solid var(--ui-color-border);
+		border-radius: 0;
 		min-height: 28rem;
 		overflow: hidden;
 	}

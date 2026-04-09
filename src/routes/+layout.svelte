@@ -27,7 +27,7 @@
 	<div class="ui-frame">
 		<header class="ui-topbar">
 			<a aria-label="Open workspace" class="ui-topbar__home" href={resolve('/')}>
-				<Rotate3d aria-hidden="true" class="ui-topbar__home-icon" size={20} />
+				<Rotate3d aria-hidden="true" class="ui-topbar__home-icon" size={18} />
 				<span class="ui-topbar__home-label">Three Editor</span>
 			</a>
 
@@ -44,7 +44,7 @@
 						isMenuOpen = !isMenuOpen;
 					}}
 				>
-					<Menu aria-hidden="true" size={18} />
+					<Menu aria-hidden="true" size={16} />
 				</IconButton>
 			</div>
 		</header>
@@ -66,7 +66,7 @@
 								class:ui-nav-panel__link--active={page.url.pathname.startsWith('/three/editor')}
 								href={resolve('/three/editor/pi')}
 							>
-								<SquarePen aria-hidden="true" size={18} />
+								<SquarePen aria-hidden="true" size={16} />
 								<span>Editor</span>
 							</a>
 
@@ -76,7 +76,7 @@
 								class:ui-nav-panel__link--active={page.url.pathname.startsWith('/pi/chat')}
 								href={resolve('/pi/chat')}
 							>
-								<MessageSquareText aria-hidden="true" size={18} />
+								<MessageSquareText aria-hidden="true" size={16} />
 								<span>Chat</span>
 							</a>
 
@@ -86,7 +86,7 @@
 								class:ui-nav-panel__link--active={page.url.pathname === '/pi'}
 								href={resolve('/pi')}
 							>
-								<Settings2 aria-hidden="true" size={18} />
+								<Settings2 aria-hidden="true" size={16} />
 								<span>Settings</span>
 							</a>
 						</nav>

@@ -33,10 +33,6 @@
 	<ScrollAreaPrimitive.Scrollbar class={scrollAreaScrollbarClass} orientation="vertical">
 		<ScrollAreaPrimitive.Thumb class={scrollAreaThumbClass} />
 	</ScrollAreaPrimitive.Scrollbar>
-	<ScrollAreaPrimitive.Scrollbar class={scrollAreaScrollbarClass} orientation="horizontal">
-		<ScrollAreaPrimitive.Thumb class={scrollAreaThumbClass} />
-	</ScrollAreaPrimitive.Scrollbar>
-	<ScrollAreaPrimitive.Corner />
 </ScrollAreaPrimitive.Root>
 
 <style>
@@ -61,13 +57,7 @@
 	:global(.ui-scroll-area__scrollbar[data-orientation='vertical']) {
 		width: 0.55rem;
 		padding: 0.08rem;
-		border-left: 1px solid rgba(255, 255, 255, 0.04);
-	}
-
-	:global(.ui-scroll-area__scrollbar[data-orientation='horizontal']) {
-		height: 0.55rem;
-		padding: 0.08rem;
-		border-top: 1px solid rgba(255, 255, 255, 0.04);
+		border-left: 1px solid var(--ui-color-border);
 	}
 
 	:global(.ui-scroll-area__thumb) {

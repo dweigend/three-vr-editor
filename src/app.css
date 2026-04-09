@@ -24,6 +24,9 @@
 :root {
 	--ui-font-sans: 'JetBrains Mono', 'IBM Plex Mono', 'SFMono-Regular', ui-monospace, monospace;
 	--ui-font-mono: 'JetBrains Mono', 'IBM Plex Mono', 'SFMono-Regular', ui-monospace, monospace;
+	--ui-font-size-heading: 1rem;
+	--ui-font-size-body: 0.86rem;
+	--ui-font-size-meta: 0.72rem;
 	--ui-color-canvas: #060608;
 	--ui-color-canvas-raised: #0b0b0e;
 	--ui-color-surface: rgba(10, 10, 14, 0.94);
@@ -66,7 +69,7 @@
 	--ui-screen-padding: 0.85rem;
 	--ui-panel-padding: 0.9rem;
 	--ui-panel-header-padding: 0.75rem 0.9rem;
-	--ui-control-size: 2.125rem;
+	--ui-control-size: 2.2rem;
 	--ui-section-gap: var(--ui-space-4);
 }
 
@@ -93,8 +96,8 @@ body {
 		auto;
 	color: var(--ui-color-text);
 	font-family: var(--ui-font-sans);
-	font-size: 0.95rem;
-	line-height: 1.6;
+	font-size: var(--ui-font-size-body);
+	line-height: 1.55;
 	-moz-osx-font-smoothing: grayscale;
 	-webkit-font-smoothing: antialiased;
 }
@@ -180,7 +183,7 @@ select {
 
 .ui-topbar__home-label {
 	color: var(--ui-color-text);
-	font-size: 0.74rem;
+	font-size: var(--ui-font-size-meta);
 	font-weight: 700;
 	letter-spacing: 0.16em;
 	text-transform: uppercase;
@@ -205,10 +208,8 @@ select {
 
 .ui-topbar__menu-button:hover,
 .ui-topbar__menu-button:focus-visible {
-	border-color: transparent;
 	background: transparent;
 	color: var(--ui-color-accent-strong);
-	box-shadow: none;
 }
 
 /* Page Shell */
@@ -262,7 +263,7 @@ select {
 	border: 1px solid transparent;
 	padding: 0.8rem 0.85rem;
 	color: var(--ui-color-text-muted);
-	font-size: 0.9rem;
+	font-size: var(--ui-font-size-body);
 	font-weight: 500;
 	transition:
 		border-color var(--ui-transition-fast),
@@ -368,7 +369,7 @@ select {
 .ui-surface-label {
 	margin: 0;
 	color: var(--ui-color-accent-strong);
-	font-size: 0.72rem;
+	font-size: var(--ui-font-size-meta);
 	font-weight: 700;
 	letter-spacing: 0.2em;
 	text-transform: uppercase;
@@ -376,15 +377,16 @@ select {
 
 .ui-page-title {
 	margin: 0;
-	font-size: clamp(1.5rem, 5vw, 2.8rem);
-	line-height: 0.95;
-	letter-spacing: -0.06em;
+	font-size: var(--ui-font-size-heading);
+	line-height: 1.15;
+	letter-spacing: 0.08em;
 	text-transform: uppercase;
 }
 
 .ui-page-copy {
 	margin: 0;
 	color: var(--ui-color-text-muted);
+	font-size: var(--ui-font-size-body);
 	max-width: 72ch;
 }
 
@@ -417,7 +419,7 @@ select {
 }
 
 .ui-card__header {
-	border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+	border-bottom: 1px solid var(--ui-color-border);
 }
 
 /* Pane */
@@ -446,7 +448,7 @@ select {
 	flex-wrap: wrap;
 	gap: var(--ui-space-3);
 	padding: var(--ui-panel-header-padding);
-	border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+	border-bottom: 1px solid var(--ui-color-border);
 }
 
 .ui-pane__body {
@@ -566,7 +568,7 @@ select {
 .ui-toolbar-status {
 	margin: 0;
 	color: var(--ui-color-text-muted);
-	font-size: 0.78rem;
+	font-size: var(--ui-font-size-meta);
 	letter-spacing: 0.08em;
 	text-transform: uppercase;
 }
@@ -588,9 +590,9 @@ select {
 }
 
 .ui-toolbar-button--active {
-	border-color: rgba(168, 85, 247, 0.52);
-	background: rgba(168, 85, 247, 0.14);
-	color: var(--ui-color-text);
+	border-color: transparent;
+	background: transparent;
+	color: var(--ui-color-accent-strong);
 }
 
 /* ==========================================================================
@@ -604,13 +606,13 @@ select {
 	align-items: center;
 	justify-content: center;
 	gap: var(--ui-space-2);
-	min-height: 2.75rem;
+	min-height: var(--ui-control-size);
 	border: 1px solid var(--ui-color-border);
-	padding: 0.75rem 1rem;
+	padding: 0.55rem 0.9rem;
 	background: var(--ui-color-surface-raised);
 	color: var(--ui-color-text);
 	font-family: var(--ui-font-mono);
-	font-size: 0.76rem;
+	font-size: var(--ui-font-size-meta);
 	font-weight: 700;
 	letter-spacing: 0.12em;
 	line-height: 1;
@@ -658,15 +660,15 @@ select {
 }
 
 .ui-button--sm {
-	min-height: 2.2rem;
+	min-height: var(--ui-control-size);
 	padding: 0.55rem 0.8rem;
-	font-size: 0.68rem;
+	font-size: var(--ui-font-size-meta);
 }
 
 .ui-button--lg {
-	min-height: 3rem;
-	padding: 0.95rem 1.35rem;
-	font-size: 0.82rem;
+	min-height: calc(var(--ui-control-size) + 0.3rem);
+	padding: 0.7rem 1rem;
+	font-size: var(--ui-font-size-meta);
 }
 
 /* Icon Buttons */
@@ -675,23 +677,21 @@ select {
 	display: inline-flex;
 	align-items: center;
 	justify-content: center;
-	width: 2.4rem;
-	height: 2.4rem;
-	border: 1px solid var(--ui-color-border);
+	width: var(--ui-control-size);
+	height: var(--ui-control-size);
+	border: 0;
 	background: transparent;
 	color: var(--ui-color-text-muted);
 	cursor: pointer;
 	transition:
-		border-color var(--ui-transition-fast),
 		background var(--ui-transition-fast),
 		color var(--ui-transition-fast);
 }
 
 .ui-icon-button:hover,
 .ui-icon-button:focus-visible {
-	border-color: var(--ui-color-accent);
-	background: rgba(255, 255, 255, 0.03);
-	color: var(--ui-color-text);
+	background: transparent;
+	color: var(--ui-color-accent-strong);
 	outline: none;
 }
 
@@ -724,15 +724,17 @@ select {
 
 .ui-panel-link__title {
 	margin: 0;
-	font-size: 0.92rem;
+	font-size: var(--ui-font-size-heading);
 	font-weight: 700;
 	color: var(--ui-color-text);
+	letter-spacing: 0.04em;
+	text-transform: uppercase;
 }
 
 .ui-panel-link__copy {
 	margin: 0;
 	color: var(--ui-color-text-muted);
-	font-size: 0.84rem;
+	font-size: var(--ui-font-size-body);
 }
 
 /* ==========================================================================
@@ -759,7 +761,7 @@ select {
 .ui-form-label {
 	margin: 0;
 	color: var(--ui-color-text-muted);
-	font-size: 0.75rem;
+	font-size: var(--ui-font-size-meta);
 	font-weight: 700;
 	letter-spacing: 0.12em;
 	text-transform: uppercase;
@@ -769,19 +771,25 @@ select {
 .ui-textarea,
 .ui-select {
 	width: 100%;
+	min-height: var(--ui-control-size);
 	border: 1px solid var(--ui-color-border);
 	background: rgba(255, 255, 255, 0.02);
 	color: var(--ui-color-text);
-	padding: 0.8rem 0.9rem;
+	padding: 0.55rem 0.75rem;
+	font-size: var(--ui-font-size-body);
+	line-height: 1.45;
 }
 
 .ui-command-input {
 	width: 100%;
+	min-height: var(--ui-control-size);
 	border: 0;
 	background: transparent;
 	color: var(--ui-color-text);
 	padding: 0;
 	font: inherit;
+	font-size: var(--ui-font-size-body);
+	line-height: 1.45;
 }
 
 .ui-command-input::placeholder {
@@ -812,7 +820,7 @@ select {
 .ui-status {
 	margin: 0;
 	color: var(--ui-color-text-muted);
-	font-size: 0.84rem;
+	font-size: var(--ui-font-size-meta);
 }
 
 .ui-status--success {
@@ -826,16 +834,16 @@ select {
 .ui-empty-state {
 	margin: 0;
 	color: var(--ui-color-text-muted);
-	font-size: 0.92rem;
+	font-size: var(--ui-font-size-body);
 }
 
 .ui-pill {
 	display: inline-flex;
 	align-items: center;
-	border: 1px solid rgba(255, 255, 255, 0.12);
+	border: 1px solid var(--ui-color-border);
 	padding: 0.18rem 0.36rem;
 	color: var(--ui-color-text-muted);
-	font-size: 0.62rem;
+	font-size: var(--ui-font-size-meta);
 	font-weight: 700;
 	letter-spacing: 0.06em;
 	text-transform: uppercase;
@@ -850,17 +858,15 @@ select {
 .ui-selection-indicator {
 	display: inline-grid;
 	place-items: center;
-	width: 1.5rem;
-	height: 1.5rem;
-	border: 1px solid rgba(255, 255, 255, 0.2);
-	background: rgba(255, 255, 255, 0.04);
+	width: 1.35rem;
+	height: 1.35rem;
+	border: 0;
+	background: transparent;
 	color: transparent;
 }
 
 .ui-selection-indicator--selected {
-	border-color: rgba(168, 85, 247, 0.8);
-	background: rgba(168, 85, 247, 0.95);
-	color: #060608;
+	color: var(--ui-color-accent-strong);
 }
 
 .ui-icon-action {
@@ -873,6 +879,22 @@ select {
 
 .ui-icon-action svg {
 	display: block;
+}
+
+.ui-command-prompt,
+.ui-command-lead {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	width: var(--ui-control-size);
+	min-width: var(--ui-control-size);
+	min-height: var(--ui-control-size);
+	color: var(--ui-color-text-subtle);
+	font-family: var(--ui-font-mono);
+	font-size: var(--ui-font-size-body);
+	font-weight: 700;
+	letter-spacing: 0.08em;
+	text-transform: uppercase;
 }
 
 /* ==========================================================================
@@ -933,7 +955,7 @@ select {
 
 .ui-code-editor__toolbar {
 	padding: 0.75rem 1rem;
-	border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+	border-bottom: 1px solid var(--ui-color-border);
 }
 
 .ui-code-editor__body {
@@ -955,14 +977,14 @@ select {
 .ui-message {
 	display: grid;
 	gap: var(--ui-space-2);
-	border: 1px solid rgba(255, 255, 255, 0.08);
+	border: 1px solid var(--ui-color-border);
 	background: rgba(255, 255, 255, 0.02);
 	padding: 1rem;
 }
 
 .ui-message__role {
 	color: var(--ui-color-accent-strong);
-	font-size: 0.72rem;
+	font-size: var(--ui-font-size-meta);
 	font-weight: 700;
 	letter-spacing: 0.12em;
 	text-transform: uppercase;

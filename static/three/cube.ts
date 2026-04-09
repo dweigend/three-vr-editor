@@ -8,12 +8,14 @@
 import {
 	AmbientLight,
 	Color,
+	CylinderGeometry,
 	DirectionalLight,
 	Group,
 	Mesh,
 	MeshStandardMaterial,
 	PointLight,
-	SphereGeometry
+	SphereGeometry,
+	Vector3
 } from 'three';
 
 import type {
@@ -35,6 +37,9 @@ const BLINK_SPEED = 2.5;
 const RED_PHASE = 0;
 const BLUE_PHASE = Math.PI;
 const YELLOW_PHASE = (2 * Math.PI) / 3;
+const TUBE_RADIUS = 0.08;
+const TUBE_COLOR = '#cccccc';
+const TUBE_SEGMENTS = 16;
 
 export const createDemoScene: ThreeDemoSceneFactory = ({ camera, scene }): ThreeDemoSceneController => {
 	const geometry = new SphereGeometry(SPHERE_SIZE, 32, 32);
@@ -52,6 +57,13 @@ export const createDemoScene: ThreeDemoSceneFactory = ({ camera, scene }): Three
 		color: SPHERE_YELLOW_COLOR,
 		metalness: 0.12,
 		roughness: 0.35
+	});
+	const tubeMaterial = new MeshStandardMaterial({
+		color: TUBE_COLOR,
+		metalness: 0.3,
+		roughness: 0.5,
+		transparent: true,
+		opacity: 0.7
 	});
 
 	const redSphere = new Mesh(geometry, redMaterial);
@@ -80,6 +92,45 @@ export const createDemoScene: ThreeDemoSceneFactory = ({ camera, scene }): Three
 	orbitGroup.add(redSphere);
 	orbitGroup.add(blueSphere);
 	orbitGroup.add(yellowSphere);
+
+	// Helper to create a tube between two points
+	const createTubeBetween = (start: Vector3, end: Vector3): Mesh => {
+		const distance = start.distanceTo(end);
+		const cylinder = new CylinderGeometry(
+			TUBE_RADIUS,
+			TUBE_RADIUS,
+			distance,
+			TUBE_SEGMENTS,
+			1,
+			true // openEnded
+		);
+		const tube = new Mesh(cylinder, tubeMaterial);
+
+		// Position cylinder at midpoint
+		const midpoint = new Vector3().addVectors(start, end).multiplyScalar(0.5);
+		tube.position.copy(midpoint);
+
+		// Rotate cylinder to align with direction vector
+		const direction = new Vector3().subVectors(end, start).normalize();
+		const axis = new Vector3(0, 1, 0).cross(direction);
+		const angle = Math.acos(new Vector3(0, 1, 0).dot(direction));
+		tube.quaternion.setFromAxisAngle(axis, angle);
+
+		return tube;
+	};
+
+	// Create tubes between each pair of spheres
+	const redPos = redSphere.position.clone();
+	const bluePos = blueSphere.position.clone();
+	const yellowPos = yellowSphere.position.clone();
+
+	const tubeRedBlue = createTubeBetween(redPos, bluePos);
+	const tubeBlueYellow = createTubeBetween(bluePos, yellowPos);
+	const tubeYellowRed = createTubeBetween(yellowPos, redPos);
+
+	orbitGroup.add(tubeRedBlue);
+	orbitGroup.add(tubeBlueYellow);
+	orbitGroup.add(tubeYellowRed);
 
 	const ambientLight = new AmbientLight('#ffffff', AMBIENT_LIGHT_INTENSITY);
 	const directionalLight = new DirectionalLight('#ffffff', DIRECTIONAL_LIGHT_INTENSITY);
@@ -111,6 +162,8 @@ export const createDemoScene: ThreeDemoSceneFactory = ({ camera, scene }): Three
 			redMaterial.dispose();
 			blueMaterial.dispose();
 			yellowMaterial.dispose();
+			tubeMaterial.dispose();
+			// Cylinder geometries are disposed by their meshes when removed from scene
 			// PointLight has no dispose method, removal handled by orbitGroup removal
 		}
 	};

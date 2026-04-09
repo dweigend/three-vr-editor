@@ -20,6 +20,7 @@
 		ThreeSourceDocument,
 		ThreeSourceFileSummary
 	} from '$lib/three/three-editor-types';
+	import type { ThreeCreateFileRequest, ThreeTemplateSummary } from '$lib/three/three-template-types';
 	import type { ThreeEditorActiveFileContext } from '$lib/three/three-editor-workspace-types';
 	import { createThreeEditorWorkspaceState } from '$lib/three/three-editor-workspace-state.svelte';
 	import { joinClassNames } from '$lib/utils/class-names';
@@ -32,6 +33,7 @@
 		pendingAppliedEdit?: EditorAgentAppliedEdit | null;
 		pendingAppliedEditToken?: number;
 		previewEntryPath: string;
+		templates?: ThreeTemplateSummary[];
 	};
 
 	let {
@@ -41,7 +43,8 @@
 		initialPreview,
 		pendingAppliedEdit = null,
 		pendingAppliedEditToken = 0,
-		previewEntryPath
+		previewEntryPath,
+		templates = []
 	}: Props = $props();
 	type CollapsiblePaneApi = {
 		collapse: () => void;
@@ -64,7 +67,8 @@
 		initialDocument: stableInitialDocument,
 		initialPreview: stableInitialPreview,
 		previewEndpoint: resolve('/three/editor/preview'),
-		previewEntryPath: stablePreviewEntryPath
+		previewEntryPath: stablePreviewEntryPath,
+		previewMode: 'selected'
 	});
 
 	$effect(() => {
@@ -89,12 +93,9 @@
 		void workspaceState.saveActiveDocument();
 	});
 
-	async function handleCreateFile(fileName: string): Promise<void> {
+	async function handleCreateFile(request: ThreeCreateFileRequest): Promise<void> {
 		try {
-			await workspaceState.createFile({
-				fileName,
-				mode: 'blank'
-			});
+			await workspaceState.createFile(request);
 			workspaceMessage = null;
 		} catch (error) {
 			workspaceMessage = error instanceof Error ? error.message : 'Create file failed.';
@@ -188,6 +189,7 @@
 								files={workspaceState.files}
 								bind:selectedPath={workspaceState.selectedPath}
 								onCreateFile={handleCreateFile}
+								{templates}
 								value={workspaceState.activeDocument}
 								onChange={workspaceState.handleSourceChange}
 								onSave={workspaceState.saveActiveDocument}

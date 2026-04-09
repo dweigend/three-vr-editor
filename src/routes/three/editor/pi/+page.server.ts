@@ -9,12 +9,12 @@ import { hasActiveOpenRouterKey } from '$lib/server/pi/auth';
 import { readEditorAgentSession } from '$lib/server/pi/editor-agent';
 import { getConfiguredModel } from '$lib/server/pi/models';
 import { clearPiSessionCookie, getPiSessionCookie } from '$lib/server/pi/session-cookie';
-import { loadThreeEditorPageData } from '$lib/server/three/editor-page-load';
+import { loadThreeEditorTemplatePageData } from '$lib/server/three/editor-template-page-load';
 
 import type { PageServerLoad } from './$types';
 
 export const load: PageServerLoad = async ({ cookies }) => {
-	const editorData = await loadThreeEditorPageData();
+	const editorData = await loadThreeEditorTemplatePageData();
 	const hasActiveKey = hasActiveOpenRouterKey();
 	const configuredModel = getConfiguredModel();
 	const editorSessionFile = getPiSessionCookie(cookies, 'editor');
