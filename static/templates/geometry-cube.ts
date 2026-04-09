@@ -1,16 +1,27 @@
-/**
- * Purpose: Teach the smallest possible lit cube scene with a few friendly controls.
- * Context: Students can use this template to learn the shared scene contract and try
- * one geometry, one material, and two lights without extra setup.
- * Responsibility: Build the cube scene, animate it, and clean up all created resources.
- * Boundaries: The shared runtime still owns the renderer, resize handling, and editor UI.
- */
+/** Start here if you want a lit cube you can tweak right away. */
 
-/* @three-template
-{
+import {
+	AmbientLight,
+	BoxGeometry,
+	Color,
+	DirectionalLight,
+	Mesh,
+	MeshStandardMaterial,
+	type PerspectiveCamera,
+	type Scene
+} from 'three';
+
+import {
+	defineThreeTemplateParameters,
+	defineThreeTemplateUi,
+	type ThreeDemoSceneFactory
+} from '$lib/features/editor/three-helpers';
+
+// The editor sidebar reads this to build the labels and controls.
+export const templateUi = defineThreeTemplateUi({
 	"id": "geometry-cube",
 	"title": "Geometry Cube",
-	"description": "A minimal rotating cube scene for learning the template format.",
+	"description": "A simple cube with color, size, and spin controls.",
 	"rendererKind": "webgl",
 	"tags": ["geometry", "cube", "starter"],
 	"parameters": [
@@ -45,34 +56,17 @@
 			"defaultValue": 0.01
 		}
 	]
-}
-*/
+});
 
-import {
-	AmbientLight,
-	BoxGeometry,
-	Color,
-	DirectionalLight,
-	Mesh,
-	MeshStandardMaterial
-} from 'three';
-
-import type {
-	ThreeDemoSceneController,
-	ThreeDemoSceneFactory
-} from '../../src/lib/three/three-demo-scene';
-
-// Try these values first in the editor sidebar.
-// @three-template-parameters:start
-export const templateParameters = {
+// These are the values students can play with first.
+export const templateParameters = defineThreeTemplateParameters({
 	"background": "#020617",
 	"cubeColor": "#60a5fa",
 	"cubeSize": 1.4,
 	"spinSpeed": 0.01
-} satisfies Record<string, number | string>;
-// @three-template-parameters:end
+});
 
-type CubeSceneSettings = {
+type CubeSettings = {
 	background: string;
 	cubeColor: string;
 	cubeSize: number;
@@ -84,49 +78,45 @@ type SceneLights = {
 	directionalLight: DirectionalLight;
 };
 
-export const createDemoScene: ThreeDemoSceneFactory = ({
-	camera,
-	scene
-}): ThreeDemoSceneController => {
-	const settings = readCubeSceneSettings();
-	const cubeGeometry = createCubeGeometry(settings);
-	const cubeMaterial = createCubeMaterial(settings);
+export const createDemoScene: ThreeDemoSceneFactory = ({ camera, scene }) => {
+	const settings = readCubeSettings();
+	const cubeGeometry = new BoxGeometry(
+		settings.cubeSize,
+		settings.cubeSize,
+		settings.cubeSize
+	);
+	const cubeMaterial = new MeshStandardMaterial({
+		color: settings.cubeColor,
+		metalness: 0.2,
+		roughness: 0.38
+	});
 	const cubeMesh = new Mesh(cubeGeometry, cubeMaterial);
 	const sceneLights = createSceneLights();
 
-	configureScene(camera, scene, settings, cubeMesh, sceneLights);
+	setupScene(camera, scene, settings.background, cubeMesh, sceneLights);
 
 	return {
 		update: () => {
-			spinCube(cubeMesh, settings.spinSpeed);
+			cubeMesh.rotation.x += settings.spinSpeed * 0.8;
+			cubeMesh.rotation.y += settings.spinSpeed;
 		},
 		dispose: () => {
-			cleanupScene(scene, cubeMesh, sceneLights);
+			scene.remove(sceneLights.ambientLight);
+			scene.remove(sceneLights.directionalLight);
+			scene.remove(cubeMesh);
 			cubeGeometry.dispose();
 			cubeMaterial.dispose();
 		}
 	};
 };
 
-function readCubeSceneSettings(): CubeSceneSettings {
+function readCubeSettings(): CubeSettings {
 	return {
 		background: String(templateParameters.background),
 		cubeColor: String(templateParameters.cubeColor),
 		cubeSize: Number(templateParameters.cubeSize),
 		spinSpeed: Number(templateParameters.spinSpeed)
 	};
-}
-
-function createCubeGeometry(settings: CubeSceneSettings): BoxGeometry {
-	return new BoxGeometry(settings.cubeSize, settings.cubeSize, settings.cubeSize);
-}
-
-function createCubeMaterial(settings: CubeSceneSettings): MeshStandardMaterial {
-	return new MeshStandardMaterial({
-		color: settings.cubeColor,
-		metalness: 0.2,
-		roughness: 0.38
-	});
 }
 
 function createSceneLights(): SceneLights {
@@ -136,33 +126,18 @@ function createSceneLights(): SceneLights {
 	};
 }
 
-function configureScene(
-	camera: Parameters<ThreeDemoSceneFactory>[0]['camera'],
-	scene: Parameters<ThreeDemoSceneFactory>[0]['scene'],
-	settings: CubeSceneSettings,
+function setupScene(
+	camera: PerspectiveCamera,
+	scene: Scene,
+	background: string,
 	cubeMesh: Mesh,
 	sceneLights: SceneLights
 ): void {
-	scene.background = new Color(settings.background);
+	scene.background = new Color(background);
 	camera.position.set(0, 0.6, 3.8);
 	sceneLights.directionalLight.position.set(3, 4, 5);
 
 	scene.add(sceneLights.ambientLight);
 	scene.add(sceneLights.directionalLight);
 	scene.add(cubeMesh);
-}
-
-function spinCube(cubeMesh: Mesh, spinSpeed: number): void {
-	cubeMesh.rotation.x += spinSpeed * 0.8;
-	cubeMesh.rotation.y += spinSpeed;
-}
-
-function cleanupScene(
-	scene: Parameters<ThreeDemoSceneFactory>[0]['scene'],
-	cubeMesh: Mesh,
-	sceneLights: SceneLights
-): void {
-	scene.remove(sceneLights.ambientLight);
-	scene.remove(sceneLights.directionalLight);
-	scene.remove(cubeMesh);
 }

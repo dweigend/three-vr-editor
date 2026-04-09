@@ -6,7 +6,7 @@
  */
 
 import { mkdir, readdir, readFile, stat, writeFile } from 'node:fs/promises';
-import { basename, dirname, extname, relative, resolve } from 'node:path';
+import { basename, dirname, extname, resolve } from 'node:path';
 
 import type { ThreeSourceDocument, ThreeSourceFileSummary } from '$lib/features/editor/three-editor-types';
 import type { ThreeCreateFileRequest, ThreeCreateFileResult } from '$lib/features/editor/three-template-types';
@@ -16,8 +16,6 @@ import { STATIC_TEMPLATES_DIR, STATIC_THREE_DIR, toManagedRelativePath } from '.
 export const DEFAULT_MANAGED_SCENE_NAME = 'Cube';
 export const DEFAULT_PREVIEW_ENTRY_PATH = 'scenes/cube.ts';
 const DEFAULT_LIST_EXCLUDE_PREFIXES = ['shared/', 'templates/'];
-const TEMPLATE_THREE_LIB_PREFIX = '../../src/lib/features/editor/';
-const MANAGED_THREE_LIB_PREFIX = '../../../src/lib/features/editor/';
 export type ThreeFileService = {
 	createManagedFile: (request: ThreeCreateFileRequest) => Promise<ThreeCreateFileResult>;
 	listFiles: () => Promise<ThreeSourceFileSummary[]>;
@@ -95,8 +93,7 @@ export function createThreeFileService(
 
 async function readTemplateSource(templateRootDir: string, templatePath: string): Promise<string> {
 	const normalizedTemplatePath = normalizeRequestedPath(templatePath);
-	const source = await readFile(resolveManagedFilePath(templateRootDir, normalizedTemplatePath), 'utf-8');
-	return source.replaceAll(TEMPLATE_THREE_LIB_PREFIX, MANAGED_THREE_LIB_PREFIX);
+	return readFile(resolveManagedFilePath(templateRootDir, normalizedTemplatePath), 'utf-8');
 }
 
 export async function listManagedFiles(
@@ -172,21 +169,10 @@ async function createUniqueScenePath(rootDir: string, fileName: string): Promise
 	throw new Error('Unable to find a unique file path under static/three/scenes.');
 }
 
-function createBlankManagedSceneSource(outputPath: string, fileName: string): string {
+function createBlankManagedSceneSource(_outputPath: string, fileName: string): string {
 	const sceneTitle = toSceneTitle(fileName);
-	const sharedSceneTypeImportPath = relative(
-		dirname(outputPath),
-		resolve(process.cwd(), 'src', 'lib', 'features', 'editor', 'three-demo-scene')
-	)
-		.split('\\')
-		.join('/');
 
-	return `/**
- * Purpose: Provide a minimal editable Three.js scene starter for the editor workspace.
- * Context: New blank files should be valid preview entries without requiring any optional template metadata.
- * Responsibility: Define one small rotating cube scene plus cleanup logic for further customization.
- * Boundaries: This starter does not include template parameters, additional assets, or route-specific behavior.
- */
+	return `/** A tiny cube scene to start from. Tweak it however you like. */
 
 import {
 \tAmbientLight,
@@ -194,19 +180,18 @@ import {
 \tColor,
 \tDirectionalLight,
 \tMesh,
-\tMeshStandardMaterial
+\tMeshStandardMaterial,
+\ttype PerspectiveCamera,
+\ttype Scene
 } from 'three';
 
-import type {
-\tThreeDemoSceneController,
-\tThreeDemoSceneFactory
-} from '${sharedSceneTypeImportPath}';
+import { type ThreeDemoSceneFactory } from '$lib/features/editor/three-helpers';
 
 const BACKGROUND = '#020617';
 const CUBE_COLOR = '#60a5fa';
 const ROTATION_SPEED = 0.01;
 
-export const createDemoScene: ThreeDemoSceneFactory = ({ camera, scene }): ThreeDemoSceneController => {
+export const createDemoScene: ThreeDemoSceneFactory = ({ camera, scene }) => {
 \tconst geometry = new BoxGeometry(1.2, 1.2, 1.2);
 \tconst material = new MeshStandardMaterial({
 \t\tcolor: CUBE_COLOR,
@@ -217,14 +202,7 @@ export const createDemoScene: ThreeDemoSceneFactory = ({ camera, scene }): Three
 \tconst ambientLight = new AmbientLight('#ffffff', 2.4);
 \tconst directionalLight = new DirectionalLight('#ffffff', 2.8);
 
-\tscene.background = new Color(BACKGROUND);
-\tcamera.position.set(0, 0.8, 3.5);
-\tdirectionalLight.position.set(3, 4, 5);
-\tcube.name = '${sceneTitle}';
-
-\tscene.add(ambientLight);
-\tscene.add(directionalLight);
-\tscene.add(cube);
+\tsetupScene(camera, scene, cube, ambientLight, directionalLight);
 
 \treturn {
 \t\tupdate: () => {
@@ -240,6 +218,23 @@ export const createDemoScene: ThreeDemoSceneFactory = ({ camera, scene }): Three
 \t\t}
 \t};
 };
+
+function setupScene(
+\tcamera: PerspectiveCamera,
+\tscene: Scene,
+\tcube: Mesh,
+\tambientLight: AmbientLight,
+\tdirectionalLight: DirectionalLight
+): void {
+\tscene.background = new Color(BACKGROUND);
+\tcamera.position.set(0, 0.8, 3.5);
+\tdirectionalLight.position.set(3, 4, 5);
+\tcube.name = '${sceneTitle}';
+
+\tscene.add(ambientLight);
+\tscene.add(directionalLight);
+\tscene.add(cube);
+}
 `;
 }
 

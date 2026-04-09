@@ -18,7 +18,20 @@ This folder contains editor-specific client modules for the editor workspace.
 - workspace state and transport
   `three-editor-workspace-state.svelte.ts`, `editor-agent-client.ts`, `editor-agent-types.ts`
 - template metadata and file creation UI
-  `ThreeFileCreatePanel.svelte`, `ThreeTemplateParameterPanel.svelte`, `three-template-source.ts`, `three-template-types.ts`
+  `ThreeFileCreatePanel.svelte`, `ThreeTemplateParameterPanel.svelte`,
+  `three-helpers.ts`, `three-template-source.ts`, `three-template-types.ts`
+
+## Public Template API
+
+Managed template files should import from `three-helpers.ts` instead of reaching into
+multiple editor modules directly.
+
+- scene contract types
+  `ThreeDemoSceneFactory`, `ThreeDemoSceneController`
+- template metadata helpers
+  `defineThreeTemplateUi(...)`, `defineThreeTemplateParameters(...)`
+- shared input helper
+  `createThreePointerTracker(...)`
 
 ## Boundaries
 

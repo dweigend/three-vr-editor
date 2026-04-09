@@ -26,7 +26,8 @@ This folder contains the server-side services behind the editor workspace.
 - list, read, save, and create managed scene files
 - build browser-runnable preview bundles with `esbuild`
 - expose the initial page bootstrap data for the editor route
-- list valid templates by parsing optional template headers under `static/templates`
+- list valid templates by parsing helper-based metadata exports or legacy template
+  headers under `static/templates`
 
 ## Workspace Conventions
 

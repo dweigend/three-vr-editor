@@ -51,7 +51,7 @@ export type ThreeTemplateParameterDefinition =
 	| ThreeTemplateSelectParameterDefinition
 	| ThreeTemplateTextParameterDefinition;
 
-export type ThreeTemplateHeader = {
+export type ThreeTemplateUi = {
 	description: string;
 	id: string;
 	parameters: ThreeTemplateParameterDefinition[];
@@ -60,19 +60,17 @@ export type ThreeTemplateHeader = {
 	title: string;
 };
 
-export type ThreeTemplateSummary = {
-	description: string;
-	id: string;
-	parameters: ThreeTemplateParameterDefinition[];
+export type ThreeTemplateHeader = ThreeTemplateUi;
+
+export type ThreeTemplateParameterMap = Record<string, ThreeTemplateParameterValue>;
+
+export type ThreeTemplateSummary = ThreeTemplateUi & {
 	path: string;
-	rendererKind: ThreeTemplateRendererKind;
-	tags: string[];
-	title: string;
 };
 
 export type ThreeTemplateSourceDetails = {
 	header: ThreeTemplateHeader | null;
-	parameters: Record<string, ThreeTemplateParameterValue> | null;
+	parameters: ThreeTemplateParameterMap | null;
 };
 
 export type ThreeCreateBlankFileRequest = {

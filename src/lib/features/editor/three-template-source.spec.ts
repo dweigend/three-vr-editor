@@ -17,6 +17,33 @@ const TEMPLATE_SOURCE = `/**
  * Example scene.
  */
 
+import {
+\tdefineThreeTemplateParameters,
+\tdefineThreeTemplateUi
+} from '$lib/features/editor/three-helpers';
+
+export const templateUi = defineThreeTemplateUi({
+\t"id": "example",
+\t"title": "Example",
+\t"description": "Example template",
+\t"rendererKind": "webgl",
+\t"tags": ["example"],
+\t"parameters": [
+\t\t{ "key": "color", "label": "Color", "control": "color", "defaultValue": "#ffffff" }
+\t]
+});
+
+export const templateParameters = defineThreeTemplateParameters({
+\t"color": "#ffffff"
+});
+
+export const createDemoScene = () => ({ update() {}, dispose() {} });
+`;
+
+const LEGACY_TEMPLATE_SOURCE = `/**
+ * Example scene.
+ */
+
 /* @three-template
 {
 \t"id": "example",
@@ -40,8 +67,17 @@ export const createDemoScene = () => ({ update() {}, dispose() {} });
 `;
 
 describe('three-template-source', () => {
-	it('reads the optional template header and parameter block', () => {
+	it('reads helper-based template metadata and parameter values', () => {
 		const result = readThreeTemplateSourceDetails(TEMPLATE_SOURCE);
+
+		expect(result.header?.id).toBe('example');
+		expect(result.parameters).toEqual({
+			color: '#ffffff'
+		});
+	});
+
+	it('still reads the legacy comment format', () => {
+		const result = readThreeTemplateSourceDetails(LEGACY_TEMPLATE_SOURCE);
 
 		expect(result.header?.id).toBe('example');
 		expect(result.parameters).toEqual({
@@ -61,6 +97,17 @@ describe('three-template-source', () => {
 
 	it('rewrites only the managed parameter block', () => {
 		const updatedSource = writeThreeTemplateParameters(TEMPLATE_SOURCE, {
+			color: '#ff0000'
+		});
+
+		expect(updatedSource).toContain('"color": "#ff0000"');
+		expect(readThreeTemplateSourceDetails(updatedSource).parameters).toEqual({
+			color: '#ff0000'
+		});
+	});
+
+	it('rewrites the legacy managed parameter block', () => {
+		const updatedSource = writeThreeTemplateParameters(LEGACY_TEMPLATE_SOURCE, {
 			color: '#ff0000'
 		});
 

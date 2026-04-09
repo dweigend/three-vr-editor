@@ -1,14 +1,28 @@
-/**
- * Purpose: Teach basic raycasting with a small field of cubes.
- * Context: Students can move the pointer over the scene and see how one hovered cube
- * swaps to a brighter material.
- * Responsibility: Build the cube field, track pointer input, highlight the hovered cube,
- * and clean up all event listeners and resources.
- * Boundaries: This template stays focused on one hover interaction and omits extra UI.
- */
+/** Start here if you want to learn raycasting with a friendly little cube field. */
 
-/* @three-template
-{
+import {
+	AmbientLight,
+	BoxGeometry,
+	Color,
+	DirectionalLight,
+	Group,
+	Mesh,
+	MeshStandardMaterial,
+	Raycaster,
+	type PerspectiveCamera,
+	type Scene,
+	type Vector2
+} from 'three';
+
+import {
+	createThreePointerTracker,
+	defineThreeTemplateParameters,
+	defineThreeTemplateUi,
+	type ThreeDemoSceneFactory
+} from '$lib/features/editor/three-helpers';
+
+// The editor sidebar reads this to build the labels and controls.
+export const templateUi = defineThreeTemplateUi({
 	"id": "interactive-cubes",
 	"title": "Interactive Cubes",
 	"description": "A small cube field that highlights the hovered cube.",
@@ -43,36 +57,15 @@
 			"defaultValue": 5
 		}
 	]
-}
-*/
+});
 
-import {
-	AmbientLight,
-	BoxGeometry,
-	Color,
-	DirectionalLight,
-	Group,
-	Mesh,
-	MeshStandardMaterial,
-	Raycaster,
-	Vector2
-} from 'three';
-
-import type {
-	ThreeDemoSceneController,
-	ThreeDemoSceneFactory
-} from '../../src/lib/three/three-demo-scene';
-import { bindPointerTracking } from '../../src/lib/three/pointer-tracking';
-
-// Try these values first in the editor sidebar.
-// @three-template-parameters:start
-export const templateParameters = {
+// These are the values students can play with first.
+export const templateParameters = defineThreeTemplateParameters({
 	"background": "#111827",
 	"cubeColor": "#60a5fa",
 	"gridSize": 5,
 	"highlightColor": "#fbbf24"
-} satisfies Record<string, number | string>;
-// @three-template-parameters:end
+});
 
 type InteractiveCubeSettings = {
 	background: string;
@@ -90,7 +83,7 @@ export const createDemoScene: ThreeDemoSceneFactory = ({
 	camera,
 	container,
 	scene
-}): ThreeDemoSceneController => {
+}) => {
 	const settings = readInteractiveCubeSettings();
 	const cubeGeometry = new BoxGeometry(0.72, 0.72, 0.72);
 	const baseMaterial = createBaseMaterial(settings.cubeColor);
@@ -103,11 +96,13 @@ export const createDemoScene: ThreeDemoSceneFactory = ({
 		settings.gridSize
 	);
 	const sceneLights = createSceneLights();
-	const pointerTracker = bindPointerTracking(container);
+	const pointerTracker = createThreePointerTracker(container, {
+		idlePointer: { x: 2, y: 2 }
+	});
 	const raycaster = new Raycaster();
 	let hoveredCube: Mesh | null = null;
 
-	configureScene(camera, scene, settings.background, cubeGroup, sceneLights);
+	setupScene(camera, scene, settings.background, cubeGroup, sceneLights);
 
 	return {
 		update: () => {
@@ -193,9 +188,9 @@ function createCubeField(
 	return cubeMeshes;
 }
 
-function configureScene(
-	camera: Parameters<ThreeDemoSceneFactory>[0]['camera'],
-	scene: Parameters<ThreeDemoSceneFactory>[0]['scene'],
+function setupScene(
+	camera: PerspectiveCamera,
+	scene: Scene,
 	background: string,
 	cubeGroup: Group,
 	sceneLights: SceneLights
@@ -213,7 +208,7 @@ function configureScene(
 function updateHoveredCube(
 	raycaster: Raycaster,
 	pointer: Vector2,
-	camera: Parameters<ThreeDemoSceneFactory>[0]['camera'],
+	camera: PerspectiveCamera,
 	cubeMeshes: Mesh[],
 	baseMaterial: MeshStandardMaterial,
 	highlightMaterial: MeshStandardMaterial,

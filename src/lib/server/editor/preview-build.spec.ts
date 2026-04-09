@@ -5,8 +5,8 @@
  * Boundaries: These tests do not render the bundled code in a browser runtime.
  */
 
-import { mkdtemp, rm, writeFile } from 'node:fs/promises';
-import { join } from 'node:path';
+import { mkdir, mkdtemp, readFile, readdir, rm, writeFile } from 'node:fs/promises';
+import { join, resolve } from 'node:path';
 import { tmpdir } from 'node:os';
 import { afterEach, describe, expect, it } from 'vitest';
 
@@ -67,6 +67,60 @@ describe('createThreePreviewBuilder', () => {
 			expect(result.error.message.length).toBeGreaterThan(0);
 			expect(result.error.source?.filePath).toBe('cube.ts');
 			expect(result.error.source?.line).toBeGreaterThan(0);
+		}
+	});
+
+	it('resolves $lib template helper imports in preview code', async () => {
+		const rootDir = await createFixtureDir();
+		await writeFile(
+			join(rootDir, 'cube.ts'),
+			`import {
+	type ThreeDemoSceneFactory,
+	defineThreeTemplateParameters
+} from '$lib/features/editor/three-helpers';
+
+export const templateParameters = defineThreeTemplateParameters({
+	"spinSpeed": 0.01
+});
+
+export const createDemoScene: ThreeDemoSceneFactory = () => ({
+	update() {},
+	dispose() {}
+});`,
+			'utf-8'
+		);
+		const builder = createThreePreviewBuilder(rootDir);
+
+		const result = await builder.buildPreview({
+			entryPath: 'cube.ts',
+			files: []
+		});
+
+		expect(result.status).toBe('success');
+	});
+
+	it('bundles every managed template source', async () => {
+		const rootDir = await createFixtureDir();
+		await mkdir(join(rootDir, 'scenes'), { recursive: true });
+		const templateDir = resolve(process.cwd(), 'static', 'templates');
+		const templateNames = (await readdir(templateDir)).filter((fileName) =>
+			fileName.endsWith('.ts')
+		);
+
+		for (const templateName of templateNames) {
+			const source = await readFile(join(templateDir, templateName), 'utf-8');
+			await writeFile(join(rootDir, 'scenes', templateName), source, 'utf-8');
+		}
+
+		const builder = createThreePreviewBuilder(rootDir);
+
+		for (const templateName of templateNames) {
+			const result = await builder.buildPreview({
+				entryPath: `scenes/${templateName}`,
+				files: []
+			});
+
+			expect(result.status).toBe('success');
 		}
 	});
 });

@@ -1,14 +1,30 @@
-/**
- * Purpose: Teach reflective materials with a small procedural environment map.
- * Context: Students can change the base color, metalness, and roughness to see how
- * environment lighting changes the look of reflective objects.
- * Responsibility: Build the reflective scene, create a PMREM environment, animate the
- * object group, and dispose every created WebGL resource.
- * Boundaries: This version stays self-contained and avoids external HDR assets.
- */
+/** Start here if you want reflective materials without loading an HDR file. */
 
-/* @three-template
-{
+import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
+import {
+	AmbientLight,
+	Color,
+	DirectionalLight,
+	Group,
+	Mesh,
+	MeshStandardMaterial,
+	PMREMGenerator,
+	SphereGeometry,
+	TorusKnotGeometry,
+	WebGLRenderTarget,
+	type PerspectiveCamera,
+	type Scene,
+	type WebGLRenderer
+} from 'three';
+
+import {
+	defineThreeTemplateParameters,
+	defineThreeTemplateUi,
+	type ThreeDemoSceneFactory
+} from '$lib/features/editor/three-helpers';
+
+// The editor sidebar reads this to build the labels and controls.
+export const templateUi = defineThreeTemplateUi({
 	"id": "materials-envmaps-fasthdr",
 	"title": "Materials Envmaps FastHDR",
 	"description": "A reflective-material scene with a procedural environment map.",
@@ -46,43 +62,25 @@
 			"defaultValue": 0.18
 		}
 	]
-}
-*/
+});
 
-import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
-import {
-	AmbientLight,
-	Color,
-	DirectionalLight,
-	Group,
-	Mesh,
-	MeshStandardMaterial,
-	PMREMGenerator,
-	SphereGeometry,
-	Texture,
-	TorusKnotGeometry
-} from 'three';
-
-import type {
-	ThreeDemoSceneController,
-	ThreeDemoSceneFactory
-} from '../../src/lib/three/three-demo-scene';
-
-// Try these values first in the editor sidebar.
-// @three-template-parameters:start
-export const templateParameters = {
+// These are the values students can play with first.
+export const templateParameters = defineThreeTemplateParameters({
 	"background": "#020617",
 	"metalness": 0.85,
 	"roughness": 0.18,
 	"surfaceColor": "#f8fafc"
-} satisfies Record<string, number | string>;
-// @three-template-parameters:end
+});
 
-type ReflectiveSceneSettings = {
+type ReflectiveSettings = {
 	background: string;
 	metalness: number;
 	roughness: number;
 	surfaceColor: string;
+};
+
+type EnvironmentMap = {
+	target: WebGLRenderTarget;
 };
 
 type SceneLights = {
@@ -94,10 +92,11 @@ export const createDemoScene: ThreeDemoSceneFactory = ({
 	camera,
 	renderer,
 	scene
-}): ThreeDemoSceneController => {
-	const settings = readReflectiveSceneSettings();
-	const pmremGenerator = new PMREMGenerator(renderer);
-	const environmentTexture = createEnvironmentTexture(pmremGenerator);
+}) => {
+	const webglRenderer = renderer as WebGLRenderer;
+	const settings = readReflectiveSettings();
+	const pmremGenerator = new PMREMGenerator(webglRenderer);
+	const environmentMap = createEnvironmentMap(pmremGenerator);
 	const surfaceMaterial = createSurfaceMaterial(settings);
 	const knotGeometry = new TorusKnotGeometry(0.9, 0.24, 160, 24);
 	const sphereGeometry = new SphereGeometry(0.48, 32, 24);
@@ -108,11 +107,11 @@ export const createDemoScene: ThreeDemoSceneFactory = ({
 	);
 	const sceneLights = createSceneLights();
 
-	configureScene(
+	setupScene(
 		camera,
 		scene,
 		settings.background,
-		environmentTexture,
+		environmentMap,
 		reflectiveGroup,
 		sceneLights
 	);
@@ -126,7 +125,7 @@ export const createDemoScene: ThreeDemoSceneFactory = ({
 			scene.remove(sceneLights.directionalLight);
 			scene.remove(reflectiveGroup);
 			scene.environment = null;
-			environmentTexture.dispose();
+			environmentMap.target.dispose();
 			knotGeometry.dispose();
 			sphereGeometry.dispose();
 			surfaceMaterial.dispose();
@@ -135,7 +134,7 @@ export const createDemoScene: ThreeDemoSceneFactory = ({
 	};
 };
 
-function readReflectiveSceneSettings(): ReflectiveSceneSettings {
+function readReflectiveSettings(): ReflectiveSettings {
 	return {
 		background: String(templateParameters.background),
 		metalness: Number(templateParameters.metalness),
@@ -144,12 +143,15 @@ function readReflectiveSceneSettings(): ReflectiveSceneSettings {
 	};
 }
 
-function createEnvironmentTexture(pmremGenerator: PMREMGenerator): Texture {
-	return pmremGenerator.fromScene(new RoomEnvironment(), 0.05).texture;
+function createEnvironmentMap(pmremGenerator: PMREMGenerator): EnvironmentMap {
+	// PMREM blurs the scene into an environment texture that reflections can sample.
+	return {
+		target: pmremGenerator.fromScene(new RoomEnvironment(), 0.05)
+	};
 }
 
 function createSurfaceMaterial(
-	settings: ReflectiveSceneSettings
+	settings: ReflectiveSettings
 ): MeshStandardMaterial {
 	return new MeshStandardMaterial({
 		color: settings.surfaceColor,
@@ -182,16 +184,16 @@ function createReflectiveGroup(
 	return reflectiveGroup;
 }
 
-function configureScene(
-	camera: Parameters<ThreeDemoSceneFactory>[0]['camera'],
-	scene: Parameters<ThreeDemoSceneFactory>[0]['scene'],
+function setupScene(
+	camera: PerspectiveCamera,
+	scene: Scene,
 	background: string,
-	environmentTexture: Texture,
+	environmentMap: EnvironmentMap,
 	reflectiveGroup: Group,
 	sceneLights: SceneLights
 ): void {
 	scene.background = new Color(background);
-	scene.environment = environmentTexture;
+	scene.environment = environmentMap.target.texture;
 	camera.position.set(0, 0.8, 5);
 	sceneLights.directionalLight.position.set(4, 5, 6);
 

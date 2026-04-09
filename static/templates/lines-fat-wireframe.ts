@@ -1,15 +1,18 @@
-/**
- * Purpose: Teach how a fat wireframe can outline a mesh on the WebGPU path.
- * Context: Students can change the line width and wire color while comparing the filled
- * shape and its screen-space outline.
- * Responsibility: Build the wireframe scene, keep the line material sized to the
- * viewport, animate the group, and clean up all geometry and materials.
- * Boundaries: This template stays focused on the core wireframe idea and omits
- * extra tools.
- */
+/** Start here if you want a mesh outline that stays thick on screen. */
 
-/* @three-template
-{
+import { LineMaterial } from 'three/addons/lines/LineMaterial.js';
+import { Wireframe } from 'three/addons/lines/Wireframe.js';
+import { WireframeGeometry2 } from 'three/addons/lines/WireframeGeometry2.js';
+import * as THREE from 'three/webgpu';
+
+import {
+	defineThreeTemplateParameters,
+	defineThreeTemplateUi,
+	type ThreeDemoSceneFactory
+} from '$lib/features/editor/three-helpers';
+
+// The editor sidebar reads this to build the labels and controls.
+export const templateUi = defineThreeTemplateUi({
 	"id": "lines-fat-wireframe",
 	"title": "Lines Fat Wireframe",
 	"description": "A thick wireframe torus knot rendered on the WebGPU path.",
@@ -47,28 +50,15 @@
 			"defaultValue": 0.008
 		}
 	]
-}
-*/
+});
 
-import { LineMaterial } from 'three/addons/lines/LineMaterial.js';
-import { Wireframe } from 'three/addons/lines/Wireframe.js';
-import { WireframeGeometry2 } from 'three/addons/lines/WireframeGeometry2.js';
-import * as THREE from 'three/webgpu';
-
-import type {
-	ThreeDemoSceneController,
-	ThreeDemoSceneFactory
-} from '../../src/lib/three/three-demo-scene';
-
-// Try these values first in the editor sidebar.
-// @three-template-parameters:start
-export const templateParameters = {
+// These are the values students can play with first.
+export const templateParameters = defineThreeTemplateParameters({
 	"background": "#0f172a",
 	"lineWidth": 6,
 	"spinSpeed": 0.008,
 	"wireColor": "#c084fc"
-} satisfies Record<string, number | string>;
-// @three-template-parameters:end
+});
 
 export const demoRendererKind = 'webgpu';
 
@@ -91,11 +81,11 @@ export const createDemoScene: ThreeDemoSceneFactory = ({
 	camera,
 	container,
 	scene
-}): ThreeDemoSceneController => {
+}) => {
 	const settings = readFatWireframeSettings();
 	const wireframeScene = createWireframeScene(settings);
 
-	configureScene(camera, scene, settings.background, wireframeScene.group);
+	setupScene(camera, scene, settings.background, wireframeScene.group);
 	updateLineResolution(
 		wireframeScene.lineMaterial,
 		container.clientWidth,
@@ -156,9 +146,9 @@ function createWireframeScene(settings: FatWireframeSettings): WireframeScene {
 	};
 }
 
-function configureScene(
-	camera: Parameters<ThreeDemoSceneFactory>[0]['camera'],
-	scene: Parameters<ThreeDemoSceneFactory>[0]['scene'],
+function setupScene(
+	camera: THREE.PerspectiveCamera,
+	scene: THREE.Scene,
 	background: string,
 	group: THREE.Group
 ): void {
@@ -177,6 +167,6 @@ function updateLineResolution(
 	width: number,
 	height: number
 ): void {
-	// Fat lines are measured in screen space, so they need the current viewport size.
+	// Fat lines use screen-space widths, so the current viewport size matters.
 	lineMaterial.resolution.set(width, height);
 }

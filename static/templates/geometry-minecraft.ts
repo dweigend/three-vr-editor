@@ -1,18 +1,29 @@
-/**
- * Purpose: Teach a blocky terrain made from many simple cube instances.
- * Context: Students can change the grid size and terrain height to see how instancing
- * and procedural noise work together.
- * Responsibility: Build the instanced terrain, light it, animate it slightly, and
- * release all shared resources.
- * Boundaries: This scene stays focused on terrain generation and omits controls
- * or textures.
- */
+/** Build a tiny block world and see how instancing keeps it fast. */
 
-/* @three-template
-{
+import { ImprovedNoise } from 'three/addons/math/ImprovedNoise.js';
+import {
+	AmbientLight,
+	BoxGeometry,
+	Color,
+	DirectionalLight,
+	InstancedMesh,
+	MeshStandardMaterial,
+	Object3D,
+	type PerspectiveCamera,
+	type Scene
+} from 'three';
+
+import {
+	defineThreeTemplateParameters,
+	defineThreeTemplateUi,
+	type ThreeDemoSceneFactory
+} from '$lib/features/editor/three-helpers';
+
+// The editor sidebar reads this to build the labels and controls.
+export const templateUi = defineThreeTemplateUi({
 	"id": "geometry-minecraft",
 	"title": "Geometry Minecraft",
-	"description": "A compact voxel terrain scene with a Minecraft-like silhouette.",
+	"description": "Grow the grid or the hills and keep the blocky look.",
 	"rendererKind": "webgl",
 	"tags": ["geometry", "minecraft", "terrain"],
 	"parameters": [
@@ -47,38 +58,19 @@
 			"defaultValue": "#65a30d"
 		}
 	]
-}
-*/
+});
 
-import { ImprovedNoise } from 'three/addons/math/ImprovedNoise.js';
-import {
-	AmbientLight,
-	BoxGeometry,
-	Color,
-	DirectionalLight,
-	InstancedMesh,
-	MeshStandardMaterial,
-	Object3D
-} from 'three';
-
-import type {
-	ThreeDemoSceneController,
-	ThreeDemoSceneFactory
-} from '../../src/lib/three/three-demo-scene';
-
-// Try these values first in the editor sidebar.
-// @three-template-parameters:start
-export const templateParameters = {
+// These are the values students can play with first.
+export const templateParameters = defineThreeTemplateParameters({
 	"background": "#bfdbfe",
 	"gridSize": 12,
 	"groundColor": "#65a30d",
 	"heightScale": 3
-} satisfies Record<string, number | string>;
-// @three-template-parameters:end
+});
 
 const terrainNoise = new ImprovedNoise();
 
-type MinecraftSceneSettings = {
+type MinecraftSettings = {
 	background: string;
 	gridSize: number;
 	groundColor: string;
@@ -90,20 +82,21 @@ type SceneLights = {
 	directionalLight: DirectionalLight;
 };
 
-export const createDemoScene: ThreeDemoSceneFactory = ({
-	camera,
-	scene
-}): ThreeDemoSceneController => {
-	const settings = readMinecraftSceneSettings();
+export const createDemoScene: ThreeDemoSceneFactory = ({ camera, scene }) => {
+	const settings = readMinecraftSettings();
 	const blockGeometry = new BoxGeometry(1, 1, 1);
-	const groundMaterial = createGroundMaterial(settings.groundColor);
+	const groundMaterial = new MeshStandardMaterial({
+		color: settings.groundColor,
+		metalness: 0.04,
+		roughness: 0.88
+	});
 	const blockCount = settings.gridSize * settings.gridSize;
 	const terrainMesh = new InstancedMesh(blockGeometry, groundMaterial, blockCount);
 	const placementHelper = new Object3D();
 	const sceneLights = createSceneLights();
 
 	fillTerrain(terrainMesh, placementHelper, settings);
-	configureScene(camera, scene, settings, terrainMesh, sceneLights);
+	setupScene(camera, scene, settings, terrainMesh, sceneLights);
 
 	return {
 		update: () => {
@@ -119,21 +112,13 @@ export const createDemoScene: ThreeDemoSceneFactory = ({
 	};
 };
 
-function readMinecraftSceneSettings(): MinecraftSceneSettings {
+function readMinecraftSettings(): MinecraftSettings {
 	return {
 		background: String(templateParameters.background),
 		gridSize: Number(templateParameters.gridSize),
 		groundColor: String(templateParameters.groundColor),
 		heightScale: Number(templateParameters.heightScale)
 	};
-}
-
-function createGroundMaterial(groundColor: string): MeshStandardMaterial {
-	return new MeshStandardMaterial({
-		color: groundColor,
-		metalness: 0.04,
-		roughness: 0.88
-	});
 }
 
 function createSceneLights(): SceneLights {
@@ -146,7 +131,7 @@ function createSceneLights(): SceneLights {
 function fillTerrain(
 	terrainMesh: InstancedMesh,
 	placementHelper: Object3D,
-	settings: MinecraftSceneSettings
+	settings: MinecraftSettings
 ): void {
 	let instanceIndex = 0;
 
@@ -165,10 +150,10 @@ function fillTerrain(
 	}
 }
 
-function configureScene(
-	camera: Parameters<ThreeDemoSceneFactory>[0]['camera'],
-	scene: Parameters<ThreeDemoSceneFactory>[0]['scene'],
-	settings: MinecraftSceneSettings,
+function setupScene(
+	camera: PerspectiveCamera,
+	scene: Scene,
+	settings: MinecraftSettings,
 	terrainMesh: InstancedMesh,
 	sceneLights: SceneLights
 ): void {

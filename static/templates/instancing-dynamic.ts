@@ -1,14 +1,25 @@
-/**
- * Purpose: Teach how instancing can animate many objects with one shared mesh setup.
- * Context: Students can change the grid size and wave speed to see how one update loop
- * controls a large field of animated columns.
- * Responsibility: Build the instanced column field, animate each column height, and
- * clean up the shared geometry and material.
- * Boundaries: This template focuses on instancing and skips the larger original demo UI.
- */
+/** Start here if you want to animate lots of objects with one shared mesh. */
 
-/* @three-template
-{
+import {
+	AmbientLight,
+	BoxGeometry,
+	Color,
+	DirectionalLight,
+	InstancedMesh,
+	MeshStandardMaterial,
+	Object3D,
+	type PerspectiveCamera,
+	type Scene
+} from 'three';
+
+import {
+	defineThreeTemplateParameters,
+	defineThreeTemplateUi,
+	type ThreeDemoSceneFactory
+} from '$lib/features/editor/three-helpers';
+
+// The editor sidebar reads this to build the labels and controls.
+export const templateUi = defineThreeTemplateUi({
 	"id": "instancing-dynamic",
 	"title": "Instancing Dynamic",
 	"description": "A wave of instanced columns that animate their height over time.",
@@ -46,35 +57,17 @@
 			"defaultValue": "#22d3ee"
 		}
 	]
-}
-*/
+});
 
-import {
-	AmbientLight,
-	BoxGeometry,
-	Color,
-	DirectionalLight,
-	InstancedMesh,
-	MeshStandardMaterial,
-	Object3D
-} from 'three';
-
-import type {
-	ThreeDemoSceneController,
-	ThreeDemoSceneFactory
-} from '../../src/lib/three/three-demo-scene';
-
-// Try these values first in the editor sidebar.
-// @three-template-parameters:start
-export const templateParameters = {
+// These are the values students can play with first.
+export const templateParameters = defineThreeTemplateParameters({
 	"amount": 14,
 	"background": "#0f172a",
 	"columnColor": "#22d3ee",
 	"waveSpeed": 1.4
-} satisfies Record<string, number | string>;
-// @three-template-parameters:end
+});
 
-type InstancingSceneSettings = {
+type InstancingSettings = {
 	amount: number;
 	background: string;
 	columnColor: string;
@@ -86,25 +79,22 @@ type SceneLights = {
 	directionalLight: DirectionalLight;
 };
 
-export const createDemoScene: ThreeDemoSceneFactory = ({
-	camera,
-	scene
-}): ThreeDemoSceneController => {
-	const settings = readInstancingSceneSettings();
+export const createDemoScene: ThreeDemoSceneFactory = ({ camera, scene }) => {
+	const settings = readInstancingSettings();
 	const columnGeometry = new BoxGeometry(0.8, 1, 0.8);
 	const columnMaterial = createColumnMaterial(settings.columnColor);
-	const instanceCount = settings.amount * settings.amount;
+	const columnCount = settings.amount * settings.amount;
 	const columnField = new InstancedMesh(
 		columnGeometry,
 		columnMaterial,
-		instanceCount
+		columnCount
 	);
 	const placementHelper = new Object3D();
 	const sceneLights = createSceneLights();
 	let elapsedTime = 0;
 
-	populateColumns(columnField, placementHelper, settings.amount, 0);
-	configureScene(
+	fillColumnField(columnField, placementHelper, settings.amount, 0);
+	setupScene(
 		camera,
 		scene,
 		settings.background,
@@ -116,7 +106,12 @@ export const createDemoScene: ThreeDemoSceneFactory = ({
 	return {
 		update: () => {
 			elapsedTime += 0.016 * settings.waveSpeed;
-			populateColumns(columnField, placementHelper, settings.amount, elapsedTime);
+			fillColumnField(
+				columnField,
+				placementHelper,
+				settings.amount,
+				elapsedTime
+			);
 			columnField.instanceMatrix.needsUpdate = true;
 			columnField.rotation.y += 0.0025;
 		},
@@ -130,7 +125,7 @@ export const createDemoScene: ThreeDemoSceneFactory = ({
 	};
 };
 
-function readInstancingSceneSettings(): InstancingSceneSettings {
+function readInstancingSettings(): InstancingSettings {
 	return {
 		amount: Number(templateParameters.amount),
 		background: String(templateParameters.background),
@@ -154,7 +149,7 @@ function createSceneLights(): SceneLights {
 	};
 }
 
-function populateColumns(
+function fillColumnField(
 	columnField: InstancedMesh,
 	placementHelper: Object3D,
 	amount: number,
@@ -164,26 +159,42 @@ function populateColumns(
 
 	for (let zIndex = 0; zIndex < amount; zIndex += 1) {
 		for (let xIndex = 0; xIndex < amount; xIndex += 1) {
-			const wavePhase = xIndex * 0.35 + zIndex * 0.2;
-			const columnHeight =
-				0.6 + Math.abs(Math.sin(elapsedTime + wavePhase)) * 3.4;
-
-			placementHelper.position.set(
-				xIndex - amount / 2,
-				columnHeight * 0.5,
-				zIndex - amount / 2
+			updateColumnTransform(
+				placementHelper,
+				amount,
+				xIndex,
+				zIndex,
+				elapsedTime
 			);
-			placementHelper.scale.set(1, columnHeight, 1);
-			placementHelper.updateMatrix();
 			columnField.setMatrixAt(instanceIndex, placementHelper.matrix);
 			instanceIndex += 1;
 		}
 	}
 }
 
-function configureScene(
-	camera: Parameters<ThreeDemoSceneFactory>[0]['camera'],
-	scene: Parameters<ThreeDemoSceneFactory>[0]['scene'],
+function updateColumnTransform(
+	placementHelper: Object3D,
+	amount: number,
+	xIndex: number,
+	zIndex: number,
+	elapsedTime: number
+): void {
+	const wavePhase = xIndex * 0.35 + zIndex * 0.2;
+	const columnHeight = 0.6 + Math.abs(Math.sin(elapsedTime + wavePhase)) * 3.4;
+
+	// One helper object builds the transform matrix for each instance.
+	placementHelper.position.set(
+		xIndex - amount / 2,
+		columnHeight * 0.5,
+		zIndex - amount / 2
+	);
+	placementHelper.scale.set(1, columnHeight, 1);
+	placementHelper.updateMatrix();
+}
+
+function setupScene(
+	camera: PerspectiveCamera,
+	scene: Scene,
 	background: string,
 	amount: number,
 	columnField: InstancedMesh,

@@ -1,18 +1,35 @@
-/**
- * Purpose: Teach the idea of constructive solid geometry with one simple boolean result.
- * Context: Students can switch between subtract, intersect, and union to see how two
- * shapes combine into a new mesh.
- * Responsibility: Build the source brushes, evaluate one CSG operation, animate the
- * result, and release the created resources.
- * Boundaries: The template keeps the setup compact and does not expose the full
- * example UI.
- */
+/** Try union, subtract, and intersect with one box and one sphere. */
 
-/* @three-template
-{
+import {
+	ADDITION,
+	Brush,
+	Evaluator,
+	INTERSECTION,
+	SUBTRACTION
+} from 'three-bvh-csg';
+import {
+	AmbientLight,
+	BoxGeometry,
+	Color,
+	DirectionalLight,
+	Mesh,
+	MeshStandardMaterial,
+	SphereGeometry,
+	type PerspectiveCamera,
+	type Scene
+} from 'three';
+
+import {
+	defineThreeTemplateParameters,
+	defineThreeTemplateUi,
+	type ThreeDemoSceneFactory
+} from '$lib/features/editor/three-helpers';
+
+// The editor sidebar reads this to build the labels and controls.
+export const templateUi = defineThreeTemplateUi({
 	"id": "geometry-csg",
 	"title": "Geometry CSG",
-	"description": "A simple boolean-geometry scene with one box and one sphere.",
+	"description": "Move the cutter and switch the boolean operation.",
 	"rendererKind": "webgl",
 	"tags": ["geometry", "csg", "boolean"],
 	"parameters": [
@@ -49,46 +66,21 @@
 			"defaultValue": 0.2
 		}
 	]
-}
-*/
+});
 
-import {
-	ADDITION,
-	Brush,
-	Evaluator,
-	INTERSECTION,
-	SUBTRACTION
-} from 'three-bvh-csg';
-import {
-	AmbientLight,
-	BoxGeometry,
-	Color,
-	DirectionalLight,
-	Mesh,
-	MeshStandardMaterial,
-	SphereGeometry
-} from 'three';
-
-import type {
-	ThreeDemoSceneController,
-	ThreeDemoSceneFactory
-} from '../../src/lib/three/three-demo-scene';
-
-// Try these values first in the editor sidebar.
-// @three-template-parameters:start
-export const templateParameters = {
+// These are the values students can play with first.
+export const templateParameters = defineThreeTemplateParameters({
 	"background": "#09090b",
 	"cutterOffset": 0.2,
 	"operation": "subtract",
 	"surfaceColor": "#f97316"
-} satisfies Record<string, number | string>;
-// @three-template-parameters:end
+});
 
 const evaluator = new Evaluator();
 
 type CsgOperationKey = 'intersect' | 'subtract' | 'union';
 
-type CsgSceneSettings = {
+type CsgSettings = {
 	background: string;
 	cutterOffset: number;
 	operation: CsgOperationKey;
@@ -100,22 +92,27 @@ type SceneLights = {
 	directionalLight: DirectionalLight;
 };
 
-export const createDemoScene: ThreeDemoSceneFactory = ({
-	camera,
-	scene
-}): ThreeDemoSceneController => {
-	const settings = readCsgSceneSettings();
-	const surfaceMaterial = createSurfaceMaterial(settings.surfaceColor);
+export const createDemoScene: ThreeDemoSceneFactory = ({ camera, scene }) => {
+	const settings = readCsgSettings();
+	const surfaceMaterial = new MeshStandardMaterial({
+		color: settings.surfaceColor,
+		metalness: 0.08,
+		roughness: 0.35
+	});
 	const baseBrush = new Brush(new BoxGeometry(2.2, 1.6, 1.6), surfaceMaterial);
-	const cutterBrush = new Brush(new SphereGeometry(0.95, 32, 24), surfaceMaterial);
+	const cutterBrush = new Brush(
+		new SphereGeometry(0.95, 32, 24),
+		surfaceMaterial
+	);
 	const sceneLights = createSceneLights();
 	const resultMesh = buildResultMesh(baseBrush, cutterBrush, settings);
 
-	configureScene(camera, scene, settings.background, resultMesh, sceneLights);
+	setupScene(camera, scene, settings.background, resultMesh, sceneLights);
 
 	return {
 		update: () => {
-			spinMesh(resultMesh);
+			resultMesh.rotation.x += 0.005;
+			resultMesh.rotation.y += 0.01;
 		},
 		dispose: () => {
 			scene.remove(sceneLights.ambientLight);
@@ -129,21 +126,13 @@ export const createDemoScene: ThreeDemoSceneFactory = ({
 	};
 };
 
-function readCsgSceneSettings(): CsgSceneSettings {
+function readCsgSettings(): CsgSettings {
 	return {
 		background: String(templateParameters.background),
 		cutterOffset: Number(templateParameters.cutterOffset),
 		operation: readOperationKey(String(templateParameters.operation)),
 		surfaceColor: String(templateParameters.surfaceColor)
 	};
-}
-
-function createSurfaceMaterial(surfaceColor: string): MeshStandardMaterial {
-	return new MeshStandardMaterial({
-		color: surfaceColor,
-		metalness: 0.08,
-		roughness: 0.35
-	});
 }
 
 function createSceneLights(): SceneLights {
@@ -156,12 +145,13 @@ function createSceneLights(): SceneLights {
 function buildResultMesh(
 	baseBrush: Brush,
 	cutterBrush: Brush,
-	settings: CsgSceneSettings
+	settings: CsgSettings
 ): Mesh {
 	cutterBrush.position.x = settings.cutterOffset;
 	baseBrush.updateMatrixWorld(true);
 	cutterBrush.updateMatrixWorld(true);
 
+	// This is the main CSG step: two meshes go in, one new result mesh comes out.
 	return evaluator.evaluate(
 		baseBrush,
 		cutterBrush,
@@ -169,9 +159,9 @@ function buildResultMesh(
 	) as Mesh;
 }
 
-function configureScene(
-	camera: Parameters<ThreeDemoSceneFactory>[0]['camera'],
-	scene: Parameters<ThreeDemoSceneFactory>[0]['scene'],
+function setupScene(
+	camera: PerspectiveCamera,
+	scene: Scene,
 	background: string,
 	resultMesh: Mesh,
 	sceneLights: SceneLights
@@ -183,11 +173,6 @@ function configureScene(
 	scene.add(sceneLights.ambientLight);
 	scene.add(sceneLights.directionalLight);
 	scene.add(resultMesh);
-}
-
-function spinMesh(resultMesh: Mesh): void {
-	resultMesh.rotation.x += 0.005;
-	resultMesh.rotation.y += 0.01;
 }
 
 function readOperationKey(value: string): CsgOperationKey {

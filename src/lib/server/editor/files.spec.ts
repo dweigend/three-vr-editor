@@ -89,6 +89,9 @@ describe('createThreeFileService', () => {
 		await expect(readFile(join(rootDir, createdFile.path), 'utf-8')).resolves.toContain(
 			'export const createDemoScene'
 		);
+		await expect(readFile(join(rootDir, createdFile.path), 'utf-8')).resolves.toContain(
+			"$lib/features/editor/three-helpers"
+		);
 	});
 
 	it('creates a scene file from a managed template', async () => {

@@ -1,16 +1,15 @@
-/**
- * Purpose: Teach how batched meshes draw many related objects through one shared
- * container.
- * Context: Students can change the instance count and field radius while keeping the code
- * focused on one batched mesh instead of many separate meshes.
- * Responsibility: Build the batched field, animate the instance transforms, and dispose
- * the shared geometries and material.
- * Boundaries: This template keeps only the core batching idea and omits inspector
- * tooling.
- */
+/** Start here if you want lots of shapes inside one batched mesh container. */
 
-/* @three-template
-{
+import * as THREE from 'three/webgpu';
+
+import {
+	defineThreeTemplateParameters,
+	defineThreeTemplateUi,
+	type ThreeDemoSceneFactory
+} from '$lib/features/editor/three-helpers';
+
+// The editor sidebar reads this to build the labels and controls.
+export const templateUi = defineThreeTemplateUi({
 	"id": "mesh-batch",
 	"title": "Mesh Batch",
 	"description": "A compact batched-mesh field with animated instances.",
@@ -51,29 +50,19 @@
 			"defaultValue": 0.85
 		}
 	]
-}
-*/
+});
 
-import * as THREE from 'three/webgpu';
-
-import type {
-	ThreeDemoSceneController,
-	ThreeDemoSceneFactory
-} from '../../src/lib/three/three-demo-scene';
-
-// Try these values first in the editor sidebar.
-// @three-template-parameters:start
-export const templateParameters = {
+// These are the values students can play with first.
+export const templateParameters = defineThreeTemplateParameters({
 	"background": "#020617",
 	"instanceCount": 96,
 	"opacity": 0.85,
 	"radius": 12
-} satisfies Record<string, number | string>;
-// @three-template-parameters:end
+});
 
 export const demoRendererKind = 'webgpu';
 
-type BatchedSceneSettings = {
+type BatchedSettings = {
 	background: string;
 	instanceCount: number;
 	opacity: number;
@@ -93,16 +82,13 @@ type BatchedScene = {
 	placementHelper: THREE.Object3D;
 };
 
-export const createDemoScene: ThreeDemoSceneFactory = ({
-	camera,
-	scene
-}): ThreeDemoSceneController => {
-	const settings = readBatchedSceneSettings();
+export const createDemoScene: ThreeDemoSceneFactory = ({ camera, scene }) => {
+	const settings = readBatchedSettings();
 	const batchedScene = createBatchedScene(settings);
 	const sceneLights = createSceneLights();
 	let elapsedTime = 0;
 
-	configureScene(
+	setupScene(
 		camera,
 		scene,
 		settings.background,
@@ -128,7 +114,7 @@ export const createDemoScene: ThreeDemoSceneFactory = ({
 	};
 };
 
-function readBatchedSceneSettings(): BatchedSceneSettings {
+function readBatchedSettings(): BatchedSettings {
 	return {
 		background: String(templateParameters.background),
 		instanceCount: Number(templateParameters.instanceCount),
@@ -144,39 +130,18 @@ function createSceneLights(): SceneLights {
 	};
 }
 
-function createBatchedScene(settings: BatchedSceneSettings): BatchedScene {
-	const material = new THREE.MeshStandardMaterial({
-		metalness: 0.18,
-		opacity: settings.opacity,
-		roughness: 0.34,
-		transparent: settings.opacity < 1
-	});
-	const geometryDefinitions = [
-		new THREE.BoxGeometry(1.2, 1.2, 1.2),
-		new THREE.ConeGeometry(0.8, 1.6, 24),
-		new THREE.SphereGeometry(0.7, 24, 18)
-	];
-	const batchedMesh = new THREE.BatchedMesh(
-		settings.instanceCount,
-		settings.instanceCount * 320,
-		settings.instanceCount * 640,
-		material
-	);
+function createBatchedScene(settings: BatchedSettings): BatchedScene {
+	const material = createBatchedMaterial(settings.opacity);
+	const geometryDefinitions = createGeometryDefinitions();
+	const batchedMesh = createBatchedMesh(settings.instanceCount, material);
 	const geometryIds = geometryDefinitions.map((geometry) =>
 		batchedMesh.addGeometry(geometry)
 	);
-	const instanceIds: number[] = [];
-
-	for (let index = 0; index < settings.instanceCount; index += 1) {
-		const instanceId = batchedMesh.addInstance(
-			geometryIds[index % geometryIds.length]
-		);
-		batchedMesh.setColorAt(
-			instanceId,
-			new THREE.Color().setHSL((index % 12) / 12, 0.72, 0.58)
-		);
-		instanceIds.push(instanceId);
-	}
+	const instanceIds = addBatchedInstances(
+		batchedMesh,
+		geometryIds,
+		settings.instanceCount
+	);
 
 	return {
 		batchedMesh,
@@ -187,9 +152,60 @@ function createBatchedScene(settings: BatchedSceneSettings): BatchedScene {
 	};
 }
 
-function configureScene(
-	camera: Parameters<ThreeDemoSceneFactory>[0]['camera'],
-	scene: Parameters<ThreeDemoSceneFactory>[0]['scene'],
+function createBatchedMaterial(opacity: number): THREE.MeshStandardMaterial {
+	return new THREE.MeshStandardMaterial({
+		metalness: 0.18,
+		opacity,
+		roughness: 0.34,
+		transparent: opacity < 1
+	});
+}
+
+function createGeometryDefinitions(): THREE.BufferGeometry[] {
+	return [
+		new THREE.BoxGeometry(1.2, 1.2, 1.2),
+		new THREE.ConeGeometry(0.8, 1.6, 24),
+		new THREE.SphereGeometry(0.7, 24, 18)
+	];
+}
+
+function createBatchedMesh(
+	instanceCount: number,
+	material: THREE.MeshStandardMaterial
+): THREE.BatchedMesh {
+	return new THREE.BatchedMesh(
+		instanceCount,
+		instanceCount * 320,
+		instanceCount * 640,
+		material
+	);
+}
+
+function addBatchedInstances(
+	batchedMesh: THREE.BatchedMesh,
+	geometryIds: number[],
+	instanceCount: number
+): number[] {
+	const instanceIds: number[] = [];
+
+	for (let index = 0; index < instanceCount; index += 1) {
+		// BatchedMesh keeps many transforms inside one shared draw-friendly object.
+		const instanceId = batchedMesh.addInstance(
+			geometryIds[index % geometryIds.length]
+		);
+		batchedMesh.setColorAt(
+			instanceId,
+			new THREE.Color().setHSL((index % 12) / 12, 0.72, 0.58)
+		);
+		instanceIds.push(instanceId);
+	}
+
+	return instanceIds;
+}
+
+function setupScene(
+	camera: THREE.PerspectiveCamera,
+	scene: THREE.Scene,
 	background: string,
 	radius: number,
 	batchedScene: BatchedScene,
@@ -206,31 +222,45 @@ function configureScene(
 
 function updateBatchTransforms(
 	batchedScene: BatchedScene,
-	settings: BatchedSceneSettings,
+	settings: BatchedSettings,
 	elapsedTime: number
 ): void {
 	for (let index = 0; index < batchedScene.instanceIds.length; index += 1) {
-		const angle = (index / settings.instanceCount) * Math.PI * 2;
-		const ringIndex = index % 5;
-		const orbitRadius = settings.radius * (0.35 + ringIndex * 0.1);
-		const phaseOffset = (index % 11) * 0.4;
-		const bobHeight = Math.sin(elapsedTime * 1.3 + phaseOffset) * 0.8;
-
-		batchedScene.placementHelper.position.set(
-			Math.cos(angle + elapsedTime * 0.12) * orbitRadius,
-			Math.sin(angle * 1.7 + elapsedTime * 0.8) * 2.4 + bobHeight,
-			Math.sin(angle + elapsedTime * 0.12) * orbitRadius
+		updateInstanceTransform(
+			batchedScene.placementHelper,
+			settings,
+			index,
+			elapsedTime
 		);
-		batchedScene.placementHelper.rotation.set(
-			elapsedTime * 0.6 + phaseOffset,
-			angle + elapsedTime * 0.4,
-			phaseOffset * 0.4
-		);
-		batchedScene.placementHelper.scale.setScalar(0.6 + (index % 4) * 0.16);
-		batchedScene.placementHelper.updateMatrix();
 		batchedScene.batchedMesh.setMatrixAt(
 			batchedScene.instanceIds[index],
 			batchedScene.placementHelper.matrix
 		);
 	}
+}
+
+function updateInstanceTransform(
+	placementHelper: THREE.Object3D,
+	settings: BatchedSettings,
+	index: number,
+	elapsedTime: number
+): void {
+	const angle = (index / settings.instanceCount) * Math.PI * 2;
+	const ringIndex = index % 5;
+	const orbitRadius = settings.radius * (0.35 + ringIndex * 0.1);
+	const phaseOffset = (index % 11) * 0.4;
+	const bobHeight = Math.sin(elapsedTime * 1.3 + phaseOffset) * 0.8;
+
+	placementHelper.position.set(
+		Math.cos(angle + elapsedTime * 0.12) * orbitRadius,
+		Math.sin(angle * 1.7 + elapsedTime * 0.8) * 2.4 + bobHeight,
+		Math.sin(angle + elapsedTime * 0.12) * orbitRadius
+	);
+	placementHelper.rotation.set(
+		elapsedTime * 0.6 + phaseOffset,
+		angle + elapsedTime * 0.4,
+		phaseOffset * 0.4
+	);
+	placementHelper.scale.setScalar(0.6 + (index % 4) * 0.16);
+	placementHelper.updateMatrix();
 }

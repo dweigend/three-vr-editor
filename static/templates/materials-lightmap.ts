@@ -1,15 +1,15 @@
-/**
- * Purpose: Teach a baked-looking material using a tiny procedural light map.
- * Context: Students can change the base color, accent color, and light-map intensity
- * without needing any external texture files.
- * Responsibility: Build the scene, generate the light map, copy the UV channel needed for
- * light maps, and clean up every created resource.
- * Boundaries: This template focuses on the light-map idea and avoids the larger
- * original demo.
- */
+/** Start here if you want baked-looking lighting without loading any textures. */
 
-/* @three-template
-{
+import * as THREE from 'three/webgpu';
+
+import {
+	defineThreeTemplateParameters,
+	defineThreeTemplateUi,
+	type ThreeDemoSceneFactory
+} from '$lib/features/editor/three-helpers';
+
+// The editor sidebar reads this to build the labels and controls.
+export const templateUi = defineThreeTemplateUi({
 	"id": "materials-lightmap",
 	"title": "Materials Lightmap",
 	"description": "A procedural light-map scene with one box and one floor.",
@@ -44,29 +44,19 @@
 			"defaultValue": "#60a5fa"
 		}
 	]
-}
-*/
+});
 
-import * as THREE from 'three/webgpu';
-
-import type {
-	ThreeDemoSceneController,
-	ThreeDemoSceneFactory
-} from '../../src/lib/three/three-demo-scene';
-
-// Try these values first in the editor sidebar.
-// @three-template-parameters:start
-export const templateParameters = {
+// These are the values students can play with first.
+export const templateParameters = defineThreeTemplateParameters({
 	"accentColor": "#60a5fa",
 	"background": "#111827",
 	"baseColor": "#e5e7eb",
 	"lightMapIntensity": 1.4
-} satisfies Record<string, number | string>;
-// @three-template-parameters:end
+});
 
 export const demoRendererKind = 'webgpu';
 
-type LightMapSceneSettings = {
+type LightMapSettings = {
 	accentColor: string;
 	background: string;
 	baseColor: string;
@@ -78,25 +68,28 @@ type SceneLights = {
 	directionalLight: THREE.DirectionalLight;
 };
 
+type LightMapBox = THREE.Mesh<
+	THREE.BoxGeometry,
+	THREE.MeshStandardMaterial
+>;
+
+type LightMapFloor = THREE.Mesh<
+	THREE.PlaneGeometry,
+	THREE.MeshStandardMaterial
+>;
+
 type LightMapScene = {
-	boxGeometry: THREE.BoxGeometry;
-	boxMaterial: THREE.MeshStandardMaterial;
-	boxMesh: THREE.Mesh;
-	floorGeometry: THREE.PlaneGeometry;
-	floorMaterial: THREE.MeshStandardMaterial;
-	floorMesh: THREE.Mesh;
+	boxMesh: LightMapBox;
+	floorMesh: LightMapFloor;
 	lightMapTexture: THREE.CanvasTexture;
 };
 
-export const createDemoScene: ThreeDemoSceneFactory = ({
-	camera,
-	scene
-}): ThreeDemoSceneController => {
-	const settings = readLightMapSceneSettings();
+export const createDemoScene: ThreeDemoSceneFactory = ({ camera, scene }) => {
+	const settings = readLightMapSettings();
 	const lightMapScene = createLightMapScene(settings);
 	const sceneLights = createSceneLights();
 
-	configureScene(camera, scene, settings.background, lightMapScene, sceneLights);
+	setupScene(camera, scene, settings.background, lightMapScene, sceneLights);
 
 	return {
 		update: () => {
@@ -108,15 +101,15 @@ export const createDemoScene: ThreeDemoSceneFactory = ({
 			scene.remove(lightMapScene.floorMesh);
 			scene.remove(lightMapScene.boxMesh);
 			lightMapScene.lightMapTexture.dispose();
-			lightMapScene.floorGeometry.dispose();
-			lightMapScene.boxGeometry.dispose();
-			lightMapScene.floorMaterial.dispose();
-			lightMapScene.boxMaterial.dispose();
+			lightMapScene.floorMesh.geometry.dispose();
+			lightMapScene.boxMesh.geometry.dispose();
+			lightMapScene.floorMesh.material.dispose();
+			lightMapScene.boxMesh.material.dispose();
 		}
 	};
 };
 
-function readLightMapSceneSettings(): LightMapSceneSettings {
+function readLightMapSettings(): LightMapSettings {
 	return {
 		accentColor: String(templateParameters.accentColor),
 		background: String(templateParameters.background),
@@ -132,9 +125,22 @@ function createSceneLights(): SceneLights {
 	};
 }
 
-function createLightMapScene(settings: LightMapSceneSettings): LightMapScene {
+function createLightMapScene(settings: LightMapSettings): LightMapScene {
 	const lightMapTexture = createLightMapTexture(settings.accentColor);
-	const floorGeometry = new THREE.PlaneGeometry(8, 8);
+	const boxMesh = createBoxMesh(settings, lightMapTexture);
+	const floorMesh = createFloorMesh();
+
+	return {
+		boxMesh,
+		floorMesh,
+		lightMapTexture
+	};
+}
+
+function createBoxMesh(
+	settings: LightMapSettings,
+	lightMapTexture: THREE.CanvasTexture
+): LightMapBox {
 	const boxGeometry = new THREE.BoxGeometry(2, 2.6, 2);
 	const boxMaterial = new THREE.MeshStandardMaterial({
 		color: settings.baseColor,
@@ -143,32 +149,31 @@ function createLightMapScene(settings: LightMapSceneSettings): LightMapScene {
 		metalness: 0.02,
 		roughness: 0.86
 	});
-	const floorMaterial = new THREE.MeshStandardMaterial({
-		color: '#1f2937',
-		metalness: 0,
-		roughness: 0.92
-	});
-	const floorMesh = new THREE.Mesh(floorGeometry, floorMaterial);
-	const boxMesh = new THREE.Mesh(boxGeometry, boxMaterial);
 
 	copyLightMapUvChannel(boxGeometry);
+
+	return new THREE.Mesh(boxGeometry, boxMaterial);
+}
+
+function createFloorMesh(): LightMapFloor {
+	const floorMesh = new THREE.Mesh(
+		new THREE.PlaneGeometry(8, 8),
+		new THREE.MeshStandardMaterial({
+			color: '#1f2937',
+			metalness: 0,
+			roughness: 0.92
+		})
+	);
+
 	floorMesh.rotation.x = -Math.PI / 2;
 	floorMesh.position.y = -1.3;
 
-	return {
-		boxGeometry,
-		boxMaterial,
-		boxMesh,
-		floorGeometry,
-		floorMaterial,
-		floorMesh,
-		lightMapTexture
-	};
+	return floorMesh;
 }
 
-function configureScene(
-	camera: Parameters<ThreeDemoSceneFactory>[0]['camera'],
-	scene: Parameters<ThreeDemoSceneFactory>[0]['scene'],
+function setupScene(
+	camera: THREE.PerspectiveCamera,
+	scene: THREE.Scene,
 	background: string,
 	lightMapScene: LightMapScene,
 	sceneLights: SceneLights
@@ -190,7 +195,7 @@ function copyLightMapUvChannel(geometry: THREE.BufferGeometry): void {
 		return;
 	}
 
-	// Light maps use a second UV channel, so we copy the default UVs into that slot.
+	// Light maps look at a second UV channel, so we copy the default one into it.
 	geometry.setAttribute('uv1', uvAttribute.clone());
 	geometry.setAttribute('uv2', uvAttribute.clone());
 }

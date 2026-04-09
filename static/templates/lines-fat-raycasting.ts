@@ -1,14 +1,19 @@
-/**
- * Purpose: Teach raycasting against a thick line rendered with the WebGPU line helpers.
- * Context: Students can move the pointer over the curve and see the line change color
- * when the raycaster finds a hit.
- * Responsibility: Build the thick line, track pointer input, update hover feedback, and
- * release the geometry and material resources.
- * Boundaries: This scene keeps only the core line interaction and omits extra demo UI.
- */
+/** Start here if you want a thick line that reacts to your pointer. */
 
-/* @three-template
-{
+import { Line2 } from 'three/addons/lines/Line2.js';
+import { LineGeometry } from 'three/addons/lines/LineGeometry.js';
+import { LineMaterial } from 'three/addons/lines/LineMaterial.js';
+import * as THREE from 'three/webgpu';
+
+import {
+	createThreePointerTracker,
+	defineThreeTemplateParameters,
+	defineThreeTemplateUi,
+	type ThreeDemoSceneFactory
+} from '$lib/features/editor/three-helpers';
+
+// The editor sidebar reads this to build the labels and controls.
+export const templateUi = defineThreeTemplateUi({
 	"id": "lines-fat-raycasting",
 	"title": "Lines Fat Raycasting",
 	"description": "A thick curved line that reacts to pointer raycasts.",
@@ -43,29 +48,15 @@
 			"defaultValue": 8
 		}
 	]
-}
-*/
+});
 
-import { Line2 } from 'three/addons/lines/Line2.js';
-import { LineGeometry } from 'three/addons/lines/LineGeometry.js';
-import { LineMaterial } from 'three/addons/lines/LineMaterial.js';
-import * as THREE from 'three/webgpu';
-
-import type {
-	ThreeDemoSceneController,
-	ThreeDemoSceneFactory
-} from '../../src/lib/three/three-demo-scene';
-import { bindPointerTracking } from '../../src/lib/three/pointer-tracking';
-
-// Try these values first in the editor sidebar.
-// @three-template-parameters:start
-export const templateParameters = {
+// These are the values students can play with first.
+export const templateParameters = defineThreeTemplateParameters({
 	"background": "#020617",
 	"baseColor": "#38bdf8",
 	"hitColor": "#f59e0b",
 	"lineWidth": 8
-} satisfies Record<string, number | string>;
-// @three-template-parameters:end
+});
 
 export const demoRendererKind = 'webgpu';
 
@@ -80,11 +71,13 @@ export const createDemoScene: ThreeDemoSceneFactory = ({
 	camera,
 	container,
 	scene
-}): ThreeDemoSceneController => {
+}) => {
 	const settings = readFatLineSettings();
 	const lineGeometry = new LineGeometry();
 	const lineMaterial = createLineMaterial(settings);
-	const pointerTracker = bindPointerTracking(container);
+	const pointerTracker = createThreePointerTracker(container, {
+		idlePointer: { x: 2, y: 2 }
+	});
 	const raycaster = new THREE.Raycaster();
 
 	lineGeometry.setPositions(createLinePoints());
@@ -92,7 +85,7 @@ export const createDemoScene: ThreeDemoSceneFactory = ({
 	const fatLine = new Line2(lineGeometry, lineMaterial);
 	fatLine.computeLineDistances();
 
-	configureScene(camera, scene, settings.background, fatLine);
+	setupScene(camera, scene, settings.background, fatLine);
 	updateLineResolution(lineMaterial, container.clientWidth, container.clientHeight);
 
 	return {
@@ -150,9 +143,9 @@ function createLinePoints(): number[] {
 	return points;
 }
 
-function configureScene(
-	camera: Parameters<ThreeDemoSceneFactory>[0]['camera'],
-	scene: Parameters<ThreeDemoSceneFactory>[0]['scene'],
+function setupScene(
+	camera: THREE.PerspectiveCamera,
+	scene: THREE.Scene,
 	background: string,
 	fatLine: Line2
 ): void {
@@ -164,7 +157,7 @@ function configureScene(
 function updateLineHoverState(
 	raycaster: THREE.Raycaster,
 	pointer: THREE.Vector2,
-	camera: Parameters<ThreeDemoSceneFactory>[0]['camera'],
+	camera: THREE.PerspectiveCamera,
 	fatLine: Line2,
 	lineMaterial: LineMaterial,
 	settings: FatLineSettings
@@ -180,6 +173,6 @@ function updateLineResolution(
 	width: number,
 	height: number
 ): void {
-	// Fat lines are measured in screen space, so they need the current viewport size.
+	// Fat lines use screen-space widths, so the current viewport size matters.
 	lineMaterial.resolution.set(width, height);
 }

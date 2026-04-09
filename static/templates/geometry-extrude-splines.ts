@@ -1,17 +1,31 @@
-/**
- * Purpose: Teach how one 2D profile can be extruded along a 3D spline path.
- * Context: Students can switch the profile shape and watch the ribbon twist in place.
- * Responsibility: Build the spline, extrude one profile along it, animate the result,
- * and clean up all created geometry and materials.
- * Boundaries: This template stays focused on extrusion and omits the larger
- * original demo.
- */
+/** Pick a profile and watch it ride along a curved path. */
 
-/* @three-template
-{
+import {
+	AmbientLight,
+	CatmullRomCurve3,
+	Color,
+	DirectionalLight,
+	ExtrudeGeometry,
+	Mesh,
+	MeshStandardMaterial,
+	Shape,
+	Vector2,
+	Vector3,
+	type PerspectiveCamera,
+	type Scene
+} from 'three';
+
+import {
+	defineThreeTemplateParameters,
+	defineThreeTemplateUi,
+	type ThreeDemoSceneFactory
+} from '$lib/features/editor/three-helpers';
+
+// The editor sidebar reads this to build the labels and controls.
+export const templateUi = defineThreeTemplateUi({
 	"id": "geometry-extrude-splines",
 	"title": "Geometry Extrude Splines",
-	"description": "An extruded profile that follows a curved spline path.",
+	"description": "Switch the profile and change how fast the shape twists.",
 	"rendererKind": "webgl",
 	"tags": ["geometry", "extrude", "splines"],
 	"parameters": [
@@ -47,40 +61,19 @@
 			"defaultValue": 0.006
 		}
 	]
-}
-*/
+});
 
-import {
-	AmbientLight,
-	CatmullRomCurve3,
-	Color,
-	DirectionalLight,
-	ExtrudeGeometry,
-	Mesh,
-	MeshStandardMaterial,
-	Shape,
-	Vector2,
-	Vector3
-} from 'three';
-
-import type {
-	ThreeDemoSceneController,
-	ThreeDemoSceneFactory
-} from '../../src/lib/three/three-demo-scene';
-
-// Try these values first in the editor sidebar.
-// @three-template-parameters:start
-export const templateParameters = {
+// These are the values students can play with first.
+export const templateParameters = defineThreeTemplateParameters({
 	"background": "#111827",
 	"profile": "star",
 	"surfaceColor": "#a855f7",
 	"twistSpeed": 0.006
-} satisfies Record<string, number | string>;
-// @three-template-parameters:end
+});
 
 type ProfileKind = 'rounded' | 'star';
 
-type ExtrudeSceneSettings = {
+type ExtrudeSettings = {
 	background: string;
 	profile: ProfileKind;
 	surfaceColor: string;
@@ -92,11 +85,8 @@ type SceneLights = {
 	directionalLight: DirectionalLight;
 };
 
-export const createDemoScene: ThreeDemoSceneFactory = ({
-	camera,
-	scene
-}): ThreeDemoSceneController => {
-	const settings = readExtrudeSceneSettings();
+export const createDemoScene: ThreeDemoSceneFactory = ({ camera, scene }) => {
+	const settings = readExtrudeSettings();
 	const splinePath = createSplinePath();
 	const profileShape = createProfileShape(settings.profile);
 	const extrudedGeometry = new ExtrudeGeometry(profileShape, {
@@ -108,15 +98,21 @@ export const createDemoScene: ThreeDemoSceneFactory = ({
 		extrudePath: splinePath,
 		steps: 80
 	});
-	const surfaceMaterial = createSurfaceMaterial(settings.surfaceColor);
+	const surfaceMaterial = new MeshStandardMaterial({
+		color: settings.surfaceColor,
+		metalness: 0.18,
+		roughness: 0.26
+	});
 	const extrudedMesh = new Mesh(extrudedGeometry, surfaceMaterial);
 	const sceneLights = createSceneLights();
 
-	configureScene(camera, scene, settings.background, extrudedMesh, sceneLights);
+	setupScene(camera, scene, settings.background, extrudedMesh, sceneLights);
 
 	return {
 		update: () => {
-			animateExtrusion(extrudedMesh, settings.twistSpeed);
+			extrudedMesh.rotation.y += settings.twistSpeed;
+			extrudedMesh.rotation.x =
+				Math.sin(extrudedMesh.rotation.y * 0.5) * 0.2;
 		},
 		dispose: () => {
 			scene.remove(sceneLights.ambientLight);
@@ -128,7 +124,7 @@ export const createDemoScene: ThreeDemoSceneFactory = ({
 	};
 };
 
-function readExtrudeSceneSettings(): ExtrudeSceneSettings {
+function readExtrudeSettings(): ExtrudeSettings {
 	return {
 		background: String(templateParameters.background),
 		profile: readProfileKind(String(templateParameters.profile)),
@@ -146,14 +142,6 @@ function createSplinePath(): CatmullRomCurve3 {
 	]);
 }
 
-function createSurfaceMaterial(surfaceColor: string): MeshStandardMaterial {
-	return new MeshStandardMaterial({
-		color: surfaceColor,
-		metalness: 0.18,
-		roughness: 0.26
-	});
-}
-
 function createSceneLights(): SceneLights {
 	return {
 		ambientLight: new AmbientLight('#ffffff', 2.1),
@@ -161,9 +149,9 @@ function createSceneLights(): SceneLights {
 	};
 }
 
-function configureScene(
-	camera: Parameters<ThreeDemoSceneFactory>[0]['camera'],
-	scene: Parameters<ThreeDemoSceneFactory>[0]['scene'],
+function setupScene(
+	camera: PerspectiveCamera,
+	scene: Scene,
 	background: string,
 	extrudedMesh: Mesh,
 	sceneLights: SceneLights
@@ -175,11 +163,6 @@ function configureScene(
 	scene.add(sceneLights.ambientLight);
 	scene.add(sceneLights.directionalLight);
 	scene.add(extrudedMesh);
-}
-
-function animateExtrusion(extrudedMesh: Mesh, twistSpeed: number): void {
-	extrudedMesh.rotation.y += twistSpeed;
-	extrudedMesh.rotation.x = Math.sin(extrudedMesh.rotation.y * 0.5) * 0.2;
 }
 
 function readProfileKind(value: string): ProfileKind {

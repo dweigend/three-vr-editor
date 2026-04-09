@@ -6,6 +6,7 @@
  */
 
 import { build } from 'esbuild';
+import { access } from 'node:fs/promises';
 import { dirname, resolve } from 'node:path';
 
 import type { ThreePreviewBuildRequest, ThreePreviewBuildResult } from '$lib/features/editor/three-editor-types';
@@ -52,6 +53,18 @@ export function createThreePreviewBuilder(rootDir: string = STATIC_THREE_DIR): T
 					outfile: 'preview.js',
 					platform: 'browser',
 					plugins: [
+						{
+							name: 'three-editor-aliases',
+							setup(buildContext) {
+								buildContext.onResolve({ filter: /^\$lib\// }, async (args) => {
+									const resolvedPath = await resolveLibraryImportPath(args.path);
+
+									return {
+										path: resolvedPath
+									};
+								});
+							}
+						},
 						{
 							name: 'three-editor-overrides',
 							setup(buildContext) {
@@ -101,4 +114,27 @@ export function createThreePreviewBuilder(rootDir: string = STATIC_THREE_DIR): T
 			}
 		}
 	};
+}
+
+async function resolveLibraryImportPath(importPath: string): Promise<string> {
+	const relativePath = importPath.slice('$lib/'.length);
+	const basePath = resolve(process.cwd(), 'src', 'lib', relativePath);
+	const candidatePaths = [
+		basePath,
+		`${basePath}.ts`,
+		`${basePath}.js`,
+		resolve(basePath, 'index.ts'),
+		resolve(basePath, 'index.js')
+	];
+
+	for (const candidatePath of candidatePaths) {
+		try {
+			await access(candidatePath);
+			return candidatePath;
+		} catch {
+			continue;
+		}
+	}
+
+	throw new Error(`Unable to resolve library import "${importPath}".`);
 }

@@ -1,15 +1,19 @@
-/**
- * Purpose: Teach selective bloom with Three.js WebGPU and TSL.
- * Context: Students can click spheres to toggle bloom and see how a second render target
- * carries bloom information into a post-processing pass.
- * Responsibility: Build the bloom-enabled node materials, configure the post-processing
- * pipeline, react to pointer clicks, and clean up all created resources.
- * Boundaries: This template stays focused on selective bloom and omits inspector
- * features.
- */
+/** Start here if you want click-to-toggle bloom with WebGPU and TSL. */
 
-/* @three-template
-{
+import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+import { bloom } from 'three/addons/tsl/display/BloomNode.js';
+import { float, mrt, output, pass, uniform } from 'three/tsl';
+import * as THREE from 'three/webgpu';
+
+import {
+	createThreePointerTracker,
+	defineThreeTemplateParameters,
+	defineThreeTemplateUi,
+	type ThreeDemoSceneFactory
+} from '$lib/features/editor/three-helpers';
+
+// The editor sidebar reads this to build the labels and controls.
+export const templateUi = defineThreeTemplateUi({
 	"id": "postprocessing-bloom-selective",
 	"title": "Postprocessing Bloom Selective",
 	"description": "A selective bloom scene with click-to-toggle bloom spheres.",
@@ -50,32 +54,19 @@
 			"defaultValue": 1.1
 		}
 	]
-}
-*/
+});
 
-import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
-import { bloom } from 'three/addons/tsl/display/BloomNode.js';
-import { float, mrt, output, pass, uniform } from 'three/tsl';
-import * as THREE from 'three/webgpu';
-
-import type {
-	ThreeDemoSceneController,
-	ThreeDemoSceneFactory
-} from '../../src/lib/three/three-demo-scene';
-
-// Try these values first in the editor sidebar.
-// @three-template-parameters:start
-export const templateParameters = {
+// These are the values students can play with first.
+export const templateParameters = defineThreeTemplateParameters({
 	"background": "#020617",
 	"bloomStrength": 1.2,
 	"exposure": 1.1,
 	"threshold": 0.35
-} satisfies Record<string, number | string>;
-// @three-template-parameters:end
+});
 
 export const demoRendererKind = 'webgpu';
 
-type BloomSceneSettings = {
+type BloomSettings = {
 	background: string;
 	bloomStrength: number;
 	exposure: number;
@@ -87,13 +78,8 @@ type BloomSphere = THREE.Mesh<
 	THREE.MeshBasicNodeMaterial
 >;
 
-type PointerTracker = {
-	dispose: () => void;
-	pointer: THREE.Vector2;
-};
-
-type BloomPipeline = {
-	renderPipeline: THREE.RenderPipeline;
+type BloomUniform = {
+	value: number;
 };
 
 export const createDemoScene: ThreeDemoSceneFactory = ({
@@ -101,17 +87,25 @@ export const createDemoScene: ThreeDemoSceneFactory = ({
 	container,
 	renderer,
 	scene
-}): ThreeDemoSceneController => {
-	const settings = readBloomSceneSettings();
+}) => {
+	const settings = readBloomSettings();
 	const webgpuRenderer = renderer as THREE.WebGPURenderer;
 	const sphereGeometry = new THREE.IcosahedronGeometry(0.7, 8);
 	const orbitControls = new OrbitControls(camera, webgpuRenderer.domElement);
-	const pointerTracker = bindPointerClicks(container);
+	const pointerTracker = createThreePointerTracker(container, {
+		eventName: 'pointerdown',
+		idlePointer: { x: 2, y: 2 }
+	});
 	const raycaster = new THREE.Raycaster();
 	const bloomSpheres = createBloomSpheres(scene, sphereGeometry);
-	const bloomPipeline = createBloomPipeline(scene, camera, webgpuRenderer, settings);
+	const renderPipeline = createBloomPipeline(
+		scene,
+		camera,
+		webgpuRenderer,
+		settings
+	);
 
-	configureScene(
+	setupScene(
 		camera,
 		scene,
 		webgpuRenderer,
@@ -124,16 +118,11 @@ export const createDemoScene: ThreeDemoSceneFactory = ({
 		update: () => {
 			orbitControls.update();
 			spinBloomSpheres(bloomSpheres);
-			toggleBloomOnClick(
-				pointerTracker.pointer,
-				raycaster,
-				camera,
-				bloomSpheres
-			);
-			pointerTracker.pointer.set(2, 2);
+			toggleBloomOnClick(pointerTracker.pointer, raycaster, camera, bloomSpheres);
+			pointerTracker.reset();
 		},
 		render: () => {
-			bloomPipeline.renderPipeline.render();
+			renderPipeline.render();
 		},
 		dispose: () => {
 			pointerTracker.dispose();
@@ -143,12 +132,12 @@ export const createDemoScene: ThreeDemoSceneFactory = ({
 				sphere.material.dispose();
 			});
 			sphereGeometry.dispose();
-			bloomPipeline.renderPipeline.dispose?.();
+			renderPipeline.dispose?.();
 		}
 	};
 };
 
-function readBloomSceneSettings(): BloomSceneSettings {
+function readBloomSettings(): BloomSettings {
 	return {
 		background: String(templateParameters.background),
 		bloomStrength: Number(templateParameters.bloomStrength),
@@ -157,9 +146,9 @@ function readBloomSceneSettings(): BloomSceneSettings {
 	};
 }
 
-function configureScene(
-	camera: Parameters<ThreeDemoSceneFactory>[0]['camera'],
-	scene: Parameters<ThreeDemoSceneFactory>[0]['scene'],
+function setupScene(
+	camera: THREE.PerspectiveCamera,
+	scene: THREE.Scene,
 	renderer: THREE.WebGPURenderer,
 	orbitControls: OrbitControls,
 	background: string,
@@ -172,48 +161,15 @@ function configureScene(
 	orbitControls.enableDamping = true;
 }
 
-function bindPointerClicks(container: HTMLDivElement): PointerTracker {
-	const pointer = new THREE.Vector2(2, 2);
-	const handlePointerDown = (event: PointerEvent) => {
-		const bounds = container.getBoundingClientRect();
-
-		// Raycasters read positions in normalized device coordinates, not pixels.
-		pointer.x = ((event.clientX - bounds.left) / bounds.width) * 2 - 1;
-		pointer.y = -((event.clientY - bounds.top) / bounds.height) * 2 + 1;
-	};
-
-	container.addEventListener('pointerdown', handlePointerDown);
-
-	return {
-		pointer,
-		dispose: () => {
-			container.removeEventListener('pointerdown', handlePointerDown);
-		}
-	};
-}
-
 function createBloomSpheres(
-	scene: Parameters<ThreeDemoSceneFactory>[0]['scene'],
+	scene: THREE.Scene,
 	sphereGeometry: THREE.IcosahedronGeometry
 ): BloomSphere[] {
 	const bloomSpheres: BloomSphere[] = [];
 	const sphereCount = 18;
 
 	for (let index = 0; index < sphereCount; index += 1) {
-		const color = new THREE.Color().setHSL(index / sphereCount, 0.76, 0.58);
-		const bloomIntensity = uniform(index % 3 === 0 ? 1 : 0);
-		const sphereMaterial = new THREE.MeshBasicNodeMaterial({ color });
-
-		sphereMaterial.mrtNode = mrt({ bloomIntensity });
-
-		const bloomSphere = new THREE.Mesh(sphereGeometry, sphereMaterial);
-		const angle = (index / sphereCount) * Math.PI * 2;
-
-		bloomSphere.position.set(
-			Math.cos(angle) * 3.2,
-			Math.sin(angle) * 2.1,
-			Math.sin(angle * 2) * 1.8
-		);
+		const bloomSphere = createBloomSphere(index, sphereCount, sphereGeometry);
 		scene.add(bloomSphere);
 		bloomSpheres.push(bloomSphere);
 	}
@@ -221,18 +177,41 @@ function createBloomSpheres(
 	return bloomSpheres;
 }
 
+function createBloomSphere(
+	index: number,
+	sphereCount: number,
+	sphereGeometry: THREE.IcosahedronGeometry
+): BloomSphere {
+	const color = new THREE.Color().setHSL(index / sphereCount, 0.76, 0.58);
+	const bloomIntensity = uniform(index % 3 === 0 ? 1 : 0);
+	const sphereMaterial = new THREE.MeshBasicNodeMaterial({ color });
+
+	sphereMaterial.mrtNode = mrt({ bloomIntensity });
+
+	const bloomSphere = new THREE.Mesh(sphereGeometry, sphereMaterial);
+	const angle = (index / sphereCount) * Math.PI * 2;
+
+	bloomSphere.position.set(
+		Math.cos(angle) * 3.2,
+		Math.sin(angle) * 2.1,
+		Math.sin(angle * 2) * 1.8
+	);
+
+	return bloomSphere;
+}
+
 function createBloomPipeline(
-	scene: Parameters<ThreeDemoSceneFactory>[0]['scene'],
-	camera: Parameters<ThreeDemoSceneFactory>[0]['camera'],
+	scene: THREE.Scene,
+	camera: THREE.PerspectiveCamera,
 	renderer: THREE.WebGPURenderer,
-	settings: BloomSceneSettings
-): BloomPipeline {
+	settings: BloomSettings
+): THREE.RenderPipeline {
 	const scenePass = pass(scene, camera);
 
+	// MRT gives us two outputs: the normal color and a bloom mask for bright pixels.
 	scenePass.setMRT(
 		mrt({
 			output,
-			// The second target stores which pixels should contribute to bloom.
 			bloomIntensity: float(0)
 		})
 	);
@@ -249,7 +228,7 @@ function createBloomPipeline(
 	renderPipeline.outputColorTransform = false;
 	renderPipeline.outputNode = colorNode.add(bloomPass).renderOutput();
 
-	return { renderPipeline };
+	return renderPipeline;
 }
 
 function spinBloomSpheres(bloomSpheres: BloomSphere[]): void {
@@ -262,7 +241,7 @@ function spinBloomSpheres(bloomSpheres: BloomSphere[]): void {
 function toggleBloomOnClick(
 	pointer: THREE.Vector2,
 	raycaster: THREE.Raycaster,
-	camera: Parameters<ThreeDemoSceneFactory>[0]['camera'],
+	camera: THREE.PerspectiveCamera,
 	bloomSpheres: BloomSphere[]
 ): void {
 	if (pointer.x > 1 || pointer.y > 1) {
@@ -285,10 +264,8 @@ function toggleBloomOnClick(
 	bloomUniform.value = bloomUniform.value === 0 ? 1 : 0;
 }
 
-function readBloomUniform(
-	bloomSphere: BloomSphere
-): { value: number } | undefined {
+function readBloomUniform(bloomSphere: BloomSphere): BloomUniform | undefined {
 	return bloomSphere.material.mrtNode?.get('bloomIntensity') as
-		| { value: number }
+		| BloomUniform
 		| undefined;
 }

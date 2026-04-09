@@ -1,14 +1,15 @@
-/**
- * Purpose: Teach how a rectangular area light shapes the look of a simple scene.
- * Context: Students can change the light color, intensity, and panel width to see how
- * the highlight on the sphere changes.
- * Responsibility: Build the lit room, animate the sphere, and clean up every created mesh
- * and material.
- * Boundaries: This scene stays compact and avoids the extra controls from the full demo.
- */
+/** Start here if you want to see how a rectangular light changes a simple room. */
 
-/* @three-template
-{
+import * as THREE from 'three/webgpu';
+
+import {
+	defineThreeTemplateParameters,
+	defineThreeTemplateUi,
+	type ThreeDemoSceneFactory
+} from '$lib/features/editor/three-helpers';
+
+// The editor sidebar reads this to build the labels and controls.
+export const templateUi = defineThreeTemplateUi({
 	"id": "lights-rectarealight",
 	"title": "Lights RectAreaLight",
 	"description": "A compact rectangular area light demo on the WebGPU path.",
@@ -46,50 +47,47 @@
 			"defaultValue": 3.2
 		}
 	]
-}
-*/
+});
 
-import * as THREE from 'three/webgpu';
-
-import type {
-	ThreeDemoSceneController,
-	ThreeDemoSceneFactory
-} from '../../src/lib/three/three-demo-scene';
-
-// Try these values first in the editor sidebar.
-// @three-template-parameters:start
-export const templateParameters = {
+// These are the values students can play with first.
+export const templateParameters = defineThreeTemplateParameters({
 	"background": "#020617",
 	"intensity": 12,
 	"lightColor": "#fb7185",
 	"panelWidth": 3.2
-} satisfies Record<string, number | string>;
-// @three-template-parameters:end
+});
 
 export const demoRendererKind = 'webgpu';
 
-type RectAreaSceneSettings = {
+type RectAreaSettings = {
 	background: string;
 	intensity: number;
 	lightColor: string;
 	panelWidth: number;
 };
 
+type RoomMesh = THREE.Mesh<
+	THREE.BoxGeometry,
+	THREE.MeshStandardMaterial
+>;
+
+type SphereMesh = THREE.Mesh<
+	THREE.SphereGeometry,
+	THREE.MeshStandardMaterial
+>;
+
 type RoomScene = {
 	accentLight: THREE.PointLight;
 	areaLight: THREE.RectAreaLight;
-	roomMesh: THREE.Mesh;
-	sphereMesh: THREE.Mesh;
+	roomMesh: RoomMesh;
+	sphereMesh: SphereMesh;
 };
 
-export const createDemoScene: ThreeDemoSceneFactory = ({
-	camera,
-	scene
-}): ThreeDemoSceneController => {
-	const settings = readRectAreaSceneSettings();
+export const createDemoScene: ThreeDemoSceneFactory = ({ camera, scene }) => {
+	const settings = readRectAreaSettings();
 	const roomScene = createRoomScene(settings);
 
-	configureScene(camera, scene, settings.background, roomScene);
+	setupScene(camera, scene, settings.background, roomScene);
 
 	return {
 		update: () => {
@@ -103,14 +101,14 @@ export const createDemoScene: ThreeDemoSceneFactory = ({
 			scene.remove(roomScene.areaLight);
 			scene.remove(roomScene.accentLight);
 			roomScene.roomMesh.geometry.dispose();
-			(roomScene.roomMesh.material as THREE.MeshStandardMaterial).dispose();
 			roomScene.sphereMesh.geometry.dispose();
-			(roomScene.sphereMesh.material as THREE.MeshStandardMaterial).dispose();
+			roomScene.roomMesh.material.dispose();
+			roomScene.sphereMesh.material.dispose();
 		}
 	};
 };
 
-function readRectAreaSceneSettings(): RectAreaSceneSettings {
+function readRectAreaSettings(): RectAreaSettings {
 	return {
 		background: String(templateParameters.background),
 		intensity: Number(templateParameters.intensity),
@@ -119,31 +117,11 @@ function readRectAreaSceneSettings(): RectAreaSceneSettings {
 	};
 }
 
-function createRoomScene(settings: RectAreaSceneSettings): RoomScene {
-	const roomMesh = new THREE.Mesh(
-		new THREE.BoxGeometry(8, 5, 8),
-		new THREE.MeshStandardMaterial({
-			color: '#0f172a',
-			metalness: 0,
-			roughness: 0.96,
-			side: THREE.BackSide
-		})
-	);
-	const sphereMesh = new THREE.Mesh(
-		new THREE.SphereGeometry(1.1, 48, 32),
-		new THREE.MeshStandardMaterial({
-			color: '#e2e8f0',
-			metalness: 0.35,
-			roughness: 0.22
-		})
-	);
-	const areaLight = new THREE.RectAreaLight(
-		settings.lightColor,
-		settings.intensity,
-		settings.panelWidth,
-		1.8
-	);
-	const accentLight = new THREE.PointLight('#60a5fa', 16, 12);
+function createRoomScene(settings: RectAreaSettings): RoomScene {
+	const roomMesh = createRoomMesh();
+	const sphereMesh = createSphereMesh();
+	const areaLight = createAreaLight(settings);
+	const accentLight = createAccentLight();
 
 	sphereMesh.position.y = 0.2;
 	areaLight.position.set(0, 2.1, 2.8);
@@ -158,9 +136,45 @@ function createRoomScene(settings: RectAreaSceneSettings): RoomScene {
 	};
 }
 
-function configureScene(
-	camera: Parameters<ThreeDemoSceneFactory>[0]['camera'],
-	scene: Parameters<ThreeDemoSceneFactory>[0]['scene'],
+function createRoomMesh(): RoomMesh {
+	return new THREE.Mesh(
+		new THREE.BoxGeometry(8, 5, 8),
+		new THREE.MeshStandardMaterial({
+			color: '#0f172a',
+			metalness: 0,
+			roughness: 0.96,
+			side: THREE.BackSide
+		})
+	);
+}
+
+function createSphereMesh(): SphereMesh {
+	return new THREE.Mesh(
+		new THREE.SphereGeometry(1.1, 48, 32),
+		new THREE.MeshStandardMaterial({
+			color: '#e2e8f0',
+			metalness: 0.35,
+			roughness: 0.22
+		})
+	);
+}
+
+function createAreaLight(settings: RectAreaSettings): THREE.RectAreaLight {
+	return new THREE.RectAreaLight(
+		settings.lightColor,
+		settings.intensity,
+		settings.panelWidth,
+		1.8
+	);
+}
+
+function createAccentLight(): THREE.PointLight {
+	return new THREE.PointLight('#60a5fa', 16, 12);
+}
+
+function setupScene(
+	camera: THREE.PerspectiveCamera,
+	scene: THREE.Scene,
 	background: string,
 	roomScene: RoomScene
 ): void {

@@ -1,14 +1,16 @@
-/**
- * Purpose: Teach a volumetric-looking point cloud built from layered Perlin noise.
- * Context: Students can change the density threshold and point size to see how noise
- * samples become a soft cloud of points.
- * Responsibility: Build the point cloud, animate it gently, and clean up the generated
- * geometry and material.
- * Boundaries: This template keeps the volumetric idea simple and avoids custom shaders.
- */
+/** Start here if you want a soft cloud built from layered noise samples. */
 
-/* @three-template
-{
+import { ImprovedNoise } from 'three/addons/math/ImprovedNoise.js';
+import * as THREE from 'three/webgpu';
+
+import {
+	defineThreeTemplateParameters,
+	defineThreeTemplateUi,
+	type ThreeDemoSceneFactory
+} from '$lib/features/editor/three-helpers';
+
+// The editor sidebar reads this to build the labels and controls.
+export const templateUi = defineThreeTemplateUi({
 	"id": "volume-perlin",
 	"title": "Volume Perlin",
 	"description": "A compact cloud of Perlin-noise points on the WebGPU path.",
@@ -46,32 +48,21 @@
 			"defaultValue": "#93c5fd"
 		}
 	]
-}
-*/
+});
 
-import { ImprovedNoise } from 'three/addons/math/ImprovedNoise.js';
-import * as THREE from 'three/webgpu';
-
-import type {
-	ThreeDemoSceneController,
-	ThreeDemoSceneFactory
-} from '../../src/lib/three/three-demo-scene';
-
-// Try these values first in the editor sidebar.
-// @three-template-parameters:start
-export const templateParameters = {
+// These are the values students can play with first.
+export const templateParameters = defineThreeTemplateParameters({
 	"background": "#020617",
 	"cloudColor": "#93c5fd",
 	"density": 0.42,
 	"pointSize": 0.08
-} satisfies Record<string, number | string>;
-// @three-template-parameters:end
+});
 
 export const demoRendererKind = 'webgpu';
 
 const cloudNoise = new ImprovedNoise();
 
-type VolumeSceneSettings = {
+type VolumeSettings = {
 	background: string;
 	cloudColor: string;
 	density: number;
@@ -88,18 +79,15 @@ type SceneLights = {
 	directionalLight: THREE.DirectionalLight;
 };
 
-export const createDemoScene: ThreeDemoSceneFactory = ({
-	camera,
-	scene
-}): ThreeDemoSceneController => {
-	const settings = readVolumeSceneSettings();
+export const createDemoScene: ThreeDemoSceneFactory = ({ camera, scene }) => {
+	const settings = readVolumeSettings();
 	const cloudData = createCloudData(settings);
 	const cloudGeometry = new THREE.BufferGeometry();
 	const cloudMaterial = createCloudMaterial(settings);
 	const cloudPoints = createCloudPoints(cloudGeometry, cloudMaterial, cloudData);
 	const sceneLights = createSceneLights();
 
-	configureScene(camera, scene, settings.background, cloudPoints, sceneLights);
+	setupScene(camera, scene, settings.background, cloudPoints, sceneLights);
 
 	return {
 		update: () => {
@@ -116,7 +104,7 @@ export const createDemoScene: ThreeDemoSceneFactory = ({
 	};
 };
 
-function readVolumeSceneSettings(): VolumeSceneSettings {
+function readVolumeSettings(): VolumeSettings {
 	return {
 		background: String(templateParameters.background),
 		cloudColor: String(templateParameters.cloudColor),
@@ -125,7 +113,7 @@ function readVolumeSceneSettings(): VolumeSceneSettings {
 	};
 }
 
-function createCloudData(settings: VolumeSceneSettings): CloudData {
+function createCloudData(settings: VolumeSettings): CloudData {
 	const gridSize = 18;
 	const positions: number[] = [];
 	const colors: number[] = [];
@@ -153,7 +141,7 @@ function createCloudData(settings: VolumeSceneSettings): CloudData {
 	return { colors, positions };
 }
 
-function createCloudMaterial(settings: VolumeSceneSettings): THREE.PointsMaterial {
+function createCloudMaterial(settings: VolumeSettings): THREE.PointsMaterial {
 	const cloudMaterial = new THREE.PointsMaterial({
 		color: settings.cloudColor,
 		opacity: 0.72,
@@ -189,9 +177,9 @@ function createSceneLights(): SceneLights {
 	};
 }
 
-function configureScene(
-	camera: Parameters<ThreeDemoSceneFactory>[0]['camera'],
-	scene: Parameters<ThreeDemoSceneFactory>[0]['scene'],
+function setupScene(
+	camera: THREE.PerspectiveCamera,
+	scene: THREE.Scene,
 	background: string,
 	cloudPoints: THREE.Points,
 	sceneLights: SceneLights
@@ -210,6 +198,7 @@ function readDensitySample(
 	yIndex: number,
 	zIndex: number
 ): number {
+	// Two noise layers give the cloud a softer shape without needing a shader.
 	return (
 		cloudNoise.noise(xIndex * 0.15, yIndex * 0.15, zIndex * 0.15) * 0.5 +
 		cloudNoise.noise(xIndex * 0.32, yIndex * 0.32, zIndex * 0.32) * 0.5
