@@ -33,34 +33,3 @@
 		<pre>{error.stack}</pre>
 	{/if}
 </div>
-
-<style>
-	.error-panel {
-		background: #fff1f2;
-		border: 1px solid #fecdd3;
-		border-radius: 0;
-		color: #881337;
-		padding: 1rem;
-		font-size: var(--ui-font-size-body);
-	}
-
-	.error-panel h3 {
-		margin: 0;
-	}
-
-	.error-panel p {
-		margin: 0.5rem 0 0;
-	}
-
-	.error-panel pre {
-		background: #fff;
-		border: 1px solid #fecdd3;
-		border-radius: 0;
-		font-size: var(--ui-font-size-body);
-		margin: 1rem 0 0;
-		overflow-x: hidden;
-		padding: 0.75rem;
-		white-space: pre-wrap;
-		word-break: break-word;
-	}
-</style>

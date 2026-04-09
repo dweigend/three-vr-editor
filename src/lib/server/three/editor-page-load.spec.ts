@@ -5,7 +5,7 @@
  * Boundaries: These tests do not exercise the browser editor workspace or save endpoints.
  */
 
-import { mkdtemp, rm, writeFile } from 'node:fs/promises';
+import { mkdir, mkdtemp, rm, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
 import { tmpdir } from 'node:os';
 import { afterEach, describe, expect, it } from 'vitest';
@@ -21,8 +21,9 @@ afterEach(async () => {
 describe('loadThreeEditorPageData', () => {
 	it('loads the initial managed document and preview payload', async () => {
 		const rootDir = await createFixtureDir();
+		await mkdir(join(rootDir, 'scenes'));
 		await writeFile(
-			join(rootDir, 'cube.ts'),
+			join(rootDir, 'scenes', 'cube.ts'),
 			'export const createDemoScene = () => ({ update() {}, dispose() {} });',
 			'utf-8'
 		);
@@ -30,9 +31,20 @@ describe('loadThreeEditorPageData', () => {
 
 		const result = await loadThreeEditorPageData({ rootDir });
 
-		expect(result.document.path).toBe('cube.ts');
-		expect(result.files.map((file) => file.path)).toEqual(['cube.ts', 'helper.ts']);
-		expect(result.previewEntryPath).toBe('cube.ts');
+		expect(result.document.path).toBe('scenes/cube.ts');
+		expect(result.files.map((file) => file.path)).toEqual(['helper.ts', 'scenes/cube.ts']);
+		expect(result.previewEntryPath).toBe('scenes/cube.ts');
+		expect(result.preview.status).toBe('success');
+	});
+
+	it('creates a local bootstrap scene when the managed workspace is empty', async () => {
+		const rootDir = await createFixtureDir();
+
+		const result = await loadThreeEditorPageData({ rootDir });
+
+		expect(result.document.path).toBe('scenes/cube.ts');
+		expect(result.files.map((file) => file.path)).toEqual(['scenes/cube.ts']);
+		expect(result.previewEntryPath).toBe('scenes/cube.ts');
 		expect(result.preview.status).toBe('success');
 	});
 });

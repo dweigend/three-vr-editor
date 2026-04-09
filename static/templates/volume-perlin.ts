@@ -1,22 +1,50 @@
 /**
- * Purpose: Provide a compact volumetric-noise scene inspired by the official WebGPU Perlin volume example.
- * Context: The template workbench uses this file to demonstrate a volumetric-looking WebGPU scene without external assets.
- * Responsibility: Generate a 3D field of thresholded points from noise, animate them subtly, and clean up resources.
- * Boundaries: This simplified variant keeps the volumetric idea while avoiding the full shader-heavy original example.
+ * Purpose: Teach a volumetric-looking point cloud built from layered Perlin noise.
+ * Context: Students can change the density threshold and point size to see how noise
+ * samples become a soft cloud of points.
+ * Responsibility: Build the point cloud, animate it gently, and clean up the generated
+ * geometry and material.
+ * Boundaries: This template keeps the volumetric idea simple and avoids custom shaders.
  */
 
 /* @three-template
 {
 	"id": "volume-perlin",
 	"title": "Volume Perlin",
-	"description": "A compact cloud of thresholded Perlin points rendered on the WebGPU path.",
+	"description": "A compact cloud of Perlin-noise points on the WebGPU path.",
 	"rendererKind": "webgpu",
 	"tags": ["webgpu", "volume", "noise"],
 	"parameters": [
-		{ "key": "background", "label": "Background", "control": "color", "defaultValue": "#020617" },
-		{ "key": "density", "label": "Density threshold", "control": "range", "min": 0.1, "max": 0.8, "step": 0.05, "defaultValue": 0.42 },
-		{ "key": "pointSize", "label": "Point size", "control": "range", "min": 0.03, "max": 0.18, "step": 0.01, "defaultValue": 0.08 },
-		{ "key": "cloudColor", "label": "Cloud color", "control": "color", "defaultValue": "#93c5fd" }
+		{
+			"key": "background",
+			"label": "Background",
+			"control": "color",
+			"defaultValue": "#020617"
+		},
+		{
+			"key": "density",
+			"label": "Density threshold",
+			"control": "range",
+			"min": 0.1,
+			"max": 0.8,
+			"step": 0.05,
+			"defaultValue": 0.42
+		},
+		{
+			"key": "pointSize",
+			"label": "Point size",
+			"control": "range",
+			"min": 0.03,
+			"max": 0.18,
+			"step": 0.01,
+			"defaultValue": 0.08
+		},
+		{
+			"key": "cloudColor",
+			"label": "Cloud color",
+			"control": "color",
+			"defaultValue": "#93c5fd"
+		}
 	]
 }
 */
@@ -27,8 +55,9 @@ import * as THREE from 'three/webgpu';
 import type {
 	ThreeDemoSceneController,
 	ThreeDemoSceneFactory
-} from '../../../src/lib/three/three-demo-scene';
+} from '../../src/lib/three/three-demo-scene';
 
+// Try these values first in the editor sidebar.
 // @three-template-parameters:start
 export const templateParameters = {
 	"background": "#020617",
@@ -40,68 +69,149 @@ export const templateParameters = {
 
 export const demoRendererKind = 'webgpu';
 
-const noise = new ImprovedNoise();
+const cloudNoise = new ImprovedNoise();
 
-export const createDemoScene: ThreeDemoSceneFactory = ({ camera, scene }): ThreeDemoSceneController => {
-	const gridSize = 18;
-	const points: number[] = [];
-	const colors: number[] = [];
+type VolumeSceneSettings = {
+	background: string;
+	cloudColor: string;
+	density: number;
+	pointSize: number;
+};
+
+type CloudData = {
+	colors: number[];
+	positions: number[];
+};
+
+type SceneLights = {
+	ambientLight: THREE.AmbientLight;
+	directionalLight: THREE.DirectionalLight;
+};
+
+export const createDemoScene: ThreeDemoSceneFactory = ({
+	camera,
+	scene
+}): ThreeDemoSceneController => {
+	const settings = readVolumeSceneSettings();
+	const cloudData = createCloudData(settings);
 	const cloudGeometry = new THREE.BufferGeometry();
-	const cloudMaterial = new THREE.PointsMaterial({
-		color: String(templateParameters.cloudColor),
-		opacity: 0.72,
-		size: Number(templateParameters.pointSize),
-		transparent: true
-	});
-	const cloudColor = new THREE.Color(String(templateParameters.cloudColor));
+	const cloudMaterial = createCloudMaterial(settings);
+	const cloudPoints = createCloudPoints(cloudGeometry, cloudMaterial, cloudData);
+	const sceneLights = createSceneLights();
 
-	for (let z = 0; z < gridSize; z += 1) {
-		for (let y = 0; y < gridSize; y += 1) {
-			for (let x = 0; x < gridSize; x += 1) {
-				const sample =
-					noise.noise(x * 0.15, y * 0.15, z * 0.15) * 0.5 +
-					noise.noise(x * 0.32, y * 0.32, z * 0.32) * 0.5;
+	configureScene(camera, scene, settings.background, cloudPoints, sceneLights);
 
-				if (sample < Number(templateParameters.density)) {
+	return {
+		update: () => {
+			cloudPoints.rotation.y += 0.003;
+			cloudPoints.rotation.x = Math.sin(cloudPoints.rotation.y * 0.7) * 0.2;
+		},
+		dispose: () => {
+			scene.remove(sceneLights.ambientLight);
+			scene.remove(sceneLights.directionalLight);
+			scene.remove(cloudPoints);
+			cloudGeometry.dispose();
+			cloudMaterial.dispose();
+		}
+	};
+};
+
+function readVolumeSceneSettings(): VolumeSceneSettings {
+	return {
+		background: String(templateParameters.background),
+		cloudColor: String(templateParameters.cloudColor),
+		density: Number(templateParameters.density),
+		pointSize: Number(templateParameters.pointSize)
+	};
+}
+
+function createCloudData(settings: VolumeSceneSettings): CloudData {
+	const gridSize = 18;
+	const positions: number[] = [];
+	const colors: number[] = [];
+	const cloudColor = new THREE.Color(settings.cloudColor);
+
+	for (let zIndex = 0; zIndex < gridSize; zIndex += 1) {
+		for (let yIndex = 0; yIndex < gridSize; yIndex += 1) {
+			for (let xIndex = 0; xIndex < gridSize; xIndex += 1) {
+				const densitySample = readDensitySample(xIndex, yIndex, zIndex);
+
+				if (densitySample < settings.density) {
 					continue;
 				}
 
-				points.push(
-					(x / gridSize - 0.5) * 5,
-					(y / gridSize - 0.5) * 5,
-					(z / gridSize - 0.5) * 5
+				positions.push(
+					(xIndex / gridSize - 0.5) * 5,
+					(yIndex / gridSize - 0.5) * 5,
+					(zIndex / gridSize - 0.5) * 5
 				);
 				colors.push(cloudColor.r, cloudColor.g, cloudColor.b);
 			}
 		}
 	}
 
-	cloudGeometry.setAttribute('position', new THREE.Float32BufferAttribute(points, 3));
-	cloudGeometry.setAttribute('color', new THREE.Float32BufferAttribute(colors, 3));
+	return { colors, positions };
+}
+
+function createCloudMaterial(settings: VolumeSceneSettings): THREE.PointsMaterial {
+	const cloudMaterial = new THREE.PointsMaterial({
+		color: settings.cloudColor,
+		opacity: 0.72,
+		size: settings.pointSize,
+		transparent: true
+	});
+
 	cloudMaterial.vertexColors = true;
+	return cloudMaterial;
+}
 
-	const cloud = new THREE.Points(cloudGeometry, cloudMaterial);
-	const ambientLight = new THREE.AmbientLight('#ffffff', 1.2);
-	const directionalLight = new THREE.DirectionalLight('#ffffff', 1.6);
+function createCloudPoints(
+	cloudGeometry: THREE.BufferGeometry,
+	cloudMaterial: THREE.PointsMaterial,
+	cloudData: CloudData
+): THREE.Points {
+	cloudGeometry.setAttribute(
+		'position',
+		new THREE.Float32BufferAttribute(cloudData.positions, 3)
+	);
+	cloudGeometry.setAttribute(
+		'color',
+		new THREE.Float32BufferAttribute(cloudData.colors, 3)
+	);
 
-	scene.background = new THREE.Color(String(templateParameters.background));
-	camera.position.set(0, 0, 8);
-	directionalLight.position.set(4, 6, 5);
-	scene.add(ambientLight);
-	scene.add(directionalLight);
-	scene.add(cloud);
+	return new THREE.Points(cloudGeometry, cloudMaterial);
+}
 
+function createSceneLights(): SceneLights {
 	return {
-		update: () => {
-			cloud.rotation.y += 0.003;
-			cloud.rotation.x = Math.sin(cloud.rotation.y * 0.7) * 0.2;
-		},
-		dispose: () => {
-			scene.remove(ambientLight);
-			scene.remove(directionalLight);
-			scene.remove(cloud);
-			cloudGeometry.dispose();
-			cloudMaterial.dispose();
-		}
+		ambientLight: new THREE.AmbientLight('#ffffff', 1.2),
+		directionalLight: new THREE.DirectionalLight('#ffffff', 1.6)
 	};
-};
+}
+
+function configureScene(
+	camera: Parameters<ThreeDemoSceneFactory>[0]['camera'],
+	scene: Parameters<ThreeDemoSceneFactory>[0]['scene'],
+	background: string,
+	cloudPoints: THREE.Points,
+	sceneLights: SceneLights
+): void {
+	scene.background = new THREE.Color(background);
+	camera.position.set(0, 0, 8);
+	sceneLights.directionalLight.position.set(4, 6, 5);
+
+	scene.add(sceneLights.ambientLight);
+	scene.add(sceneLights.directionalLight);
+	scene.add(cloudPoints);
+}
+
+function readDensitySample(
+	xIndex: number,
+	yIndex: number,
+	zIndex: number
+): number {
+	return (
+		cloudNoise.noise(xIndex * 0.15, yIndex * 0.15, zIndex * 0.15) * 0.5 +
+		cloudNoise.noise(xIndex * 0.32, yIndex * 0.32, zIndex * 0.32) * 0.5
+	);
+}

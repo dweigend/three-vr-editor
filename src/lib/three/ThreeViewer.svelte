@@ -88,24 +88,3 @@
 		</div>
 	{/snippet}
 </svelte:boundary>
-
-<style>
-	.viewer-shell {
-		display: grid;
-		gap: 1rem;
-	}
-
-	.viewer-surface {
-		background: #020617;
-		border: 1px solid var(--ui-color-border);
-		border-radius: 0;
-		min-height: 28rem;
-		overflow: hidden;
-	}
-
-	.viewer-surface :global(canvas) {
-		display: block;
-		height: 100%;
-		width: 100%;
-	}
-</style>

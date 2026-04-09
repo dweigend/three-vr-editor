@@ -34,21 +34,3 @@
 		<span>{textValue}</span>
 	{/if}
 </DropdownMenuPrimitive.Item>
-
-<style>
-	:global(.ui-menu-item) {
-		width: 100%;
-		border: 0;
-		background: transparent;
-		color: inherit;
-		cursor: default;
-	}
-
-	:global(.ui-menu-item[data-disabled]) {
-		opacity: 0.45;
-	}
-
-	:global(.ui-menu-item:focus-visible) {
-		outline: none;
-	}
-</style>

@@ -25,30 +25,3 @@
 		<button type="button" class="retry-button" onclick={onRetry}>Retry</button>
 	{/if}
 </div>
-
-<style>
-	.viewer-header {
-		align-items: start;
-		display: flex;
-		gap: 1rem;
-		justify-content: space-between;
-	}
-
-	.viewer-header h2 {
-		margin: 0;
-	}
-
-	.viewer-header p {
-		margin: 0.35rem 0 0;
-	}
-
-	.retry-button {
-		background: #0f172a;
-		border: 0;
-		border-radius: 999px;
-		color: #fff;
-		cursor: pointer;
-		font: inherit;
-		padding: 0.6rem 1rem;
-	}
-</style>

@@ -1,7 +1,7 @@
 <!--
 	Purpose: Document the server-side Three workflow services that power managed files, previews, and template discovery.
 	Context: The editor and template workbench demos depend on a small set of server-only helpers instead of route-local ad hoc logic.
-Responsibility: Explain the file service, preview builder, demo loaders, template service, and the split between editable scenes and template sources.
+	Responsibility: Explain the file service, preview builder, demo loaders, template service, and the split between editable scenes and template sources.
 	Boundaries: This README does not describe client-side Three runtime or editor UI behavior in detail.
 -->
 
@@ -30,14 +30,15 @@ This folder contains the server-side services behind the Three viewer, editor, a
 
 ## `static/three` Conventions
 
-- `static/three/cube.ts`
-  Stable minimal reference scene for the viewer path.
+- `static/three/`
+  Ignored local editor workspace. The page loader bootstraps `scenes/cube.ts` here when the workspace starts empty.
 - `static/templates/`
   Shared template sources that can be copied into the editable workbench.
 - `static/three/scenes/`
   Generated editable scene files created by the workbench.
 
 The file service should keep path access constrained to the managed root and treat template metadata as optional. Missing headers must not make a scene invalid.
+Starter material that should be committed belongs in `static/templates`, not in `static/three`.
 
 ## Boundaries
 

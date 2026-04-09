@@ -1,22 +1,51 @@
 /**
- * Purpose: Provide a thick wireframe scene inspired by the official fat wireframe example.
- * Context: The template workbench uses this scene to exercise the optional resize hook on a WebGPU-oriented line setup.
- * Responsibility: Render one rotating torus knot wireframe with configurable thickness and color.
- * Boundaries: The scene keeps only the core wireframe idea and omits the larger demo shell.
+ * Purpose: Teach how a fat wireframe can outline a mesh on the WebGPU path.
+ * Context: Students can change the line width and wire color while comparing the filled
+ * shape and its screen-space outline.
+ * Responsibility: Build the wireframe scene, keep the line material sized to the
+ * viewport, animate the group, and clean up all geometry and materials.
+ * Boundaries: This template stays focused on the core wireframe idea and omits
+ * extra tools.
  */
 
 /* @three-template
 {
 	"id": "lines-fat-wireframe",
 	"title": "Lines Fat Wireframe",
-	"description": "A thick wireframe torus knot rendered through the WebGPU preview path.",
+	"description": "A thick wireframe torus knot rendered on the WebGPU path.",
 	"rendererKind": "webgpu",
 	"tags": ["webgpu", "lines", "wireframe"],
 	"parameters": [
-		{ "key": "background", "label": "Background", "control": "color", "defaultValue": "#0f172a" },
-		{ "key": "wireColor", "label": "Wire color", "control": "color", "defaultValue": "#c084fc" },
-		{ "key": "lineWidth", "label": "Line width", "control": "range", "min": 2, "max": 18, "step": 1, "defaultValue": 6 },
-		{ "key": "spinSpeed", "label": "Spin speed", "control": "range", "min": 0.002, "max": 0.02, "step": 0.001, "defaultValue": 0.008 }
+		{
+			"key": "background",
+			"label": "Background",
+			"control": "color",
+			"defaultValue": "#0f172a"
+		},
+		{
+			"key": "wireColor",
+			"label": "Wire color",
+			"control": "color",
+			"defaultValue": "#c084fc"
+		},
+		{
+			"key": "lineWidth",
+			"label": "Line width",
+			"control": "range",
+			"min": 2,
+			"max": 18,
+			"step": 1,
+			"defaultValue": 6
+		},
+		{
+			"key": "spinSpeed",
+			"label": "Spin speed",
+			"control": "range",
+			"min": 0.002,
+			"max": 0.02,
+			"step": 0.001,
+			"defaultValue": 0.008
+		}
 	]
 }
 */
@@ -29,8 +58,9 @@ import * as THREE from 'three/webgpu';
 import type {
 	ThreeDemoSceneController,
 	ThreeDemoSceneFactory
-} from '../../../src/lib/three/three-demo-scene';
+} from '../../src/lib/three/three-demo-scene';
 
+// Try these values first in the editor sidebar.
 // @three-template-parameters:start
 export const templateParameters = {
 	"background": "#0f172a",
@@ -42,45 +72,111 @@ export const templateParameters = {
 
 export const demoRendererKind = 'webgpu';
 
-export const createDemoScene: ThreeDemoSceneFactory = ({ camera, scene }): ThreeDemoSceneController => {
-	const torusGeometry = new THREE.TorusKnotGeometry(1.1, 0.34, 200, 32);
-	const wireGeometry = new WireframeGeometry2(torusGeometry);
-	const material = new LineMaterial({
-		color: new THREE.Color(String(templateParameters.wireColor)).getHex(),
-		linewidth: Number(templateParameters.lineWidth)
-	});
-	const wireframe = new Wireframe(wireGeometry, material);
-	const fill = new THREE.Mesh(
-		torusGeometry,
-		new THREE.MeshBasicMaterial({
-			color: '#0f172a',
-			opacity: 0.16,
-			transparent: true
-		})
-	);
-	const group = new THREE.Group();
+type FatWireframeSettings = {
+	background: string;
+	lineWidth: number;
+	spinSpeed: number;
+	wireColor: string;
+};
 
-	scene.background = new THREE.Color(String(templateParameters.background));
-	camera.position.set(0, 0.4, 5.5);
-	group.add(fill);
-	group.add(wireframe);
-	scene.add(group);
+type WireframeScene = {
+	fillMaterial: THREE.MeshBasicMaterial;
+	group: THREE.Group;
+	lineMaterial: LineMaterial;
+	torusGeometry: THREE.TorusKnotGeometry;
+	wireGeometry: WireframeGeometry2;
+};
+
+export const createDemoScene: ThreeDemoSceneFactory = ({
+	camera,
+	container,
+	scene
+}): ThreeDemoSceneController => {
+	const settings = readFatWireframeSettings();
+	const wireframeScene = createWireframeScene(settings);
+
+	configureScene(camera, scene, settings.background, wireframeScene.group);
+	updateLineResolution(
+		wireframeScene.lineMaterial,
+		container.clientWidth,
+		container.clientHeight
+	);
 
 	return {
 		update: () => {
-			const spinSpeed = Number(templateParameters.spinSpeed);
-			group.rotation.x += spinSpeed * 0.7;
-			group.rotation.y += spinSpeed;
+			spinWireframe(wireframeScene.group, settings.spinSpeed);
 		},
 		resize: ({ height, width }) => {
-			material.resolution.set(width, height);
+			updateLineResolution(wireframeScene.lineMaterial, width, height);
 		},
 		dispose: () => {
-			scene.remove(group);
-			torusGeometry.dispose();
-			wireGeometry.dispose();
-			material.dispose();
-			(fill.material as THREE.MeshBasicMaterial).dispose();
+			scene.remove(wireframeScene.group);
+			wireframeScene.torusGeometry.dispose();
+			wireframeScene.wireGeometry.dispose();
+			wireframeScene.lineMaterial.dispose();
+			wireframeScene.fillMaterial.dispose();
 		}
 	};
 };
+
+function readFatWireframeSettings(): FatWireframeSettings {
+	return {
+		background: String(templateParameters.background),
+		lineWidth: Number(templateParameters.lineWidth),
+		spinSpeed: Number(templateParameters.spinSpeed),
+		wireColor: String(templateParameters.wireColor)
+	};
+}
+
+function createWireframeScene(settings: FatWireframeSettings): WireframeScene {
+	const torusGeometry = new THREE.TorusKnotGeometry(1.1, 0.34, 200, 32);
+	const wireGeometry = new WireframeGeometry2(torusGeometry);
+	const lineMaterial = new LineMaterial({
+		color: new THREE.Color(settings.wireColor).getHex(),
+		linewidth: settings.lineWidth
+	});
+	const fillMaterial = new THREE.MeshBasicMaterial({
+		color: '#0f172a',
+		opacity: 0.16,
+		transparent: true
+	});
+	const fillMesh = new THREE.Mesh(torusGeometry, fillMaterial);
+	const wireframe = new Wireframe(wireGeometry, lineMaterial);
+	const group = new THREE.Group();
+
+	group.add(fillMesh);
+	group.add(wireframe);
+
+	return {
+		fillMaterial,
+		group,
+		lineMaterial,
+		torusGeometry,
+		wireGeometry
+	};
+}
+
+function configureScene(
+	camera: Parameters<ThreeDemoSceneFactory>[0]['camera'],
+	scene: Parameters<ThreeDemoSceneFactory>[0]['scene'],
+	background: string,
+	group: THREE.Group
+): void {
+	scene.background = new THREE.Color(background);
+	camera.position.set(0, 0.4, 5.5);
+	scene.add(group);
+}
+
+function spinWireframe(group: THREE.Group, spinSpeed: number): void {
+	group.rotation.x += spinSpeed * 0.7;
+	group.rotation.y += spinSpeed;
+}
+
+function updateLineResolution(
+	lineMaterial: LineMaterial,
+	width: number,
+	height: number
+): void {
+	// Fat lines are measured in screen space, so they need the current viewport size.
+	lineMaterial.resolution.set(width, height);
+}

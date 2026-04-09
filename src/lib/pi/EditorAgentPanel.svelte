@@ -293,32 +293,3 @@
 		</ConversationPanel>
 	</div>
 </section>
-
-<style>
-	:global(.editor-agent-panel__conversation) {
-		height: 100%;
-		min-height: 0;
-	}
-
-	.editor-agent-panel__composer {
-		width: 100%;
-	}
-
-	:global(.editor-agent-panel__toolbar) {
-		width: 100%;
-		padding: 0;
-		border: 0;
-		background: transparent;
-	}
-
-	.editor-agent-panel__trailing {
-		display: inline-flex;
-		align-items: center;
-		gap: var(--ui-space-2);
-	}
-
-	:global(.editor-agent-panel__composer .input-bar__input) {
-		text-transform: none;
-		letter-spacing: 0.02em;
-	}
-</style>

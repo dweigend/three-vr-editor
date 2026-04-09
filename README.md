@@ -17,7 +17,9 @@ The current app is intentionally centered on three user-facing surfaces:
 
 ## Current Capabilities
 
-- Managed Three source files live under `static/three`.
+- Managed editable Three source files live under `static/three`.
+- `static/three` is treated as a local generated workspace and ignored by git except for the placeholder directory entry.
+- Starter templates live under `static/templates`.
 - The editor path can load, edit, save, and preview managed Three scene files.
 - The editor Pi panel can analyze or update the active editor file through server-only Pi tooling in either one-shot or editor-session mode.
 - The settings path can validate, store, activate, and remove multiple OpenRouter keys.
@@ -129,13 +131,20 @@ This layer defines the rules for editable files, preview safety, and template di
 
 ### `static/three`
 
-This is the managed source root for scene files and scene templates.
+This is the managed source root for editable scene files.
 
-- `cube.ts` is the stable minimal reference scene
-- `templates/` contains managed template sources used by the file services
+- the editor bootstraps `scenes/cube.ts` locally when the workspace is empty
 - generated editable files belong under `scenes/` when created through the editor workflow
 
-The folder is intentionally treated as application-managed input, not as a general asset dump.
+The folder is intentionally treated as local application-managed input, not as a committed asset dump.
+
+### `static/templates`
+
+This folder contains the teaching-oriented starter templates used by the editor workflow.
+
+- each template stays self-contained and readable for students
+- template metadata powers the workbench template picker
+- non-template helper files such as documentation are ignored unless they include a template header
 
 ## App Surfaces
 
@@ -156,6 +165,7 @@ The app intentionally exposes only three primary screens:
 - Keep Pi imports in server-only modules, route handlers, and `.server.ts` files.
 - Keep editor modules UI-focused; put file or preview orchestration in shared workspace state or server services.
 - Reuse the shared `createDemoScene` contract instead of inventing route-specific scene APIs.
+- Commit starter scenes and teaching material under `static/templates`; keep local editor output under ignored `static/three`.
 - Keep documentation current when folder responsibilities shift. Important architecture folders under `src/lib` and `src/lib/server` should have short local READMEs.
 
 ## Folder Guides

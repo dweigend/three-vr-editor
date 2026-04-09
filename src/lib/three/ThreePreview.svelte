@@ -139,19 +139,3 @@
 		<ThreeViewerErrorPanel error={toViewerError(error)} />
 	{/snippet}
 </svelte:boundary>
-
-<style>
-	.preview-surface {
-		height: 100%;
-		min-height: 24rem;
-		min-width: 0;
-		background: #030613;
-		overflow: hidden;
-	}
-
-	.preview-surface :global(canvas) {
-		display: block;
-		height: 100%;
-		width: 100%;
-	}
-</style>

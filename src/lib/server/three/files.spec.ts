@@ -25,7 +25,8 @@ describe('createThreeFileService', () => {
 		await mkdir(join(rootDir, 'nested'));
 		await mkdir(join(rootDir, 'templates'));
 		await mkdir(join(rootDir, 'shared'));
-		await writeFile(join(rootDir, 'cube.ts'), 'export const createDemoScene = () => null;', 'utf-8');
+		await mkdir(join(rootDir, 'scenes'));
+		await writeFile(join(rootDir, 'scenes', 'cube.ts'), 'export const createDemoScene = () => null;', 'utf-8');
 		await writeFile(join(rootDir, 'nested', 'helper.ts'), 'export const helper = true;', 'utf-8');
 		await writeFile(join(rootDir, 'templates', 'template.ts'), 'export const ignored = true;', 'utf-8');
 		await writeFile(join(rootDir, 'shared', 'helper.ts'), 'export const ignored = true;', 'utf-8');
@@ -34,24 +35,25 @@ describe('createThreeFileService', () => {
 		await expect(service.listFiles()).resolves.toEqual([
 			{
 				extension: '.ts',
-				isPreviewEntry: true,
-				isPreviewRelevant: true,
-				name: 'cube.ts',
-				path: 'cube.ts'
-			},
-			{
-				extension: '.ts',
 				isPreviewEntry: false,
 				isPreviewRelevant: true,
 				name: 'helper.ts',
 				path: 'nested/helper.ts'
+			},
+			{
+				extension: '.ts',
+				isPreviewEntry: true,
+				isPreviewRelevant: true,
+				name: 'cube.ts',
+				path: 'scenes/cube.ts'
 			}
 		]);
 	});
 
 	it('rejects paths outside the managed root', async () => {
 		const rootDir = await createFixtureDir();
-		await writeFile(join(rootDir, 'cube.ts'), 'export const createDemoScene = () => null;', 'utf-8');
+		await mkdir(join(rootDir, 'scenes'));
+		await writeFile(join(rootDir, 'scenes', 'cube.ts'), 'export const createDemoScene = () => null;', 'utf-8');
 		const service = createThreeFileService(rootDir);
 
 		await expect(service.readManagedFile('../secret.ts')).rejects.toThrow(
@@ -61,13 +63,14 @@ describe('createThreeFileService', () => {
 
 	it('saves a valid managed file', async () => {
 		const rootDir = await createFixtureDir();
-		const filePath = join(rootDir, 'cube.ts');
+		await mkdir(join(rootDir, 'scenes'));
+		const filePath = join(rootDir, 'scenes', 'cube.ts');
 		await writeFile(filePath, 'export const createDemoScene = () => null;', 'utf-8');
 		const service = createThreeFileService(rootDir);
 
 		await service.saveManagedFile({
 			content: 'export const createDemoScene = () => ({ update() {}, dispose() {} });',
-			path: 'cube.ts'
+			path: 'scenes/cube.ts'
 		});
 
 		await expect(readFile(filePath, 'utf-8')).resolves.toContain('update() {}');
@@ -96,14 +99,14 @@ describe('createThreeFileService', () => {
 			'export const createDemoScene = () => ({ update() {}, dispose() {} });',
 			'utf-8'
 		);
-		const service = createThreeFileService(rootDir, 'cube.ts', {
+		const service = createThreeFileService(rootDir, 'scenes/cube.ts', {
 			templateRootDir: templateDir
 		});
 
 		const createdFile = await service.createManagedFile({
 			fileName: 'Template Clone',
 			mode: 'template',
-			templatePath: 'templates/template.ts'
+			templatePath: 'template.ts'
 		});
 
 		expect(createdFile.path).toBe('scenes/template-clone.ts');
@@ -114,14 +117,15 @@ describe('createThreeFileService', () => {
 
 	it('rejects template copies outside the managed templates directory', async () => {
 		const rootDir = await createFixtureDir();
-		await writeFile(join(rootDir, 'cube.ts'), 'export const createDemoScene = () => null;', 'utf-8');
+		await mkdir(join(rootDir, 'scenes'));
+		await writeFile(join(rootDir, 'scenes', 'cube.ts'), 'export const createDemoScene = () => null;', 'utf-8');
 		const service = createThreeFileService(rootDir);
 
 		await expect(
 			service.createManagedFile({
 				fileName: 'Bad Template Clone',
 				mode: 'template',
-				templatePath: 'cube.ts'
+				templatePath: '../cube.ts'
 			})
 		).rejects.toThrow('File path is outside the managed static/three directory.');
 	});

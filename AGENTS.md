@@ -13,7 +13,8 @@ Boundaries: This file defines repository guidance, not product behavior.
 - `src/lib/pi` contains browser-side Pi UI and transport-only types.
 - `src/lib/server/pi` contains all Pi SDK usage, session setup, auth, and active-file edit tooling.
 - `src/lib/server/three` contains managed file access, preview building, demo bootstrap loaders, and template listing.
-- `static/three` is the managed source root for scene files and templates.
+- `static/three` is the managed local workspace for editable scene files and should stay generated, not versioned beyond placeholders.
+- `static/templates` contains the teaching-oriented starter templates copied into editable scenes.
 
 ## Editor Default
 
@@ -32,8 +33,9 @@ Boundaries: This file defines repository guidance, not product behavior.
 
 ## Template System Rules
 
-- Managed templates live under `static/three/templates`.
+- Managed templates live under `static/templates`.
 - Managed editable files are served from `static/three` and created under `static/three/scenes` by the workbench.
+- Treat `static/three` as local working state. Commit starter material under `static/templates`, not under `static/three`.
 - Template metadata should stay machine-readable, minimal, and shared through the template parsing helpers.
 - Parameter panels should be driven by shared metadata and must degrade gracefully when a file has no template header.
 - Prefer app-compatible adaptations of official Three.js examples over copying full example HTML shells.

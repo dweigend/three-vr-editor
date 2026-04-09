@@ -28,14 +28,3 @@
 >
 	{@render children?.()}
 </DropdownMenuPrimitive.Content>
-
-<style>
-	:global(.ui-menu-content) {
-		z-index: 40;
-		border: 1px solid var(--ui-color-border);
-		background: rgba(6, 6, 8, 0.98);
-		box-shadow:
-			0 18px 50px rgba(0, 0, 0, 0.36),
-			inset 0 1px 0 rgba(255, 255, 255, 0.03);
-	}
-</style>

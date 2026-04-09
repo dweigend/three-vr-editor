@@ -12,6 +12,10 @@ node_modules
 .DS_Store
 Thumbs.db
 
+# Managed editor workspace
+static/three/*
+!static/three/.gitkeep
+
 # Env
 .env
 .env.*

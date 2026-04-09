@@ -1,8 +1,11 @@
 /**
- * Purpose: Provide a simplified voxel-terrain scene inspired by the official geometry minecraft example.
- * Context: The template workbench uses this file to demonstrate procedural terrain generation with optional parameters.
- * Responsibility: Build one blocky terrain mesh from instanced cubes, light it, and dispose shared resources.
- * Boundaries: This scene omits texture packs, first-person controls, and other full-demo concerns.
+ * Purpose: Teach a blocky terrain made from many simple cube instances.
+ * Context: Students can change the grid size and terrain height to see how instancing
+ * and procedural noise work together.
+ * Responsibility: Build the instanced terrain, light it, animate it slightly, and
+ * release all shared resources.
+ * Boundaries: This scene stays focused on terrain generation and omits controls
+ * or textures.
  */
 
 /* @three-template
@@ -13,10 +16,36 @@
 	"rendererKind": "webgl",
 	"tags": ["geometry", "minecraft", "terrain"],
 	"parameters": [
-		{ "key": "background", "label": "Sky color", "control": "color", "defaultValue": "#bfdbfe" },
-		{ "key": "gridSize", "label": "Grid size", "control": "range", "min": 8, "max": 18, "step": 1, "defaultValue": 12 },
-		{ "key": "heightScale", "label": "Height scale", "control": "range", "min": 1, "max": 6, "step": 0.5, "defaultValue": 3 },
-		{ "key": "groundColor", "label": "Ground color", "control": "color", "defaultValue": "#65a30d" }
+		{
+			"key": "background",
+			"label": "Sky color",
+			"control": "color",
+			"defaultValue": "#bfdbfe"
+		},
+		{
+			"key": "gridSize",
+			"label": "Grid size",
+			"control": "range",
+			"min": 8,
+			"max": 18,
+			"step": 1,
+			"defaultValue": 12
+		},
+		{
+			"key": "heightScale",
+			"label": "Height scale",
+			"control": "range",
+			"min": 1,
+			"max": 6,
+			"step": 0.5,
+			"defaultValue": 3
+		},
+		{
+			"key": "groundColor",
+			"label": "Ground color",
+			"control": "color",
+			"defaultValue": "#65a30d"
+		}
 	]
 }
 */
@@ -35,8 +64,9 @@ import {
 import type {
 	ThreeDemoSceneController,
 	ThreeDemoSceneFactory
-} from '../../../src/lib/three/three-demo-scene';
+} from '../../src/lib/three/three-demo-scene';
 
+// Try these values first in the editor sidebar.
 // @three-template-parameters:start
 export const templateParameters = {
 	"background": "#bfdbfe",
@@ -46,58 +76,125 @@ export const templateParameters = {
 } satisfies Record<string, number | string>;
 // @three-template-parameters:end
 
-const noise = new ImprovedNoise();
+const terrainNoise = new ImprovedNoise();
 
-export const createDemoScene: ThreeDemoSceneFactory = ({ camera, scene }): ThreeDemoSceneController => {
-	const gridSize = Number(templateParameters.gridSize);
-	const heightScale = Number(templateParameters.heightScale);
+type MinecraftSceneSettings = {
+	background: string;
+	gridSize: number;
+	groundColor: string;
+	heightScale: number;
+};
+
+type SceneLights = {
+	ambientLight: AmbientLight;
+	directionalLight: DirectionalLight;
+};
+
+export const createDemoScene: ThreeDemoSceneFactory = ({
+	camera,
+	scene
+}): ThreeDemoSceneController => {
+	const settings = readMinecraftSceneSettings();
 	const blockGeometry = new BoxGeometry(1, 1, 1);
-	const material = new MeshStandardMaterial({
-		color: String(templateParameters.groundColor),
-		metalness: 0.04,
-		roughness: 0.88
-	});
-	const blockCount = gridSize * gridSize;
-	const blocks = new InstancedMesh(blockGeometry, material, blockCount);
-	const ambientLight = new AmbientLight('#ffffff', 2.2);
-	const directionalLight = new DirectionalLight('#ffffff', 3.4);
-	const dummy = new Object3D();
-	let instanceId = 0;
+	const groundMaterial = createGroundMaterial(settings.groundColor);
+	const blockCount = settings.gridSize * settings.gridSize;
+	const terrainMesh = new InstancedMesh(blockGeometry, groundMaterial, blockCount);
+	const placementHelper = new Object3D();
+	const sceneLights = createSceneLights();
 
-	scene.background = new Color(String(templateParameters.background));
-	camera.position.set(gridSize * 0.6, gridSize * 0.7, gridSize * 0.8);
-	camera.lookAt(0, 0, 0);
-	directionalLight.position.set(gridSize, gridSize * 1.4, gridSize * 0.8);
-
-	for (let z = 0; z < gridSize; z += 1) {
-		for (let x = 0; x < gridSize; x += 1) {
-			const xOffset = x - gridSize / 2;
-			const zOffset = z - gridSize / 2;
-			const height =
-				Math.max(1, Math.round((noise.noise(x * 0.18, z * 0.18, 0.35) + 0.6) * heightScale));
-
-			dummy.position.set(xOffset, height * 0.5, zOffset);
-			dummy.scale.set(0.92, height, 0.92);
-			dummy.updateMatrix();
-			blocks.setMatrixAt(instanceId, dummy.matrix);
-			instanceId += 1;
-		}
-	}
-
-	scene.add(ambientLight);
-	scene.add(directionalLight);
-	scene.add(blocks);
+	fillTerrain(terrainMesh, placementHelper, settings);
+	configureScene(camera, scene, settings, terrainMesh, sceneLights);
 
 	return {
 		update: () => {
-			blocks.rotation.y += 0.0025;
+			terrainMesh.rotation.y += 0.0025;
 		},
 		dispose: () => {
-			scene.remove(ambientLight);
-			scene.remove(directionalLight);
-			scene.remove(blocks);
+			scene.remove(sceneLights.ambientLight);
+			scene.remove(sceneLights.directionalLight);
+			scene.remove(terrainMesh);
 			blockGeometry.dispose();
-			material.dispose();
+			groundMaterial.dispose();
 		}
 	};
 };
+
+function readMinecraftSceneSettings(): MinecraftSceneSettings {
+	return {
+		background: String(templateParameters.background),
+		gridSize: Number(templateParameters.gridSize),
+		groundColor: String(templateParameters.groundColor),
+		heightScale: Number(templateParameters.heightScale)
+	};
+}
+
+function createGroundMaterial(groundColor: string): MeshStandardMaterial {
+	return new MeshStandardMaterial({
+		color: groundColor,
+		metalness: 0.04,
+		roughness: 0.88
+	});
+}
+
+function createSceneLights(): SceneLights {
+	return {
+		ambientLight: new AmbientLight('#ffffff', 2.2),
+		directionalLight: new DirectionalLight('#ffffff', 3.4)
+	};
+}
+
+function fillTerrain(
+	terrainMesh: InstancedMesh,
+	placementHelper: Object3D,
+	settings: MinecraftSceneSettings
+): void {
+	let instanceIndex = 0;
+
+	for (let zIndex = 0; zIndex < settings.gridSize; zIndex += 1) {
+		for (let xIndex = 0; xIndex < settings.gridSize; xIndex += 1) {
+			const terrainHeight = readTerrainHeight(xIndex, zIndex, settings.heightScale);
+			const xOffset = xIndex - settings.gridSize / 2;
+			const zOffset = zIndex - settings.gridSize / 2;
+
+			placementHelper.position.set(xOffset, terrainHeight * 0.5, zOffset);
+			placementHelper.scale.set(0.92, terrainHeight, 0.92);
+			placementHelper.updateMatrix();
+			terrainMesh.setMatrixAt(instanceIndex, placementHelper.matrix);
+			instanceIndex += 1;
+		}
+	}
+}
+
+function configureScene(
+	camera: Parameters<ThreeDemoSceneFactory>[0]['camera'],
+	scene: Parameters<ThreeDemoSceneFactory>[0]['scene'],
+	settings: MinecraftSceneSettings,
+	terrainMesh: InstancedMesh,
+	sceneLights: SceneLights
+): void {
+	scene.background = new Color(settings.background);
+	camera.position.set(
+		settings.gridSize * 0.6,
+		settings.gridSize * 0.7,
+		settings.gridSize * 0.8
+	);
+	camera.lookAt(0, 0, 0);
+	sceneLights.directionalLight.position.set(
+		settings.gridSize,
+		settings.gridSize * 1.4,
+		settings.gridSize * 0.8
+	);
+
+	scene.add(sceneLights.ambientLight);
+	scene.add(sceneLights.directionalLight);
+	scene.add(terrainMesh);
+}
+
+function readTerrainHeight(
+	xIndex: number,
+	zIndex: number,
+	heightScale: number
+): number {
+	const noiseValue = terrainNoise.noise(xIndex * 0.18, zIndex * 0.18, 0.35);
+	return Math.max(1, Math.round((noiseValue + 0.6) * heightScale));
+}

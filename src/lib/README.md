@@ -12,9 +12,9 @@
 ## Main Areas
 
 - [`components`](./components/README.md)
-  Small reusable primitive families aligned with the ui-system structure, currently focused on shared buttons and cards.
+  Reusable primitive families aligned with the local ui-system structure and Bits UI wrappers.
 - [`blocks`](./blocks/README.md)
-  Composed UI families that sit between primitives and route pages, starting with the grouped demo overview surface.
+  Composed UI families that sit between primitives and route pages, including the launcher, chat transcript, prompt bar, and settings sections.
 - [`editor`](./editor/README.md)
   Thin CodeMirror-oriented UI modules such as the editor shell, file picker, and line diagnostics.
 - [`three`](./three/README.md)

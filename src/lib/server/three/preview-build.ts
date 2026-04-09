@@ -35,8 +35,10 @@ export function createThreePreviewBuilder(rootDir: string = STATIC_THREE_DIR): T
 
 			try {
 				const result = await build({
+					absWorkingDir: process.cwd(),
 					bundle: true,
 					format: 'esm',
+					nodePaths: [resolve(process.cwd(), 'node_modules')],
 					stdin: overrides.has(absoluteEntryPath)
 						? {
 								contents: overrides.get(absoluteEntryPath)!,

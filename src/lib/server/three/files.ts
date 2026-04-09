@@ -6,15 +6,18 @@
  */
 
 import { mkdir, readdir, readFile, stat, writeFile } from 'node:fs/promises';
-import { basename, dirname, extname, resolve } from 'node:path';
+import { basename, dirname, extname, relative, resolve } from 'node:path';
 
 import type { ThreeSourceDocument, ThreeSourceFileSummary } from '$lib/three/three-editor-types';
 import type { ThreeCreateFileRequest, ThreeCreateFileResult } from '$lib/three/three-template-types';
 
 import { STATIC_TEMPLATES_DIR, STATIC_THREE_DIR, toManagedRelativePath } from './paths';
 
-const DEFAULT_PREVIEW_ENTRY_PATH = 'cube.ts';
+export const DEFAULT_MANAGED_SCENE_NAME = 'Cube';
+export const DEFAULT_PREVIEW_ENTRY_PATH = 'scenes/cube.ts';
 const DEFAULT_LIST_EXCLUDE_PREFIXES = ['shared/', 'templates/'];
+const TEMPLATE_THREE_LIB_PREFIX = '../../src/lib/three/';
+const MANAGED_THREE_LIB_PREFIX = '../../../src/lib/three/';
 export type ThreeFileService = {
 	createManagedFile: (request: ThreeCreateFileRequest) => Promise<ThreeCreateFileResult>;
 	listFiles: () => Promise<ThreeSourceFileSummary[]>;
@@ -56,10 +59,10 @@ export function createThreeFileService(
 		createManagedFile: async (request) => {
 			const outputPath = await createUniqueScenePath(normalizedRootDir, request.fileName);
 			const absolutePath = resolveManagedFilePath(normalizedRootDir, outputPath);
-				const content =
-					request.mode === 'blank'
-						? createBlankManagedSceneSource(request.fileName)
-						: await readTemplateSource(templateRootDir, request.templatePath);
+			const content =
+				request.mode === 'blank'
+					? createBlankManagedSceneSource(absolutePath, request.fileName)
+					: await readTemplateSource(templateRootDir, request.templatePath);
 
 			await mkdir(dirname(absolutePath), { recursive: true });
 			await writeFile(absolutePath, content, 'utf-8');
@@ -92,7 +95,8 @@ export function createThreeFileService(
 
 async function readTemplateSource(templateRootDir: string, templatePath: string): Promise<string> {
 	const normalizedTemplatePath = normalizeRequestedPath(templatePath);
-	return readFile(resolveManagedFilePath(templateRootDir, normalizedTemplatePath), 'utf-8');
+	const source = await readFile(resolveManagedFilePath(templateRootDir, normalizedTemplatePath), 'utf-8');
+	return source.replaceAll(TEMPLATE_THREE_LIB_PREFIX, MANAGED_THREE_LIB_PREFIX);
 }
 
 export async function listManagedFiles(
@@ -168,8 +172,14 @@ async function createUniqueScenePath(rootDir: string, fileName: string): Promise
 	throw new Error('Unable to find a unique file path under static/three/scenes.');
 }
 
-function createBlankManagedSceneSource(fileName: string): string {
+function createBlankManagedSceneSource(outputPath: string, fileName: string): string {
 	const sceneTitle = toSceneTitle(fileName);
+	const sharedSceneTypeImportPath = relative(
+		dirname(outputPath),
+		resolve(process.cwd(), 'src', 'lib', 'three', 'three-demo-scene')
+	)
+		.split('\\')
+		.join('/');
 
 	return `/**
  * Purpose: Provide a minimal editable Three.js scene starter for the template workbench.
@@ -190,7 +200,7 @@ import {
 import type {
 \tThreeDemoSceneController,
 \tThreeDemoSceneFactory
-} from '../../../src/lib/three/three-demo-scene';
+} from '${sharedSceneTypeImportPath}';
 
 const BACKGROUND = '#020617';
 const CUBE_COLOR = '#60a5fa';

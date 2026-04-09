@@ -7,15 +7,17 @@
 
 import { error } from '@sveltejs/kit';
 
-import { createThreeFileService } from '$lib/server/three/files';
+import {
+	createThreeFileService,
+	DEFAULT_MANAGED_SCENE_NAME,
+	DEFAULT_PREVIEW_ENTRY_PATH
+} from '$lib/server/three/files';
 import { createThreePreviewBuilder } from '$lib/server/three/preview-build';
 import type {
 	ThreePreviewBuildResult,
 	ThreeSourceDocument,
 	ThreeSourceFileSummary
 } from '$lib/three/three-editor-types';
-
-const DEFAULT_PREVIEW_ENTRY_PATH = 'cube.ts';
 
 export type ThreeEditorPageData = {
 	document: ThreeSourceDocument;
@@ -31,7 +33,16 @@ export async function loadThreeEditorPageData(options?: {
 	const previewEntryPath = options?.previewEntryPath ?? DEFAULT_PREVIEW_ENTRY_PATH;
 	const threeFileService = createThreeFileService(options?.rootDir, previewEntryPath);
 	const threePreviewBuilder = createThreePreviewBuilder(options?.rootDir);
-	const files = await threeFileService.listFiles();
+	let files = await threeFileService.listFiles();
+
+	if (files.length === 0) {
+		await threeFileService.createManagedFile({
+			fileName: DEFAULT_MANAGED_SCENE_NAME,
+			mode: 'blank'
+		});
+		files = await threeFileService.listFiles();
+	}
+
 	const selectedPath = files.find((file) => file.path === previewEntryPath)?.path ?? files[0]?.path;
 
 	if (!selectedPath) {
@@ -39,8 +50,11 @@ export async function loadThreeEditorPageData(options?: {
 	}
 
 	const document = await threeFileService.readManagedFile(selectedPath);
+	const activePreviewEntryPath = files.some((file) => file.path === previewEntryPath)
+		? previewEntryPath
+		: selectedPath;
 	const preview = await threePreviewBuilder.buildPreview({
-		entryPath: previewEntryPath,
+		entryPath: activePreviewEntryPath,
 		files: [document]
 	});
 
@@ -48,6 +62,6 @@ export async function loadThreeEditorPageData(options?: {
 		document,
 		files,
 		preview,
-		previewEntryPath
+		previewEntryPath: activePreviewEntryPath
 	};
 }

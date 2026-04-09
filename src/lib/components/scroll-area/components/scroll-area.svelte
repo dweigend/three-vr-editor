@@ -34,35 +34,3 @@
 		<ScrollAreaPrimitive.Thumb class={scrollAreaThumbClass} />
 	</ScrollAreaPrimitive.Scrollbar>
 </ScrollAreaPrimitive.Root>
-
-<style>
-	:global(.ui-scroll-area) {
-		position: relative;
-		overflow: hidden;
-	}
-
-	:global(.ui-scroll-area__viewport) {
-		width: 100%;
-		height: 100%;
-	}
-
-	:global(.ui-scroll-area__scrollbar) {
-		display: flex;
-		touch-action: none;
-		user-select: none;
-		background: rgba(255, 255, 255, 0.03);
-		transition: background var(--ui-transition-fast);
-	}
-
-	:global(.ui-scroll-area__scrollbar[data-orientation='vertical']) {
-		width: 0.55rem;
-		padding: 0.08rem;
-		border-left: 1px solid var(--ui-color-border);
-	}
-
-	:global(.ui-scroll-area__thumb) {
-		flex: 1;
-		border-radius: 999px;
-		background: rgba(168, 85, 247, 0.42);
-	}
-	</style>
