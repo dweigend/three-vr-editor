@@ -54,3 +54,5 @@ Keep each template in this order:
 - Preserve the shared `createDemoScene` contract so the workbench can still run the file.
 - Use `defineThreeTemplateUi(...)` and `defineThreeTemplateParameters(...)` so the
   editor can read and rewrite metadata safely.
+- Templates may omit editable parameters entirely. Editor modules that rely on
+  parameter discovery must treat that as a valid empty state rather than an error.

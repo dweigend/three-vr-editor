@@ -12,6 +12,13 @@
 - `static/three` is the managed local workspace for editable scene files and should stay generated, not versioned beyond placeholders.
 - `static/templates` contains the teaching-oriented starter templates copied into editable scenes.
 
+## UI Source Of Truth
+
+- For UI adjustments, inspect `/Volumes/SSD_Data/GitBase/ui-system/src/lib/components` first before creating or reshaping local primitives.
+- Reuse the external UI-system components 1:1 when they fit the need.
+- Only build or extend local `src/lib/components` primitives after checking the external UI-system families first.
+- Keep `src/lib/blocks` aligned with the same UI-system-first rule.
+
 ## Editor Default
 
 - Use `CodeMirror 6` as the default embedded code editor in this repository.

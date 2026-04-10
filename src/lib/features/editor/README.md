@@ -10,6 +10,8 @@ This folder contains editor-specific client modules for the editor workspace.
   `ThreePreview.svelte`, `create-three-runtime.ts`, `load-three-preview-module.ts`, `three-viewer-errors.ts`
 - workspace state and transport
   `three-editor-workspace-state.svelte.ts`, `editor-agent-client.ts`, `editor-agent-types.ts`
+- optional shared live-parameter layer for interactive editor modules
+  `LIVE-LAYER-PLAN.md`
 - template metadata and file creation UI
   `ThreeFileCreatePanel.svelte`, `ThreeTemplateParameterPanel.svelte`,
   `three-helpers.ts`, `three-template-source.ts`, `three-template-types.ts`
@@ -31,3 +33,4 @@ multiple editor modules directly.
 - Keep generic primitives in `src/lib/components`.
 - Keep composed reusable UI in `src/lib/blocks`.
 - Keep Pi SDK usage and filesystem access in `src/lib/server`.
+- Keep optional shared live preview state in this folder rather than duplicating it in feature modules.

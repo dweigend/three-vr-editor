@@ -10,6 +10,10 @@
   Composed UI blocks.
 - [`features/editor`](./features/editor/README.md)
   Editor-specific client code.
+- [`features/node-editor`](./features/node-editor/README.md)
+  Optional visual node-editor module for the editor workbench.
+- [`features/controlls`](./features/controlls/README.md)
+  Optional preview control-panel module for the editor workbench.
 - [`features/chat`](./features/chat/README.md)
   Chat-specific client code.
 - [`server`](./server/README.md)
