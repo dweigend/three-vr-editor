@@ -1,22 +1,12 @@
 <script lang="ts">
-	import type { Snippet } from 'svelte';
 	import { untrack } from 'svelte';
-	import { redo, redoDepth } from '@codemirror/commands';
 	import { javascript } from '@codemirror/lang-javascript';
 	import { HighlightStyle, syntaxHighlighting } from '@codemirror/language';
 	import { tags } from '@lezer/highlight';
-	import Plus from '@lucide/svelte/icons/plus';
+	import { redo, redoDepth } from '@codemirror/commands';
 	import { basicSetup, EditorView } from 'codemirror';
-
-	import { DropdownMenu, ToolbarButton, ToolbarRoot } from '$lib/components';
-	import type { ThreeSourceFileSummary } from '$lib/features/editor/three-editor-types';
-	import type {
-		ThreeCreateFileRequest,
-		ThreeTemplateSummary
-	} from '$lib/features/editor/three-template-types';
+	import type { CodeEditorToolbarState } from '$lib/features/editor/editor-workbench-types';
 	import '$lib/features/editor/code-editor.css';
-
-	import FileSelect from './FileSelect.svelte';
 
 	import {
 		createEditorLineRangeSignature,
@@ -30,40 +20,20 @@
 	type Props = {
 		changedLineRanges?: EditorLineRange[];
 		diagnostic?: EditorDiagnostic | null;
-		files?: ThreeSourceFileSummary[];
 		onChange: (value: string) => void;
-		onCreateFile?: ((request: ThreeCreateFileRequest) => Promise<void>) | undefined;
-		onRedo?: (() => void) | undefined;
-		onSave?: (() => void | Promise<void>) | undefined;
-		saveDisabled?: boolean;
-		selectedPath?: string;
-		statusClassName?: string;
-		statusText?: string;
-		templates?: ThreeTemplateSummary[];
-		toolbarActions?: Snippet;
+		toolbarState?: CodeEditorToolbarState | null;
 		value: string;
 	};
 
 	let {
 		changedLineRanges = [],
 		diagnostic = null,
-		files = [],
 		onChange,
-		onCreateFile,
-		onRedo,
-		onSave,
-		saveDisabled = false,
-		selectedPath = $bindable(''),
-		statusClassName = 'ui-toolbar-status',
-		statusText = '',
-		templates = [],
-		toolbarActions,
+		toolbarState = $bindable<CodeEditorToolbarState | null>(null),
 		value
 	}: Props = $props();
 
 	let canRedo = $state(false);
-	let isCreateMenuOpen = $state(false);
-	let isCreatingFile = $state(false);
 	let editorRoot: HTMLDivElement | undefined = $state();
 	let appliedDiagnosticLine = $state<number | null>(null);
 	let appliedChangedLineRangeSignature = $state('');
@@ -133,28 +103,6 @@
 		},
 		{ dark: true }
 	);
-	const createMenuItems = $derived([
-		{
-			description: 'Create a blank editable scene under static/three/scenes',
-			request: {
-				fileName: 'new-scene',
-				mode: 'blank'
-			} satisfies ThreeCreateFileRequest,
-			textValue: 'Blank starter',
-			title: 'Blank starter'
-		},
-		...templates.map((template) => ({
-			description: template.description,
-			request: {
-				fileName: template.title,
-				mode: 'template',
-				templatePath: template.path
-			} satisfies ThreeCreateFileRequest,
-			textValue: template.title,
-			title: template.title
-		}))
-	]);
-
 	function updateRedoState(nextView: EditorView): void {
 		canRedo = redoDepth(nextView.state) > 0;
 	}
@@ -166,32 +114,6 @@
 
 		if (redo(view)) {
 			updateRedoState(view);
-			onRedo?.();
-		}
-	}
-
-	async function handleSave(): Promise<void> {
-		if (saveDisabled) {
-			return;
-		}
-
-		await onSave?.();
-	}
-
-	async function handleCreateFile(request: ThreeCreateFileRequest): Promise<void> {
-		if (!onCreateFile || isCreatingFile) {
-			return;
-		}
-
-		isCreatingFile = true;
-		isCreateMenuOpen = false;
-
-		try {
-			await onCreateFile(request);
-		} catch (error) {
-			window.alert(error instanceof Error ? error.message : 'Create file failed.');
-		} finally {
-			isCreatingFile = false;
 		}
 	}
 
@@ -289,69 +211,22 @@
 		setEditorChangedLineRanges(view, changedLineRanges);
 		appliedChangedLineRangeSignature = nextSignature;
 	});
+
+	$effect(() => {
+		toolbarState = {
+			canRedo,
+			redo: handleRedo
+		};
+	});
+
+	$effect(() => {
+		return () => {
+			toolbarState = null;
+		};
+	});
 </script>
 
 <div class="ui-code-editor">
-	<ToolbarRoot class="ui-code-editor__toolbar" aria-label="Editor toolbar">
-		<div class="ui-toolbar__group ui-toolbar__group--editor ui-toolbar__group--editor-main">
-			{#if files.length > 0}
-				<FileSelect files={files} bind:value={selectedPath} compact label="Editor file" />
-			{/if}
-
-			{#if onCreateFile}
-				<DropdownMenu.Root bind:open={isCreateMenuOpen}>
-					<DropdownMenu.Trigger
-						aria-label="Create new file"
-						class="ui-button ui-button--ghost ui-button--sm ui-toolbar-button ui-code-editor__toolbar-button ui-code-editor__toolbar-button--icon"
-						disabled={isCreatingFile}
-						title="Create new file"
-					>
-						<Plus aria-hidden="true" size={16} />
-					</DropdownMenu.Trigger>
-
-					<DropdownMenu.Portal>
-						<DropdownMenu.Content class="ui-code-editor__create-menu" sideOffset={8}>
-							{#each createMenuItems as item (item.textValue)}
-								<DropdownMenu.Item
-									class="ui-code-editor__create-menu-item"
-									onSelect={() => {
-										void handleCreateFile(item.request);
-									}}
-									textValue={item.textValue}
-								>
-									<div class="ui-code-editor__create-menu-copy">
-										<span class="ui-code-editor__create-menu-title">{item.title}</span>
-										<span class="ui-code-editor__create-menu-meta">{item.description}</span>
-									</div>
-								</DropdownMenu.Item>
-							{/each}
-						</DropdownMenu.Content>
-					</DropdownMenu.Portal>
-				</DropdownMenu.Root>
-			{/if}
-
-			<ToolbarButton type="button" onclick={handleSave} disabled={saveDisabled}>
-				Save
-			</ToolbarButton>
-			<ToolbarButton
-				class="ui-button--ghost"
-				type="button"
-				onclick={handleRedo}
-				disabled={!canRedo}
-			>
-				Redo
-			</ToolbarButton>
-		</div>
-
-		<div class="ui-toolbar__group ui-toolbar__group--editor ui-toolbar__group--editor-meta">
-			{#if statusText}
-				<p class={statusClassName} title={statusText}>{statusText}</p>
-			{/if}
-
-			{@render toolbarActions?.()}
-		</div>
-	</ToolbarRoot>
-
 	<div class="ui-code-editor__body">
 		<div class="editor-root" bind:this={editorRoot}></div>
 	</div>

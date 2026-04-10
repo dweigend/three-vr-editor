@@ -16,33 +16,6 @@
 	min-width: 0;
 }
 
-.ui-code-editor__toolbar {
-	display: grid;
-	grid-template-columns: minmax(0, 1fr) auto;
-	align-items: center;
-	gap: var(--ui-space-3);
-	overflow-x: hidden;
-	overflow-y: hidden;
-	padding: 0.75rem 1rem;
-	border-bottom: 1px solid var(--ui-color-border);
-	white-space: nowrap;
-}
-
-.ui-code-editor__toolbar-button--icon {
-	width: var(--ui-control-size);
-	min-width: var(--ui-control-size);
-	padding-inline: 0;
-	border: 0;
-	background: transparent;
-}
-
-.ui-code-editor__toolbar-button--icon:hover,
-.ui-code-editor__toolbar-button--icon:focus-visible {
-	border: 0;
-	background: transparent;
-	color: var(--ui-color-accent-strong);
-}
-
 .ui-code-editor__create-menu {
 	width: 14rem;
 	max-height: min(24rem, calc(100vh - 8rem));

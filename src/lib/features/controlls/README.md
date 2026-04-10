@@ -20,6 +20,12 @@ This folder contains the optional control-panel module that lives inside the edi
 - adapters to the shared live parameter layer
   `controlls-bridge.ts`
 
+## Current Status
+
+- `ControlPanel.svelte` is wired into the editor workbench as a placeholder panel.
+- Window visibility now flows through the shared workbench toolbar state.
+- The panel intentionally shows an empty state until parameter controls land.
+
 ## Boundaries
 
 - Do not add a separate route for this feature.

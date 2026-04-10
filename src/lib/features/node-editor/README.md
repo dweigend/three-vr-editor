@@ -20,6 +20,12 @@ This folder contains the optional node-editor module that lives inside the edito
 - mapping between template parameters, graph state, and code updates
   `node-editor-mappers.ts`
 
+## Current Status
+
+- `NodeEditorPanel.svelte` is wired into the editor workbench as a placeholder panel.
+- Window visibility now flows through the shared workbench toolbar state.
+- The panel intentionally shows an empty state until graph editing lands.
+
 ## Boundaries
 
 - Do not add a separate route for this feature.
