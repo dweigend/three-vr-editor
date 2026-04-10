@@ -50,16 +50,12 @@ Keys, settings, and session files are stored outside the repository under `~/.th
 
 - `bun`
 - `vite`
-- `svelte 5`
-- `@sveltejs/kit`
+- `svelte 5` and `@sveltejs/kit`
 - `three`
 - `@mariozechner/pi-coding-agent`
 - `bits-ui`
 - `codemirror`
-- `esbuild`
-- `biome`
-- `vitest`
-- `playwright`
+- `biome` for linting
 
 ## Project Structure 🧱
 
@@ -72,13 +68,3 @@ Keys, settings, and session files are stored outside the repository under `~/.th
 - `src/lib/server/pi`: server-only Pi integration, auth, model selection, sessions, and tool orchestration
 - `static/templates`: teaching-oriented starter templates
 - `static/three`: local managed workspace for editable scene files
-
-## Further Reading
-
-- [`CONTRIBUTING.md`](./CONTRIBUTING.md)
-- [`NEXT-STEPS.md`](./NEXT-STEPS.md)
-- [`src/lib/README.md`](./src/lib/README.md)
-- [`src/lib/features/editor/README.md`](./src/lib/features/editor/README.md)
-- [`src/lib/server/README.md`](./src/lib/server/README.md)
-- [`src/lib/server/pi/README.md`](./src/lib/server/pi/README.md)
-- [`src/lib/server/editor/README.md`](./src/lib/server/editor/README.md)
