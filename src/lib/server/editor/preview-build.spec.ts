@@ -34,6 +34,38 @@ describe('createThreePreviewBuilder', () => {
 		}
 	});
 
+	it('keeps shared Three.js runtime imports external', async () => {
+		const rootDir = await createFixtureDir();
+		await writeFile(
+			join(rootDir, 'cube.ts'),
+			`import { Scene } from 'three';
+
+export const createDemoScene = () => {
+\tnew Scene();
+
+\treturn {
+\t\tupdate() {},
+\t\tdispose() {}
+\t};
+};`,
+			'utf-8'
+		);
+		const builder = createThreePreviewBuilder(rootDir);
+
+		const result = await builder.buildPreview({
+			entryPath: 'cube.ts',
+			files: []
+		});
+
+		expect(result.status).toBe('success');
+
+		if (result.status === 'success') {
+			expect(result.code).toContain('/editor/runtime/three/three.module.js');
+			expect(result.code).not.toContain('Multiple instances of Three.js being imported');
+			expect(result.code).not.toContain('window.__THREE__');
+		}
+	});
+
 	it('returns a normalized build error for invalid code', async () => {
 		const rootDir = await createFixtureDir();
 		await writeFile(

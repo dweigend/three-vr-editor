@@ -1,5 +1,10 @@
 import type { ThreePreviewBuildSuccess } from './three-editor-types';
 import type { ThreeDemoRendererKind, ThreeDemoSceneFactory } from './three-demo-scene';
+import {
+	THREE_MODULE_URL,
+	THREE_WEBGPU_MODULE_URL,
+	toAbsoluteThreeRuntimeModuleUrl
+} from './three-runtime-module-urls';
 
 const SCENE_EXPORT_NAME = 'createDemoScene';
 const RENDERER_KIND_EXPORT_NAME = 'demoRendererKind';
@@ -20,7 +25,7 @@ type ThreePreviewModule = {
 export async function loadThreePreviewModule(
 	preview: ThreePreviewBuildSuccess
 ): Promise<LoadedThreePreviewModule> {
-	const blob = new Blob([preview.code], { type: 'text/javascript' });
+	const blob = new Blob([rewriteThreeRuntimeImportUrls(preview.code)], { type: 'text/javascript' });
 	const moduleUrl = URL.createObjectURL(blob);
 
 	try {
@@ -54,4 +59,18 @@ function readRendererKind(value: unknown): ThreeDemoRendererKind {
 	}
 
 	return 'webgl';
+}
+
+function rewriteThreeRuntimeImportUrls(code: string): string {
+	const baseUrl = window.location.href;
+
+	return code
+		.replaceAll(
+			THREE_MODULE_URL,
+			toAbsoluteThreeRuntimeModuleUrl(THREE_MODULE_URL, baseUrl)
+		)
+		.replaceAll(
+			THREE_WEBGPU_MODULE_URL,
+			toAbsoluteThreeRuntimeModuleUrl(THREE_WEBGPU_MODULE_URL, baseUrl)
+		);
 }
