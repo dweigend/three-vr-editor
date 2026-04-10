@@ -1,4 +1,4 @@
-# three-js-vr-builder
+# three-vr-editor
 
 > You currently need an OpenRouter API key.
 > 🚧 This project is a work in progress.
