@@ -61,14 +61,6 @@ Keys, settings, and session files are stored outside the repository under `~/.th
 - `vitest`
 - `playwright`
 
-## Wireframes 🎨
-
-![Editor wireframe](./wireframes/editor.png)
-
-![Chat wireframe](./wireframes/chat.png)
-
-![Settings wireframe](./wireframes/settings.png)
-
 ## Project Structure 🧱
 
 - `src/routes`: main app surfaces and supporting endpoints
