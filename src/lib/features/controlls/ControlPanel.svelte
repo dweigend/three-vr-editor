@@ -5,9 +5,11 @@
 	import { Button, Card, CardBody, CardFooter, Separator, TextInput } from '$lib/components';
 	import { editorLiveLayer } from '$lib/features/editor/editor-live-layer.svelte';
 	import {
-		formatControlPanelValue,
-		isControlPanelHexColor,
-		parseControlPanelValue,
+		formatResolvedEditorLiveParameterValue,
+		isEditorLiveHexColor,
+		parseEditorLiveParameterValue
+	} from '$lib/features/editor/editor-live-parameter-values';
+	import {
 		readControlPanelEmptyState
 	} from './controlls-panel';
 
@@ -61,7 +63,7 @@
 
 		editorLiveLayer.setOverride(
 			key,
-			parseControlPanelValue(parameter.definition, nextValue)
+			parseEditorLiveParameterValue(parameter.definition, nextValue)
 		);
 	}
 
@@ -71,7 +73,7 @@
 			[key]: nextValue
 		};
 
-		if (!isControlPanelHexColor(nextValue)) {
+		if (!isEditorLiveHexColor(nextValue)) {
 			return;
 		}
 
@@ -85,7 +87,7 @@
 			return;
 		}
 
-		if (isControlPanelHexColor(draftValue)) {
+		if (isEditorLiveHexColor(draftValue)) {
 			const { [key]: _removedDraftValue, ...nextDraftValues } = colorDraftValues;
 			colorDraftValues = nextDraftValues;
 			return;
@@ -128,7 +130,7 @@
 
 									{#if parameter.definition.control === 'range'}
 										<output class="control-panel__field-meta" for={inputId}>
-											{formatControlPanelValue(parameter)}
+											{formatResolvedEditorLiveParameterValue(parameter)}
 										</output>
 									{/if}
 								</div>

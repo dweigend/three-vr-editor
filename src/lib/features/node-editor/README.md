@@ -14,17 +14,24 @@ This folder contains the optional node-editor module that lives inside the edito
 - panel shell and workbench integration
   `NodeEditorPanel.svelte`
 - browser-side state and layout
-  `node-editor-state.svelte.ts`, `node-editor-layout.ts`
+  `node-editor-state.svelte.ts`
 - type-safe interfaces and registry
   `node-editor-types.ts`, `node-editor-registry.ts`
 - mapping between template parameters, graph state, and code updates
-  `node-editor-mappers.ts`
+  `node-editor-mapper.ts`
+- SvelteFlow render shell
+  `render/NodeEditorCanvas.svelte`, `render/NodeEditorCanvasTargetNode.svelte`
+- target node rendering
+  `NodeEditorTargetNode.svelte`
 
 ## Current Status
 
-- `NodeEditorPanel.svelte` is wired into the editor workbench as a placeholder panel.
+- `NodeEditorPanel.svelte` renders parameter-driven target nodes from the shared live layer on top of a direct SvelteFlow canvas.
+- `node-editor-state.svelte.ts` keeps only local UI state such as filter, selection, per-file layout, and viewport.
+- `node-editor-registry.ts` and `node-editor-mapper.ts` translate editable template parameters into stable target-node and canvas view models.
+- Direct `@xyflow/svelte` imports are isolated to the `render/` folder.
 - Window visibility now flows through the shared workbench toolbar state.
-- The panel intentionally shows an empty state until graph editing lands.
+- Empty-state handling stays graceful for missing template metadata, missing parameter blocks, and files without editable values.
 
 ## Boundaries
 
@@ -35,3 +42,5 @@ This folder contains the optional node-editor module that lives inside the edito
 - Keep reusable composed UI in `src/lib/blocks`.
 - Keep styling in `src/app.css` instead of feature-local CSS files.
 - Treat the code editor and workspace state as the source of truth.
+- Keep the shared live layer in `src/lib/features/editor` as the only live data source.
+- Keep the SvelteFlow coupling inside the render shell instead of spreading it into editor-wide state modules.

@@ -1,47 +1,9 @@
-import type {
-	EditorLiveDiscoveryStatus,
-	EditorLiveResolvedParameter
-} from '$lib/features/editor/editor-live-layer-types';
-import type {
-	ThreeTemplateParameterDefinition,
-	ThreeTemplateParameterValue
-} from '$lib/features/editor/three-template-types';
+import type { EditorLiveDiscoveryStatus } from '$lib/features/editor/editor-live-layer-types';
 
 type ControlPanelEmptyState = {
 	description: string;
 	title: string;
 };
-
-export function parseControlPanelValue(
-	definition: ThreeTemplateParameterDefinition,
-	rawValue: string
-): ThreeTemplateParameterValue {
-	if (definition.control === 'range') {
-		const parsedValue = Number.parseFloat(rawValue);
-		return Number.isFinite(parsedValue) ? parsedValue : definition.defaultValue;
-	}
-
-	if (definition.control === 'select') {
-		return definition.options.find((option) => String(option.value) === rawValue)?.value ?? definition.defaultValue;
-	}
-
-	return rawValue;
-}
-
-export function formatControlPanelValue(parameter: EditorLiveResolvedParameter): string {
-	if (parameter.definition.control !== 'range') {
-		return String(parameter.resolvedValue);
-	}
-
-	const step = parameter.definition.step ?? 0.1;
-	const decimalPlaces = countDecimalPlaces(step);
-
-	return Number(parameter.resolvedValue).toFixed(decimalPlaces);
-}
-
-export function isControlPanelHexColor(value: string): boolean {
-	return /^#[0-9a-fA-F]{6}$/.test(value);
-}
 
 export function readControlPanelEmptyState(
 	status: EditorLiveDiscoveryStatus,
@@ -76,15 +38,4 @@ export function readControlPanelEmptyState(
 		description: 'Live values become available here as soon as the active file exposes them.',
 		title: 'Controls ready'
 	};
-}
-
-function countDecimalPlaces(value: number): number {
-	const normalizedValue = `${value}`;
-	const decimalPart = normalizedValue.split('.')[1];
-
-	if (!decimalPart) {
-		return 0;
-	}
-
-	return Math.min(decimalPart.length, 4);
 }

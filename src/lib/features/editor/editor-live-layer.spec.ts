@@ -176,4 +176,20 @@ describe('editorLiveLayer', () => {
 			}
 		]);
 	});
+
+	it('keeps the live layer active for node-editor-only consumers across rematerialization', () => {
+		editorLiveLayer.setConsumerActive('node-editor', true);
+		editorLiveLayer.syncActiveFileContext(createActiveFileContext(COLOR_TEMPLATE_SOURCE));
+		editorLiveLayer.setOverride('cubeColor', '#f97316');
+		editorLiveLayer.syncActiveFileContext(
+			createActiveFileContext(SIZE_TEMPLATE_SOURCE, 'scenes/second-example.ts')
+		);
+
+		expect(editorLiveLayer.isActive).toBe(true);
+		expect(editorLiveLayer.mode).toBe('active');
+		expect(editorLiveLayer.overrides).toEqual({});
+		expect(editorLiveLayer.resolvedParameters.map((parameter) => parameter.key)).toEqual([
+			'cubeSize'
+		]);
+	});
 });

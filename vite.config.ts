@@ -9,7 +9,7 @@ export default defineConfig({
 		include: ['@lucide/svelte/icons/check-check', '@lucide/svelte/icons/rotate-ccw']
 	},
 	ssr: {
-		noExternal: ['bits-ui', 'paneforge']
+		noExternal: ['@xyflow/svelte', 'bits-ui', 'paneforge']
 	},
 	test: {
 		expect: { requireAssertions: true },
