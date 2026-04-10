@@ -1,8 +1,7 @@
 # three-vr-editor
 
-> You currently need an OpenRouter API key.
-> 🚧 This project is a work in progress.
-> 🤖 Parts of this project were built with AI. I mainly use Codex with the OpenAI models OpenCode and Pi, and I work in 🩷 Zed.
+> ⚠️ You currently need an OpenRouter API key to make it work
+
 
 `three-js-vr-builder` is an educational editor for learning three.js by writing, previewing, and iterating on scene code inside the app.
 
@@ -42,14 +41,6 @@ Start the development server:
 ```sh
 bun run dev
 ```
-
-Then:
-
-1. Open `http://localhost:5173/settings`.
-2. Add your OpenRouter API key.
-3. Select a model.
-4. Go to `http://localhost:5173/editor` or `http://localhost:5173/chat`.
-
 `bun install` also runs `prepare`. That syncs SvelteKit and installs Playwright browsers for local test flows.
 
 There is currently no required `.env` file for local development.
@@ -89,23 +80,6 @@ Keys, settings, and session files are stored outside the repository under `~/.th
 - `src/lib/server/pi`: server-only Pi integration, auth, model selection, sessions, and tool orchestration
 - `static/templates`: teaching-oriented starter templates
 - `static/three`: local managed workspace for editable scene files
-
-## Validation 🧪
-
-Run the core checks before opening a pull request:
-
-```sh
-bun run check
-bunx biome check .
-bun run test:unit -- --run
-```
-
-Additional commands:
-
-```sh
-bun run build
-bun run test
-```
 
 ## Further Reading
 
