@@ -4,7 +4,6 @@
 
 	import { Button, Card, CardBody, CardFooter, Separator, TextInput } from '$lib/components';
 	import { editorLiveLayer } from '$lib/features/editor/editor-live-layer.svelte';
-
 	import {
 		formatControlPanelValue,
 		isControlPanelHexColor,
@@ -119,14 +118,16 @@
 				<Card>
 					<CardBody class="control-panel__body">
 						{#each editorLiveLayer.resolvedParameters as parameter, parameterIndex (parameter.key)}
+							{@const inputId = `control-panel-${parameter.key}`}
+
 							<div class="control-panel__field">
 								<div class="control-panel__field-row">
-									<label class="ui-form-label" for={`control-panel-${parameter.key}`}>
+									<label class="ui-form-label" for={inputId}>
 										{parameter.definition.label}
 									</label>
 
 									{#if parameter.definition.control === 'range'}
-										<output class="control-panel__field-meta" for={`control-panel-${parameter.key}`}>
+										<output class="control-panel__field-meta" for={inputId}>
 											{formatControlPanelValue(parameter)}
 										</output>
 									{/if}
@@ -134,7 +135,7 @@
 
 								{#if parameter.definition.control === 'range'}
 									<input
-										id={`control-panel-${parameter.key}`}
+										id={inputId}
 										class="control-panel__range-input"
 										max={parameter.definition.max}
 										min={parameter.definition.min}
@@ -147,7 +148,7 @@
 								{:else if parameter.definition.control === 'color'}
 									<div class="control-panel__color-row">
 										<input
-											id={`control-panel-${parameter.key}`}
+											id={inputId}
 											class="control-panel__color-input"
 											type="color"
 											value={String(parameter.resolvedValue)}
@@ -157,8 +158,8 @@
 
 										<TextInput
 											class="control-panel__color-text"
-											id={`control-panel-${parameter.key}-text`}
-											name={`control-panel-${parameter.key}-text`}
+											id={`${inputId}-text`}
+											name={`${inputId}-text`}
 											value={readColorFieldValue(
 												parameter.key,
 												String(parameter.resolvedValue)
@@ -171,9 +172,9 @@
 									</div>
 								{:else if parameter.definition.control === 'select'}
 									<select
-										id={`control-panel-${parameter.key}`}
+										id={inputId}
 										class="ui-select"
-										name={`control-panel-${parameter.key}`}
+										name={inputId}
 										value={String(parameter.resolvedValue)}
 										onchange={(event) =>
 											handleParameterInput(parameter.key, event.currentTarget.value)}
@@ -184,8 +185,8 @@
 									</select>
 								{:else}
 									<TextInput
-										id={`control-panel-${parameter.key}`}
-										name={`control-panel-${parameter.key}`}
+										id={inputId}
+										name={inputId}
 										placeholder={parameter.definition.placeholder}
 										type="text"
 										value={String(parameter.resolvedValue)}
