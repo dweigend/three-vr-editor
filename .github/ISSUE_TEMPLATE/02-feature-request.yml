@@ -1,0 +1,49 @@
+name: Feature request
+description: Suggest a product, teaching, or workflow improvement.
+title: "[Feature]: "
+labels: ["enhancement", "triage"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for sharing an idea. Please keep the request concrete and connected to the teaching goals of the project.
+  - type: input
+    id: summary
+    attributes:
+      label: Short summary
+      placeholder: Add an onboarding tutorial for camera controls
+    validations:
+      required: true
+  - type: textarea
+    id: problem
+    attributes:
+      label: What problem does this solve?
+      description: Explain the user or teaching pain point first.
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed solution
+      description: Describe the simplest version that would still be useful.
+    validations:
+      required: true
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives considered
+      description: Share simpler options, workarounds, or related existing features.
+  - type: textarea
+    id: context
+    attributes:
+      label: Additional context
+      description: Add examples, references, or sketches if they help.
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Checklist
+      options:
+        - label: I searched existing issues before opening this request.
+          required: true
+        - label: This request fits the educational scope of the project.
+          required: true

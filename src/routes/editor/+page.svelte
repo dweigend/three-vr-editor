@@ -1,10 +1,3 @@
-<!--
-	Purpose: Render the main editor workspace directly in the route layer.
-	Context: This is one of the three primary app pages and owns the page-specific composition of editor, Pi agent, and preview panes.
-	Responsibility: Wire the shared editor state to the route endpoints, apply Pi edits back into the active file, and keep the workspace layout explicit.
-	Boundaries: Reusable editor, preview, Pi, and state modules stay in `src/lib`.
--->
-
 <script lang="ts">
 	import { untrack } from 'svelte';
 	import { resolve } from '$app/paths';

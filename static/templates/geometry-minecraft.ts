@@ -1,5 +1,3 @@
-/** Build a tiny block world and see how instancing keeps it fast. */
-
 import { ImprovedNoise } from 'three/addons/math/ImprovedNoise.js';
 import {
 	AmbientLight,
@@ -18,8 +16,6 @@ import {
 	defineThreeTemplateUi,
 	type ThreeDemoSceneFactory
 } from '$lib/features/editor/three-helpers';
-
-// The editor sidebar reads this to build the labels and controls.
 export const templateUi = defineThreeTemplateUi({
 	"id": "geometry-minecraft",
 	"title": "Geometry Minecraft",
@@ -59,8 +55,6 @@ export const templateUi = defineThreeTemplateUi({
 		}
 	]
 });
-
-// These are the values students can play with first.
 export const templateParameters = defineThreeTemplateParameters({
 	"background": "#bfdbfe",
 	"gridSize": 12,

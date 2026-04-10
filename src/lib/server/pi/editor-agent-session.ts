@@ -1,10 +1,3 @@
-/**
- * Purpose: Create the specialized Pi session used by the Three editor agent panel.
- * Context: The editor workflow needs a stricter session than plain chat so file changes target the active file by default.
- * Responsibility: Assemble the custom active-file edit tool, resource loader prompts, and the requested session mode.
- * Boundaries: Request parsing and response shaping stay in the editor-agent service and route handler.
- */
-
 import type { ThreeEditorActiveFileContext } from '$lib/features/editor/three-editor-workspace-types';
 
 import { createPiResourceLoader } from './resource-loader';

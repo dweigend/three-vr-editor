@@ -1,10 +1,3 @@
-/**
- * Purpose: Execute Pi requests for the Three editor agent panel across one-shot and session modes.
- * Context: The editor surface needs a server-only Pi integration that can return explanations or structured active-file edits.
- * Responsibility: Build a file-aware prompt, run the specialized Pi session, and return the assistant answer plus any prepared edit.
- * Boundaries: HTTP parsing stays in the route handler, and the browser never imports Pi SDK modules from here.
- */
-
 import type {
 	EditorAgentMode,
 	EditorAgentAppliedEdit,

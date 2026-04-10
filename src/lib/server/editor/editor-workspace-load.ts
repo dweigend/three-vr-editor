@@ -1,10 +1,3 @@
-/**
- * Purpose: Load the full bootstrap state for the editor workspace page.
- * Context: The app now has one main editor route that needs managed files, initial preview data, and available templates together.
- * Responsibility: Ensure a managed scene exists, build the initial preview payload, and append parsed template summaries.
- * Boundaries: Incremental save, create, and preview requests stay in dedicated endpoint routes.
- */
-
 import { error } from '@sveltejs/kit';
 
 import {

@@ -1,10 +1,3 @@
-/**
- * Purpose: Load the Three editor workspace page.
- * Context: The editor route combines managed file editing, live preview, template creation, and the Pi editor panel.
- * Responsibility: Return editor bootstrap data plus the active Pi key, model, and editor-session status.
- * Boundaries: Pi requests run through dedicated child JSON endpoints, not through this page load.
- */
-
 import { hasActiveOpenRouterKey } from '$lib/server/pi/auth';
 import { readEditorAgentSession } from '$lib/server/pi/editor-agent';
 import { getConfiguredModel } from '$lib/server/pi/models';

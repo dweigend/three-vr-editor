@@ -1,10 +1,3 @@
-/**
- * Purpose: Provide a small optimistic conversation state helper for Pi chat surfaces.
- * Context: The standalone chat page and the embedded editor agent both need immediate local turns and pending assistant placeholders.
- * Responsibility: Manage transient client-side messages, pending assistant bubbles, and lightweight error state.
- * Boundaries: This module does not fetch data, call Pi endpoints, or persist server session state.
- */
-
 import type { ConversationMessage } from '$lib/blocks';
 
 function createMessageId(prefix: string): string {

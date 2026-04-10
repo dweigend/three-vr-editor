@@ -1,10 +1,3 @@
-<!--
-	Purpose: Render the shared button primitive with small reusable variants and sizes.
-	Context: The start screen and future reusable blocks need one consistent action surface without introducing a larger dependency stack.
-	Responsibility: Support button and link rendering while keeping styling hooks aligned with the local ui-system adaptation.
-	Boundaries: This component stays presentational and does not own routing or app-specific state.
--->
-
 <script lang="ts">
 	import type { Snippet } from 'svelte';
 

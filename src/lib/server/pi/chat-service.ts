@@ -1,10 +1,3 @@
-/**
- * Purpose: Orchestrate persisted Pi chat sessions for the standalone chat UI.
- * Context: The chat route keeps its own persistent scope while reusing the shared Pi runtime helpers.
- * Responsibility: Validate prompts, open or create managed chat sessions, run Pi prompts, and map transcript output.
- * Boundaries: Cookie handling stays in route code and low-level session creation stays in dedicated session modules.
- */
-
 import type { PiChatConversationMessage } from '$lib/features/chat/chat-types';
 
 import { createConfiguredPiAgentSession } from './session-runtime';

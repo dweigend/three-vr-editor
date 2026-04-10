@@ -1,10 +1,3 @@
-/**
- * Purpose: Verify that the editor workspace loader returns the complete bootstrap payload for the editor page.
- * Context: The single editor route depends on one loader that combines editable files, initial preview data, and template metadata.
- * Responsibility: Cover managed file loading, local bootstrap creation, preview output, and parsed template summaries.
- * Boundaries: These tests do not exercise the browser workspace UI or the create/save endpoints.
- */
-
 import { mkdir, mkdtemp, rm, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
 import { tmpdir } from 'node:os';

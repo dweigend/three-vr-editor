@@ -1,10 +1,3 @@
-/**
- * Purpose: Load the persisted Pi chat state for the chat page.
- * Context: The browser chat UI handles optimistic submission through child JSON endpoints, while SSR hydrates the initial session transcript.
- * Responsibility: Read the managed chat cookie, resolve the current transcript, and expose model and key state to the page.
- * Boundaries: Start and send operations live in dedicated child endpoints and shared Pi server modules.
- */
-
 import { hasActiveOpenRouterKey } from '$lib/server/pi/auth';
 import { readPiChatSession } from '$lib/server/pi/chat-service';
 import { getConfiguredModel } from '$lib/server/pi/models';

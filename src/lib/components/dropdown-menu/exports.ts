@@ -1,4 +1,3 @@
-/** Public exports for the dropdown-menu primitive family. */
 export { default as Content } from './components/dropdown-menu-content.svelte';
 export { default as Field } from './components/dropdown-field.svelte';
 export { default as Item } from './components/dropdown-menu-item.svelte';

@@ -1,10 +1,3 @@
-/**
- * Purpose: Define the shared template metadata and file-creation types for the editor workspace.
- * Context: Client and server modules need one stable contract for optional scene headers, parameter controls, and new file creation.
- * Responsibility: Provide serializable type definitions only, without parsing or filesystem behavior.
- * Boundaries: This module does not inspect source files, render any UI, or perform managed file writes.
- */
-
 export type ThreeTemplateRendererKind = 'webgl' | 'webgpu';
 
 export type ThreeTemplateParameterValue = number | string;

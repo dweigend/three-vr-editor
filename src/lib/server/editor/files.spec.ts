@@ -1,10 +1,3 @@
-/**
- * Purpose: Verify that the managed static/three file service only exposes and writes allowed files.
- * Context: The editor route depends on this service for listing, loading, and saving editable scene files.
- * Responsibility: Cover recursive listing, path guarding, and valid save behavior.
- * Boundaries: These tests do not build previews or mount any client-side editor components.
- */
-
 import { mkdtemp, mkdir, readFile, rm, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
 import { tmpdir } from 'node:os';

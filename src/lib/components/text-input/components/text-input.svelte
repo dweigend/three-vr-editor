@@ -1,10 +1,3 @@
-<!--
-	Purpose: Render the shared single-line input primitive for form fields and compact control rows.
-	Context: Settings and editor flows need one reusable input surface instead of repeating raw input markup.
-	Responsibility: Forward standard input props and attach the shared text-input styling hook.
-	Boundaries: This component stays presentational and does not validate values or submit forms.
--->
-
 <script lang="ts">
 	import type { HTMLInputAttributes } from 'svelte/elements';
 

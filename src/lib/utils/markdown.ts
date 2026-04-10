@@ -1,10 +1,3 @@
-/**
- * Purpose: Convert a small safe subset of Markdown into presentational HTML for chat-style responses.
- * Context: Pi assistant answers often contain headings, lists, emphasis, and code blocks that should render cleanly in the UI.
- * Responsibility: Escape unsafe HTML, parse the supported Markdown subset, and return deterministic HTML snippets for `{@html}` rendering.
- * Boundaries: This helper is intentionally small and does not aim for full CommonMark coverage or arbitrary raw HTML passthrough.
- */
-
 const FENCE_PATTERN = /^```([\w-]+)?\s*$/;
 const HEADING_PATTERN = /^(#{1,6})\s+(.*)$/;
 const LIST_ITEM_PATTERN = /^(\s*)([-*+]|\d+\.)\s+(.*)$/;

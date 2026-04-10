@@ -1,4 +1,3 @@
-/** Public prop types for the conversation-panel block family. */
 import type { Snippet } from 'svelte';
 import type { HTMLAttributes } from 'svelte/elements';
 

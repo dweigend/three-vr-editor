@@ -1,5 +1,3 @@
-/** Start here if you want to learn raycasting with a friendly little cube field. */
-
 import {
 	AmbientLight,
 	BoxGeometry,
@@ -20,8 +18,6 @@ import {
 	defineThreeTemplateUi,
 	type ThreeDemoSceneFactory
 } from '$lib/features/editor/three-helpers';
-
-// The editor sidebar reads this to build the labels and controls.
 export const templateUi = defineThreeTemplateUi({
 	"id": "interactive-cubes",
 	"title": "Interactive Cubes",
@@ -58,8 +54,6 @@ export const templateUi = defineThreeTemplateUi({
 		}
 	]
 });
-
-// These are the values students can play with first.
 export const templateParameters = defineThreeTemplateParameters({
 	"background": "#111827",
 	"cubeColor": "#60a5fa",

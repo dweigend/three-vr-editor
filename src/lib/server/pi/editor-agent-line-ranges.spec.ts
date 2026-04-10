@@ -1,10 +1,3 @@
-/**
- * Purpose: Verify that Pi editor-agent line ranges stay safe and useful for the editor highlights.
- * Context: The editor can only highlight sane line ranges, and Pi-provided ranges need a conservative fallback.
- * Responsibility: Cover normalization, merging, and fallback diff range generation.
- * Boundaries: These tests do not invoke Pi sessions or browser editor components.
- */
-
 import { describe, expect, it } from 'vitest';
 
 import { computeChangedLineRanges, normalizeChangedLineRanges } from './editor-agent-line-ranges';

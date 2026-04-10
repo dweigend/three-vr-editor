@@ -1,5 +1,3 @@
-/** Start here if you want to animate lots of objects with one shared mesh. */
-
 import {
 	AmbientLight,
 	BoxGeometry,
@@ -17,8 +15,6 @@ import {
 	defineThreeTemplateUi,
 	type ThreeDemoSceneFactory
 } from '$lib/features/editor/three-helpers';
-
-// The editor sidebar reads this to build the labels and controls.
 export const templateUi = defineThreeTemplateUi({
 	"id": "instancing-dynamic",
 	"title": "Instancing Dynamic",
@@ -58,8 +54,6 @@ export const templateUi = defineThreeTemplateUi({
 		}
 	]
 });
-
-// These are the values students can play with first.
 export const templateParameters = defineThreeTemplateParameters({
 	"amount": 14,
 	"background": "#0f172a",

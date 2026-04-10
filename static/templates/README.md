@@ -12,16 +12,24 @@ This folder contains the starter templates shown in the Three editor workbench.
 Each template should help students understand one clear Three.js idea without hiding the
 important steps in clever abstractions.
 
+## Provenance And Attribution
+
+- Many templates in this folder are simplified, app-compatible teaching adaptations of
+  official Three.js example ideas.
+- When a template is derived from a specific upstream example, add attribution where it is
+  actually useful.
+- Prefer preserving the teaching goal and shared editor contract over copying full example
+  shells verbatim.
+
 ## Template Structure
 
 Keep each template in this order:
 
-1. File header comment
-2. imports
-3. `templateUi` near the top
-4. `templateParameters` near the top
-5. short typed helper functions
-6. `createDemoScene` as the main orchestration function
+1. imports
+2. `templateUi` near the top
+3. `templateParameters` near the top
+4. short typed helper functions
+5. `createDemoScene` as the main orchestration function
 
 ## Style Rules
 
@@ -36,8 +44,7 @@ Keep each template in this order:
 - Import shared helpers from `$lib/features/editor/three-helpers`.
 - Keep functions small and focused. Split setup, animation, pointer handling, and cleanup
   into named helpers when a scene starts to feel crowded.
-- Add inline comments only for ideas that help students understand why something
-  is needed.
+- Add comments only when they explain a non-obvious idea or constraint.
 
 ## Three.js And TSL Notes
 

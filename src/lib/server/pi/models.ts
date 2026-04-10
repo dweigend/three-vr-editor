@@ -1,10 +1,3 @@
-/**
- * Purpose: Define the allowed OpenRouter models and persist the active system model.
- * Context: The settings page should offer a fixed shortlist instead of arbitrary model input.
- * Responsibility: Expose model metadata for the table and read/write the selected model.
- * Boundaries: This module does not create sessions or render the model selection page.
- */
-
 import { chmodSync, existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { dirname } from 'node:path';
 

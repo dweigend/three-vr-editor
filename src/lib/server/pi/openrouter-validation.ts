@@ -1,10 +1,3 @@
-/**
- * Purpose: Validate OpenRouter API keys before the settings page stores them.
- * Context: The setup page should confirm a key with OpenRouter using the smallest possible server-side check.
- * Responsibility: Call the official OpenRouter API and normalize validation failures.
- * Boundaries: This module does not persist keys or manage Pi chat sessions.
- */
-
 import { looksLikeOpenRouterApiKey } from './auth';
 
 const OPENROUTER_VALIDATE_URL = 'https://openrouter.ai/api/v1/models';

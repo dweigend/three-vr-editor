@@ -1,10 +1,3 @@
-<!--
-	Purpose: Document the server-side Three workflow services that power managed files, previews, and template discovery.
-	Context: The editor workspace depends on a small set of server-only helpers instead of route-local ad hoc logic.
-	Responsibility: Explain the file service, preview builder, editor page loader, template service, and the split between editable scenes and template sources.
-	Boundaries: This README does not describe client-side Three runtime or editor UI behavior in detail.
--->
-
 # `src/lib/server/editor`
 
 This folder contains the server-side services behind the editor workspace.

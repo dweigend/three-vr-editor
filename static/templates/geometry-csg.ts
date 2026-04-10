@@ -1,5 +1,3 @@
-/** Try union, subtract, and intersect with one box and one sphere. */
-
 import {
 	ADDITION,
 	Brush,
@@ -24,8 +22,6 @@ import {
 	defineThreeTemplateUi,
 	type ThreeDemoSceneFactory
 } from '$lib/features/editor/three-helpers';
-
-// The editor sidebar reads this to build the labels and controls.
 export const templateUi = defineThreeTemplateUi({
 	"id": "geometry-csg",
 	"title": "Geometry CSG",
@@ -67,8 +63,6 @@ export const templateUi = defineThreeTemplateUi({
 		}
 	]
 });
-
-// These are the values students can play with first.
 export const templateParameters = defineThreeTemplateParameters({
 	"background": "#09090b",
 	"cutterOffset": 0.2,

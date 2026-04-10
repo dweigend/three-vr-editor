@@ -1,10 +1,3 @@
-<!--
-	Purpose: Document the server-only subtree under src/lib/server.
-	Context: The repository keeps Pi integration and managed Three workflow services behind server boundaries.
-	Responsibility: Explain the top-level split between Pi and Three services and point readers to the detailed folder guides.
-	Boundaries: This README is a directory map, not a full operational runbook.
--->
-
 # `src/lib/server`
 
 This subtree contains server-only modules that must not be imported into browser components.

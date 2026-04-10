@@ -1,4 +1,3 @@
-/** Public exports for the card primitive family. */
 export { default as Card } from './components/card.svelte';
 export { default as CardBody } from './components/card-body.svelte';
 export { default as CardFooter } from './components/card-footer.svelte';

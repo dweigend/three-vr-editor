@@ -1,5 +1,3 @@
-<!-- Shared transcript and composer block. -->
-
 <script lang="ts">
 	import Bot from '@lucide/svelte/icons/bot';
 	import Smile from '@lucide/svelte/icons/smile';

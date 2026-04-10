@@ -1,10 +1,3 @@
-<!--
-	Purpose: Provide the persistent Pi chat page for the app.
-	Context: This route hydrates the stored transcript and continues the conversation through child JSON endpoints.
-	Responsibility: Render chat history, clear the input optimistically, and show Pi working state while the backend responds.
-	Boundaries: The browser never imports Pi SDK modules or accesses secrets directly.
--->
-
 <script lang="ts">
 	import { untrack } from 'svelte';
 

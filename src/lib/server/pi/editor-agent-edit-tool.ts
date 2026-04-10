@@ -1,10 +1,3 @@
-/**
- * Purpose: Define the narrow Pi tool that prepares a direct edit for the active editor file.
- * Context: The editor surface should default to applying changes to the active file instead of only returning chat instructions.
- * Responsibility: Validate the active-file target and return structured edit details for client-side apply and auto-save.
- * Boundaries: This tool prepares an edit result but does not mutate arbitrary files or broaden repo write access.
- */
-
 import { Type } from '@mariozechner/pi-ai';
 import { defineTool } from '@mariozechner/pi-coding-agent';
 

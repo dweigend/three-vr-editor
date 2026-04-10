@@ -1,10 +1,3 @@
-<!--
-	Purpose: Render the file-creation controls for the editor workspace.
-	Context: The editor page lets users create blank scenes or copy managed templates into the local workspace.
-	Responsibility: Collect the file name, creation mode, optional template choice, and submit one create request at a time.
-	Boundaries: This component does not access the filesystem directly or trigger preview rebuilds on its own.
--->
-
 <script lang="ts">
 	import { Button, TextInput } from '$lib/components';
 

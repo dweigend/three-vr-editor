@@ -1,12 +1,3 @@
-/**
- * Purpose: Expose the small public helper surface that template files can import.
- * Context: Managed template files live outside `src`, so they need one stable, readable
- * API for scene types, sidebar metadata, and shared editor helpers.
- * Responsibility: Re-export the scene contract and provide tiny identity helpers plus
- * pointer tracking for template code.
- * Boundaries: This file does not parse template source, bundle previews, or create scenes.
- */
-
 import { Vector2 } from 'three';
 
 import type {

@@ -1,10 +1,3 @@
-/**
- * Purpose: Start a persisted Pi chat session for the browser chat UI.
- * Context: The chat page uses client-side fetch for optimistic updates instead of form actions.
- * Responsibility: Validate chat availability, create a managed session, set the session cookie, and return transcript state.
- * Boundaries: UI state and optimistic rendering stay on the client, and Pi SDK setup stays in library modules.
- */
-
 import { json } from '@sveltejs/kit';
 
 import { hasActiveOpenRouterKey } from '$lib/server/pi/auth';

@@ -1,5 +1,3 @@
-<!-- Editor-side Pi panel. -->
-
 <script lang="ts">
 	import { untrack } from 'svelte';
 	import { resolve } from '$app/paths';

@@ -1,10 +1,3 @@
-/**
- * Purpose: Send browser-side chat requests to the Pi chat endpoints.
- * Context: The chat page keeps optimistic UI state in the browser while Pi stays behind server routes.
- * Responsibility: Call the start-session and send-message endpoints and normalize transport errors.
- * Boundaries: This module does not own UI state, DOM events, or server-side session logic.
- */
-
 import { resolve } from '$app/paths';
 
 import type { PiChatMessageRequest, PiChatSessionPayload } from './chat-types';

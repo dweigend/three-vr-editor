@@ -1,10 +1,3 @@
-/**
- * Purpose: List the managed Three scene templates that power editor file creation.
- * Context: The editor page needs a reusable server-side view of optional template headers under `static/templates`.
- * Responsibility: Read template files, parse their optional headers, and expose only valid template summaries.
- * Boundaries: This module does not write files, build previews, or render client-side controls.
- */
-
 import { readFile } from 'node:fs/promises';
 import { resolve } from 'node:path';
 

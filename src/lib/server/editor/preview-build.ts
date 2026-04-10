@@ -1,10 +1,3 @@
-/**
- * Purpose: Build browser-runnable preview modules from editable `static/three` source files.
- * Context: The editor page needs immediate live preview updates from in-memory TypeScript changes.
- * Responsibility: Bundle the preview entry with optional in-memory file overrides and normalize build failures.
- * Boundaries: This module does not persist files or manage browser-side module loading.
- */
-
 import { build } from 'esbuild';
 import { access } from 'node:fs/promises';
 import { dirname, resolve } from 'node:path';

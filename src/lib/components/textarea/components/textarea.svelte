@@ -1,10 +1,3 @@
-<!--
-	Purpose: Render a shared multiline text input aligned with the local ui-system primitives.
-	Context: Chat and editor surfaces need a reusable textarea primitive with consistent styling hooks.
-	Responsibility: Forward standard textarea props while attaching the shared family class.
-	Boundaries: This component stays presentational and does not own validation or submission behavior.
--->
-
 <script lang="ts">
 	import type { SvelteHTMLElements } from 'svelte/elements';
 

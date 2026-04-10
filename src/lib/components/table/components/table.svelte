@@ -1,10 +1,3 @@
-<!--
-	Purpose: Render the root compact table shell with horizontal overflow support.
-	Context: Data-heavy settings screens need a semantic table that stays compact and scrollable on narrow viewports.
-	Responsibility: Provide the table wrapper, overflow container, and shared family styling.
-	Boundaries: This component stays presentational and does not manage sorting, filtering, or pagination.
--->
-
 <script lang="ts">
 	import { joinClassNames } from '$lib/utils/class-names';
 

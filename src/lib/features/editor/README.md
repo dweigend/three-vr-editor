@@ -1,10 +1,3 @@
-<!--
-	Purpose: Document the editor-specific client layer under src/lib/features/editor.
-	Context: The editor route now depends on one focused feature subtree instead of scattered client modules across src/lib.
-	Responsibility: Explain what belongs in this layer and keep the boundary against primitives, blocks, and server services clear.
-	Boundaries: This README is a directory guide, not a full API reference for every editor module.
--->
-
 # `src/lib/features/editor`
 
 This folder contains editor-specific client modules for the editor workspace.

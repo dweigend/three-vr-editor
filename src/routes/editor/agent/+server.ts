@@ -1,10 +1,3 @@
-/**
- * Purpose: Handle Pi requests for the editor agent panel across one-shot and session modes.
- * Context: The browser posts active-file snapshots here so Pi can answer file-aware questions server-side.
- * Responsibility: Validate the JSON payload, call the Pi editor service, and return a stable JSON response.
- * Boundaries: The route does not create browser UI state or expose Pi SDK objects to the client.
- */
-
 import { error, json } from '@sveltejs/kit';
 
 import type { EditorAgentRequest } from '$lib/features/editor/editor-agent-types';

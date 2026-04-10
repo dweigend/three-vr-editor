@@ -1,10 +1,3 @@
-/**
- * Purpose: Share the small file and preview payload types used by the Three editor workflow.
- * Context: The editor route coordinates client and server modules around `static/three`.
- * Responsibility: Define stable request and response shapes for file loading, saving, and preview builds.
- * Boundaries: This file contains type definitions only and no runtime behavior.
- */
-
 import type { ViewerError } from './three-viewer-errors';
 
 export type ThreeSourceFileSummary = {

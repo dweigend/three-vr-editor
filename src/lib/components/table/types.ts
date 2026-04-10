@@ -1,4 +1,3 @@
-/** Public prop types for the table primitive family. */
 import type { Snippet } from 'svelte';
 import type { SvelteHTMLElements } from 'svelte/elements';
 

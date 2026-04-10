@@ -1,10 +1,3 @@
-/**
- * Purpose: Parse and update the optional template metadata blocks embedded in managed Three scene files.
- * Context: The new template workbench needs one reusable source-of-truth for optional scene headers and parameter blocks.
- * Responsibility: Read optional metadata, return null when no template block exists, and rewrite only the managed parameter section.
- * Boundaries: This module does not access the filesystem, render controls, or validate whether a source file is a complete scene.
- */
-
 import type {
 	ThreeTemplateHeader,
 	ThreeTemplateParameterMap,

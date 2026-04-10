@@ -1,5 +1,3 @@
-/** Start here if you want a mesh outline that stays thick on screen. */
-
 import { LineMaterial } from 'three/addons/lines/LineMaterial.js';
 import { Wireframe } from 'three/addons/lines/Wireframe.js';
 import { WireframeGeometry2 } from 'three/addons/lines/WireframeGeometry2.js';
@@ -10,8 +8,6 @@ import {
 	defineThreeTemplateUi,
 	type ThreeDemoSceneFactory
 } from '$lib/features/editor/three-helpers';
-
-// The editor sidebar reads this to build the labels and controls.
 export const templateUi = defineThreeTemplateUi({
 	"id": "lines-fat-wireframe",
 	"title": "Lines Fat Wireframe",
@@ -51,8 +47,6 @@ export const templateUi = defineThreeTemplateUi({
 		}
 	]
 });
-
-// These are the values students can play with first.
 export const templateParameters = defineThreeTemplateParameters({
 	"background": "#0f172a",
 	"lineWidth": 6,

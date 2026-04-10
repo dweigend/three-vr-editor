@@ -1,5 +1,3 @@
-/** Start here if you want reflective materials without loading an HDR file. */
-
 import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
 import {
 	AmbientLight,
@@ -22,8 +20,6 @@ import {
 	defineThreeTemplateUi,
 	type ThreeDemoSceneFactory
 } from '$lib/features/editor/three-helpers';
-
-// The editor sidebar reads this to build the labels and controls.
 export const templateUi = defineThreeTemplateUi({
 	"id": "materials-envmaps-fasthdr",
 	"title": "Materials Envmaps FastHDR",
@@ -63,8 +59,6 @@ export const templateUi = defineThreeTemplateUi({
 		}
 	]
 });
-
-// These are the values students can play with first.
 export const templateParameters = defineThreeTemplateParameters({
 	"background": "#020617",
 	"metalness": 0.85,

@@ -1,5 +1,3 @@
-/** Start here if you want a lit cube you can tweak right away. */
-
 import {
 	AmbientLight,
 	BoxGeometry,
@@ -16,8 +14,6 @@ import {
 	defineThreeTemplateUi,
 	type ThreeDemoSceneFactory
 } from '$lib/features/editor/three-helpers';
-
-// The editor sidebar reads this to build the labels and controls.
 export const templateUi = defineThreeTemplateUi({
 	"id": "geometry-cube",
 	"title": "Geometry Cube",
@@ -57,8 +53,6 @@ export const templateUi = defineThreeTemplateUi({
 		}
 	]
 });
-
-// These are the values students can play with first.
 export const templateParameters = defineThreeTemplateParameters({
 	"background": "#020617",
 	"cubeColor": "#60a5fa",

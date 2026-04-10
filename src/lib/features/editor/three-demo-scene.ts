@@ -1,10 +1,3 @@
-/**
- * Purpose: Define the shared contract between the generic viewer host and specific Three demo scenes.
- * Context: Scene logic should be movable into dedicated files without coupling those files to Svelte UI details.
- * Responsibility: Expose explicit types for scene setup, renderer selection, per-frame updates, and cleanup.
- * Boundaries: This file contains only types and no runtime scene implementation.
- */
-
 import type { PerspectiveCamera, Scene, WebGLRenderer } from 'three';
 import type { WebGPURenderer } from 'three/webgpu';
 

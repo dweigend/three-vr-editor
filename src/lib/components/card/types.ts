@@ -1,4 +1,3 @@
-/** Public prop types for the card primitive family. */
 import type { Snippet } from 'svelte';
 import type { HTMLAttributes } from 'svelte/elements';
 

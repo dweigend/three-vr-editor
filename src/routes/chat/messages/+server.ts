@@ -1,10 +1,3 @@
-/**
- * Purpose: Send one prompt turn to the persisted Pi chat session.
- * Context: The browser chat UI needs a JSON endpoint that supports immediate optimistic local updates.
- * Responsibility: Validate the request payload, create or continue the managed chat session, and return the updated transcript.
- * Boundaries: Cookie storage stays delegated to helpers and Pi runtime setup stays in server library modules.
- */
-
 import { json } from '@sveltejs/kit';
 
 import type { PiChatMessageRequest } from '$lib/features/chat/chat-types';

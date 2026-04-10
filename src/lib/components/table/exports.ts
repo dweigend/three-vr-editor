@@ -1,4 +1,3 @@
-/** Public exports for the table primitive family. */
 export { default as Table } from './components/table.svelte';
 export { default as TableBody } from './components/table-body.svelte';
 export { default as TableCell } from './components/table-cell.svelte';

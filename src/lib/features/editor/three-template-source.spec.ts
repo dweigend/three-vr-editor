@@ -1,10 +1,3 @@
-/**
- * Purpose: Verify that optional template headers and parameter blocks can be parsed and updated without breaking plain files.
- * Context: The editor sidebar relies on these helpers to show controls only when metadata is present.
- * Responsibility: Cover header parsing, null-safe behavior, and parameter block rewriting.
- * Boundaries: These tests do not touch the filesystem, preview runtime, or Svelte components.
- */
-
 import { describe, expect, it } from 'vitest';
 
 import {

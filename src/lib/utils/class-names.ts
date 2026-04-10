@@ -1,4 +1,3 @@
-/** Utility helpers for predictable class name composition across reusable UI families. */
 function normalizeClassValue(value: unknown): string[] {
 	if (!value) {
 		return [];

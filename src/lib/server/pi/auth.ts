@@ -1,10 +1,3 @@
-/**
- * Purpose: Manage stored OpenRouter API keys for the app-wide Pi integration.
- * Context: Chat, editor, and settings all rely on one active system key plus a reusable list of validated keys.
- * Responsibility: Persist keys through Pi's AuthStorage, expose masked summaries, and switch the active key.
- * Boundaries: This module does not validate keys against OpenRouter or create Pi sessions.
- */
-
 import { createHash } from 'node:crypto';
 
 import { AuthStorage } from '@mariozechner/pi-coding-agent';

@@ -1,10 +1,3 @@
-/**
- * Purpose: Provide small CodeMirror extensions for line-based editor highlights.
- * Context: The Three editor needs one red error marker and one green applied-change marker without route-specific state in the editor component.
- * Responsibility: Define line-range types, editor extensions, and helpers to apply or clear diagnostic and changed-line marks.
- * Boundaries: This module does not parse preview errors or decide when a highlight should be shown.
- */
-
 import { StateEffect, StateField, type Text } from '@codemirror/state';
 import { Decoration, type DecorationSet, EditorView } from '@codemirror/view';
 

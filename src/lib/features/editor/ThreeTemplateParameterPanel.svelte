@@ -1,5 +1,3 @@
-<!-- Template-driven editor controls. -->
-
 <script lang="ts">
 	import { TextInput } from '$lib/components';
 	import {

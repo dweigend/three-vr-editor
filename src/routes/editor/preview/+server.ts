@@ -1,10 +1,3 @@
-/**
- * Purpose: Build the live Three preview payload from the current in-memory editor state.
- * Context: The editor page posts its local source map here whenever preview-relevant code changes.
- * Responsibility: Return bundled browser code or a normalized preview error payload.
- * Boundaries: This route does not persist files or render any client UI.
- */
-
 import { error, json } from '@sveltejs/kit';
 
 import { createThreePreviewBuilder } from '$lib/server/editor/preview-build';

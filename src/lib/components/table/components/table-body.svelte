@@ -1,10 +1,3 @@
-<!--
-	Purpose: Render the semantic table body section for the table primitive family.
-	Context: The table family exposes dedicated wrappers for native table parts to keep call sites consistent.
-	Responsibility: Provide a typed wrapper around `<tbody>`.
-	Boundaries: This component stays presentational and does not manage row state.
--->
-
 <script lang="ts">
 	import { joinClassNames } from '$lib/utils/class-names';
 

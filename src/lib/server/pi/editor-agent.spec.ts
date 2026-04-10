@@ -1,10 +1,3 @@
-/**
- * Purpose: Verify that the Pi editor-agent prompt and result helpers keep the edit workflow predictable.
- * Context: The editor-agent endpoint relies on these helpers to steer Pi toward direct active-file edits and map structured tool output.
- * Responsibility: Cover the active file metadata, tool-first prompt hints, follow-up context, and tool-result mapping.
- * Boundaries: These tests do not create real Pi sessions or call external providers.
- */
-
 import { describe, expect, it } from 'vitest';
 
 import { buildEditorAgentPrompt, toEditorAgentAppliedEdit } from './editor-agent';

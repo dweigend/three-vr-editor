@@ -1,10 +1,3 @@
-<!--
-	Purpose: Render a styled scroll-area wrapper based on Bits UI primitives.
-	Context: Compact admin and settings surfaces need internal scrolling that follows the shared UI-system reference.
-	Responsibility: Compose the Bits UI root, viewport, scrollbars, and thumb with local family styling.
-	Boundaries: This component stays presentational and does not manage the surrounding panel layout.
--->
-
 <script lang="ts">
 	import { ScrollArea as ScrollAreaPrimitive } from 'bits-ui';
 	import { joinClassNames } from '$lib/utils/class-names';

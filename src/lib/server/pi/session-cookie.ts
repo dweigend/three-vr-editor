@@ -1,10 +1,3 @@
-/**
- * Purpose: Centralize the cookie contract for persisted Pi sessions across app surfaces.
- * Context: Chat and editor session mode both persist Pi state, but they must never share cookies.
- * Responsibility: Expose tiny scope-aware helpers to read, set, and clear managed Pi session cookies.
- * Boundaries: This module does not create Pi sessions or validate session files.
- */
-
 import type { Cookies } from '@sveltejs/kit';
 
 export type PiSessionScope = 'chat' | 'editor';

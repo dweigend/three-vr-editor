@@ -1,10 +1,3 @@
-/**
- * Purpose: Map generated preview runtime errors back to editable `static/three` source locations.
- * Context: The browser executes bundled preview code, but the editor should point to the original TypeScript lines.
- * Responsibility: Resolve blob-module stack frames through a source map and return the shared viewer error shape.
- * Boundaries: This file does not render UI, fetch preview payloads, or own editor state.
- */
-
 import { originalPositionFor, TraceMap } from '@jridgewell/trace-mapping';
 
 import {

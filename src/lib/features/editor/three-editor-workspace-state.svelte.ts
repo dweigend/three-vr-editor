@@ -1,10 +1,3 @@
-/**
- * Purpose: Centralize the client-side state orchestration shared by the editor workspace.
- * Context: The editor page needs one reusable place for managed file loading, preview rebuilds, save handling, and active-file context.
- * Responsibility: Keep document records, selected-file state, preview requests, and save actions reusable across workspace variants.
- * Boundaries: This module does not render UI controls or know about route-specific headings, Pi panels, or template-specific sidebars.
- */
-
 import type { EditorDiagnostic, EditorLineRange } from '$lib/features/editor/editor-diagnostics';
 import type { ThreeEditorActiveFileContext } from '$lib/features/editor/three-editor-workspace-types';
 import type {

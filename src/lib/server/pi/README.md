@@ -1,10 +1,3 @@
-<!--
-	Purpose: Document the server-only Pi integration modules shared by chat and editor surfaces.
-	Context: Pi support in this repository relies on a strict browser/server boundary and a scoped session architecture.
-	Responsibility: Explain the main Pi server modules, their roles, and the boundaries they enforce.
-	Boundaries: This README does not replace source comments for individual auth, session, or route modules.
--->
-
 # `src/lib/server/pi`
 
 This folder contains the server-only Pi integration shared by the chat, editor, and settings surfaces.

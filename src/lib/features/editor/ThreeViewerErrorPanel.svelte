@@ -1,5 +1,3 @@
-<!-- Inline preview error state. -->
-
 <script lang="ts">
 	import type { ViewerError } from '$lib/features/editor/three-viewer-errors';
 	import '$lib/features/editor/three-viewer-error-panel.css';

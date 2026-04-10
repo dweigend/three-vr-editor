@@ -1,7 +1,3 @@
-/**
- * Shared class names for the table primitive family.
- * Keep the table shell, scroll wrapper, and semantic part classes centralized.
- */
 export const tableFamily = 'table';
 export const tableShellClass = 'ui-data-table-shell';
 export const tableScrollClass = 'ui-data-table-scroll';

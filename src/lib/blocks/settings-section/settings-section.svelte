@@ -1,5 +1,3 @@
-<!-- Shared titled settings section. -->
-
 <script lang="ts">
 	import { joinClassNames } from '$lib/utils/class-names';
 

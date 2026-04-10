@@ -1,48 +1,27 @@
-<!--
-	Purpose: Explain the top-level library layout under src/lib for contributors navigating the repository.
-	Context: The repository separates editor UI, Three client logic, Pi client logic, and server-only services inside src/lib.
-	Responsibility: Point readers to the main library subtrees and describe the client/server split at a high level.
-	Boundaries: This README is a directory guide, not a full API reference for every module under src/lib.
--->
-
 # `src/lib`
 
-`src/lib` holds the reusable application code behind the three main app surfaces: editor, chat, and settings.
+`src/lib` contains the reusable code behind the editor, chat, and settings screens.
 
-## Main Areas
+## Structure
 
 - [`components`](./components/README.md)
-  Reusable primitive families aligned with the local ui-system structure and Bits UI wrappers.
+  Reusable UI primitives.
 - [`blocks`](./blocks/README.md)
-  Composed UI families that sit between primitives and route pages.
+  Composed UI blocks.
 - [`features/editor`](./features/editor/README.md)
-  Editor-specific client modules such as CodeMirror integration, preview runtime wiring, and workspace state.
+  Editor-specific client code.
 - [`features/chat`](./features/chat/README.md)
-  Chat-specific client transport and conversation state.
+  Chat-specific client code.
 - [`server`](./server/README.md)
-  Server-only services for Pi integration and managed editor file/preview workflows.
+  Server-only logic for Pi and editor workflows.
 - [`utils`](./utils/README.md)
-  Small shared technical helpers for reusable library code.
+  Shared helpers.
 
-## Client and Server Split
+## Boundaries
 
-- Browser-facing UI modules belong in `components`, `blocks`, and `features`.
-- Server-only logic belongs in `server`.
+- Browser code belongs in `components`, `blocks`, and `features`.
+- Server code belongs in `server`.
 - Pi SDK code must stay in server-only modules.
-- Shared serializable types can live in client-safe folders when they are needed on both sides.
+- Shared serializable types can live outside `server` when both sides need them.
 
-## What Belongs Here
-
-- reusable UI modules
-- shared primitive and block families
-- feature-local state, transport, and parser modules
-- client-safe helpers used by multiple routes
-- server-only services under the `server` subtree
-
-## What Does Not Belong Here
-
-- route-only page composition that is specific to one `src/routes` entrypoint
-- unmanaged filesystem access from browser-facing components
-- Pi SDK imports in client modules
-
-See the root [`README.md`](../../README.md) for the broader repository overview.
+See the root [`README.md`](../../README.md) for the repository overview.

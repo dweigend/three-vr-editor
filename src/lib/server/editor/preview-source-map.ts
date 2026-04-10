@@ -1,10 +1,3 @@
-/**
- * Purpose: Normalize generated preview source maps so browser errors can be mapped back to editable `static/three` files.
- * Context: The live preview bundles in-memory TypeScript but the editor needs stable original file locations.
- * Responsibility: Rewrite source-map paths into managed relative paths without changing the actual mappings.
- * Boundaries: This file does not build code, render previews, or inspect browser runtime errors.
- */
-
 import { toManagedRelativePath } from './paths';
 
 type PreviewSourceMap = {

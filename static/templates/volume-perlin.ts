@@ -1,5 +1,3 @@
-/** Start here if you want a soft cloud built from layered noise samples. */
-
 import { ImprovedNoise } from 'three/addons/math/ImprovedNoise.js';
 import * as THREE from 'three/webgpu';
 
@@ -8,8 +6,6 @@ import {
 	defineThreeTemplateUi,
 	type ThreeDemoSceneFactory
 } from '$lib/features/editor/three-helpers';
-
-// The editor sidebar reads this to build the labels and controls.
 export const templateUi = defineThreeTemplateUi({
 	"id": "volume-perlin",
 	"title": "Volume Perlin",
@@ -49,8 +45,6 @@ export const templateUi = defineThreeTemplateUi({
 		}
 	]
 });
-
-// These are the values students can play with first.
 export const templateParameters = defineThreeTemplateParameters({
 	"background": "#020617",
 	"cloudColor": "#93c5fd",

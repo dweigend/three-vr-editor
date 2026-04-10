@@ -1,10 +1,3 @@
-/**
- * Purpose: Provide managed file access for the editable `static/three` workspace.
- * Context: The editor page should list, read, and save scene files without exposing arbitrary filesystem access.
- * Responsibility: Guard paths, enumerate editable files, and read, persist, or create text documents under the managed root.
- * Boundaries: Preview builds and client-side editor state live in dedicated modules.
- */
-
 import { mkdir, readdir, readFile, stat, writeFile } from 'node:fs/promises';
 import { basename, dirname, extname, resolve } from 'node:path';
 

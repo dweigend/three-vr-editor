@@ -1,10 +1,3 @@
-/**
- * Purpose: Centralize the app-local filesystem paths used by the Pi integration.
- * Context: Several server modules need the same auth, settings, and session locations.
- * Responsibility: Export stable absolute paths for server-side Pi storage.
- * Boundaries: No file I/O or business logic belongs here.
- */
-
 import { homedir } from 'node:os';
 import { join } from 'node:path';
 

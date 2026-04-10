@@ -1,4 +1,3 @@
-/** Public prop types for the dropdown-menu primitive family. */
 import type { DropdownMenu, WithElementRef } from 'bits-ui';
 import type { HTMLAttributes } from 'svelte/elements';
 

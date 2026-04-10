@@ -1,0 +1,62 @@
+name: Bug report
+description: Report a broken workflow, regression, or runtime issue.
+title: "[Bug]: "
+labels: ["bug", "triage"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for reporting a bug. Please share enough detail to make the problem reproducible.
+  - type: input
+    id: summary
+    attributes:
+      label: Short summary
+      description: What is broken?
+      placeholder: Saving a template-created file fails in the editor
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      description: List the exact steps that lead to the problem.
+      placeholder: |
+        1. Open /editor
+        2. Create a file from template X
+        3. Change Y
+        4. Click save
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behavior
+    validations:
+      required: true
+  - type: textarea
+    id: actual
+    attributes:
+      label: Actual behavior
+    validations:
+      required: true
+  - type: textarea
+    id: logs
+    attributes:
+      label: Relevant logs or screenshots
+      description: Paste logs or add screenshots if they help explain the issue.
+      render: shell
+  - type: input
+    id: environment
+    attributes:
+      label: Environment
+      description: Browser, OS, Bun version, or any other relevant local details.
+      placeholder: macOS 15, Bun 1.3.5, Chrome 135
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Checklist
+      options:
+        - label: I searched existing issues before opening this report.
+          required: true
+        - label: This is not a security vulnerability.
+          required: true

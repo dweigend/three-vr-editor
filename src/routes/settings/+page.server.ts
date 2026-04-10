@@ -1,10 +1,3 @@
-/**
- * Purpose: Power the consolidated Pi settings page.
- * Context: This route combines OpenRouter key management and model selection in one place.
- * Responsibility: Load masked key summaries, model metadata, and handle the small settings actions.
- * Boundaries: Pi chat sessions stay on the dedicated chat route.
- */
-
 import { fail } from '@sveltejs/kit';
 
 import {

@@ -1,10 +1,3 @@
-<!--
-	Purpose: Preserve the current layout wireframes that drive the square-shell cleanup work.
-	Context: The screenshots in this folder are the shared visual reference for the app shell, menu, editor, settings, and chat layouts.
-	Responsibility: Name the stored wireframes clearly and explain how they map to the current screen architecture.
-	Boundaries: This folder is a design reference only and does not define implementation details by itself.
--->
-
 # `wireframes`
 
 This folder holds the layout wireframes used for the current UI cleanup pass.

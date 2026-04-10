@@ -1,5 +1,3 @@
-<!-- Live Three preview surface. -->
-
 <script lang="ts">
 	import { untrack } from 'svelte';
 	import { createThreeRuntime } from '$lib/features/editor/create-three-runtime';

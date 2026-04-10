@@ -1,5 +1,3 @@
-<!-- File picker for editor-managed files. -->
-
 <script lang="ts">
 	import { DropdownMenu } from '$lib/components';
 	import { joinClassNames } from '$lib/utils/class-names';

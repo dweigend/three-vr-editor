@@ -1,10 +1,3 @@
-/**
- * Purpose: Normalize line ranges for Pi-driven editor edits.
- * Context: The editor agent can return changed-line hints that must be safe for the editor and preview workflow.
- * Responsibility: Sanitize model-provided line ranges and compute a conservative fallback from old and new file contents.
- * Boundaries: This module does not call Pi or mutate editor state directly.
- */
-
 import type { EditorLineRange } from '$lib/features/editor/editor-diagnostics';
 
 export function normalizeChangedLineRanges(

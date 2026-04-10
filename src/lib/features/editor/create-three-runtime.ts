@@ -1,10 +1,3 @@
-/**
- * Purpose: Create a reusable Three.js runtime shell for editor preview scenes.
- * Context: The editor preview should share one renderer, resize, and cleanup implementation across scene modules.
- * Responsibility: Mount a WebGL or WebGPU renderer, run a scene factory, animate frames, and dispose resources safely.
- * Boundaries: This module does not load source files or decide which scene module should be rendered.
- */
-
 import { PerspectiveCamera, Scene, WebGLRenderer } from 'three';
 import { WebGPURenderer } from 'three/webgpu';
 

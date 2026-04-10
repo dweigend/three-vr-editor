@@ -1,10 +1,3 @@
-/**
- * Purpose: Centralize the low-level Pi runtime setup shared by chat and editor scopes.
- * Context: All Pi sessions need shared auth, model, prompt, and scope-aware path guards before orchestration.
- * Responsibility: Create configured Pi agent sessions and validate managed session-file paths.
- * Boundaries: This module does not handle route actions or convert messages for the UI.
- */
-
 import { resolve } from 'node:path';
 
 import {

@@ -1,5 +1,3 @@
-/** Start here if you want lots of shapes inside one batched mesh container. */
-
 import * as THREE from 'three/webgpu';
 
 import {
@@ -7,8 +5,6 @@ import {
 	defineThreeTemplateUi,
 	type ThreeDemoSceneFactory
 } from '$lib/features/editor/three-helpers';
-
-// The editor sidebar reads this to build the labels and controls.
 export const templateUi = defineThreeTemplateUi({
 	"id": "mesh-batch",
 	"title": "Mesh Batch",
@@ -51,8 +47,6 @@ export const templateUi = defineThreeTemplateUi({
 		}
 	]
 });
-
-// These are the values students can play with first.
 export const templateParameters = defineThreeTemplateParameters({
 	"background": "#020617",
 	"instanceCount": 96,

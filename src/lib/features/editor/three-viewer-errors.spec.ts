@@ -1,10 +1,3 @@
-/**
- * Purpose: Verify that the viewer error helpers produce stable output for runtime failures.
- * Context: The editor preview depends on these helpers to render a readable error panel instead of crashing the page.
- * Responsibility: Cover the supported error-shape normalization and stack-location extraction cases.
- * Boundaries: These tests do not mount Svelte components or exercise WebGL rendering.
- */
-
 import { describe, expect, it } from 'vitest';
 
 import {

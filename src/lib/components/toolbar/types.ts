@@ -1,4 +1,3 @@
-/** Public prop types for the toolbar primitive family. */
 import type { ComponentProps } from 'svelte';
 
 import ToolbarButton from './components/toolbar-button.svelte';

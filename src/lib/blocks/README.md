@@ -1,10 +1,3 @@
-<!--
-	Purpose: Document the composed UI block layer built from local primitives.
-	Context: The repository uses this layer for reusable, domain-facing UI groups that sit above primitives.
-	Responsibility: Explain which composed families belong here and keep the boundary against primitives and route-only code clear.
-	Boundaries: This README covers the local block layer only, not primitives or feature-specific implementation details outside it.
--->
-
 # `src/lib/blocks`
 
 This folder contains composed UI families built from local primitives.

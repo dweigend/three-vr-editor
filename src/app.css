@@ -1,21 +1,8 @@
-/* App-wide design foundations and shell layout. */
-/* Contents:
- * 1. Design Tokens
- * 2. Global Base
- * 3. App Shell And Global Layout
- * 4. Shared Typography And Layout Helpers
- * 5. Shared Pane Layout
- * 6. Shared Form Layout And Small UI Helpers
- * 7. Responsive Layout
- */
 @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700;800&display=swap');
 @import 'tailwindcss';
 @plugin '@tailwindcss/forms';
 @plugin '@tailwindcss/typography';
 
-/* ==========================================================================
-   Design Tokens
-   ========================================================================== */
 
 :root {
 	--ui-font-sans: 'JetBrains Mono', 'IBM Plex Mono', 'SFMono-Regular', ui-monospace, monospace;
@@ -62,9 +49,6 @@
 	--ui-section-gap: var(--ui-space-4);
 }
 
-/* ==========================================================================
-   Global Base
-   ========================================================================== */
 
 html {
 	background: var(--ui-color-canvas);
@@ -121,9 +105,6 @@ select {
 	font: inherit;
 }
 
-/* ==========================================================================
-   App Shell And Global Layout
-   ========================================================================== */
 
 #svelte,
 .ui-app-shell {
@@ -263,9 +244,6 @@ select {
 	outline: none;
 }
 
-/* ==========================================================================
-   Shared Typography And Layout Helpers
-   ========================================================================== */
 
 .ui-screen {
 	display: grid;
@@ -330,9 +308,6 @@ select {
 	text-transform: uppercase;
 }
 
-/* ==========================================================================
-   Shared Pane Layout
-   ========================================================================== */
 
 .ui-pane {
 	display: grid;
@@ -436,9 +411,6 @@ select {
 	display: none;
 }
 
-/* ==========================================================================
-   Shared Form Layout And Small UI Helpers
-   ========================================================================== */
 
 .ui-toolbar-status {
 	margin: 0;
@@ -569,9 +541,6 @@ select {
 	text-transform: uppercase;
 }
 
-/* ==========================================================================
-   Responsive Layout
-   ========================================================================== */
 
 @media (max-width: 960px) {
 	.ui-frame {

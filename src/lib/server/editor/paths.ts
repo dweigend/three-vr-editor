@@ -1,10 +1,3 @@
-/**
- * Purpose: Centralize the managed filesystem roots for editor scenes and templates.
- * Context: Multiple server-side modules need the same absolute path to `static/three`.
- * Responsibility: Export one stable root path plus shared path-normalization helpers for file and preview services.
- * Boundaries: This file does not perform file I/O, build previews, or handle routes.
- */
-
 import { realpathSync } from 'node:fs';
 import { isAbsolute, relative, resolve } from 'node:path';
 

@@ -1,10 +1,3 @@
-/**
- * Purpose: Normalize and format runtime errors from the local Three.js preview.
- * Context: Viewer setup and animation failures should stay inside the preview panel instead of breaking the page.
- * Responsibility: Convert unknown thrown values into a stable UI model and extract a best-effort source location.
- * Boundaries: This module does not log errors, talk to Svelte, or know anything about renderer lifecycle.
- */
-
 export type ViewerError = {
 	title: string;
 	message: string;

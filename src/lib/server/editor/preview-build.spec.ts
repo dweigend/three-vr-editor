@@ -1,10 +1,3 @@
-/**
- * Purpose: Verify that the Three preview builder bundles valid scene code and normalizes invalid code errors.
- * Context: The editor page rebuilds the preview from in-memory `static/three` source overrides.
- * Responsibility: Cover both successful bundling and syntax-error handling.
- * Boundaries: These tests do not render the bundled code in a browser runtime.
- */
-
 import { mkdir, mkdtemp, readFile, readdir, rm, writeFile } from 'node:fs/promises';
 import { join, resolve } from 'node:path';
 import { tmpdir } from 'node:os';

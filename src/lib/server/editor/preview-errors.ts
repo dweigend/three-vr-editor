@@ -1,10 +1,3 @@
-/**
- * Purpose: Normalize esbuild preview failures into the shared viewer error shape.
- * Context: The live preview should show readable inline build errors instead of crashing the page.
- * Responsibility: Map build errors and generic thrown values to a stable UI-facing error object.
- * Boundaries: This file does not build code, read files, or mount browser previews.
- */
-
 import type { Message } from 'esbuild';
 
 import {

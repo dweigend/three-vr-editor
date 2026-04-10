@@ -1,10 +1,3 @@
-<!--
-	Purpose: Render a compact icon-first button variant for shell and toolbar actions.
-	Context: The app shell uses this primitive for the top-right settings trigger and similar utility actions.
-	Responsibility: Wrap the shared button primitive with icon-oriented sizing and accessible labelling.
-	Boundaries: The component stays presentational and does not own menu or routing behavior.
--->
-
 <script lang="ts">
 	import type { Snippet } from 'svelte';
 

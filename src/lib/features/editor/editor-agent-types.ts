@@ -1,10 +1,3 @@
-/**
- * Purpose: Share the transport types for the Three editor Pi agent panel.
- * Context: The client panel and server endpoint need a small stable JSON contract for file-aware requests.
- * Responsibility: Define request, response, and follow-up payload shapes without introducing server imports.
- * Boundaries: This file contains type definitions only and no Pi SDK or UI behavior.
- */
-
 import type { EditorLineRange } from '$lib/features/editor/editor-diagnostics';
 import type { PiChatConversationMessage } from '$lib/features/chat/chat-types';
 import type { ThreeEditorActiveFileContext } from '$lib/features/editor/three-editor-workspace-types';

@@ -1,10 +1,3 @@
-<!--
-	Purpose: Compose a compact selection field from the dropdown-menu primitives.
-	Context: Settings forms need a reusable, styled alternative to native selects that matches the UI-system reference surfaces.
-	Responsibility: Render a trigger-width dropdown, synchronize the selected value, and expose a hidden form field when needed.
-	Boundaries: This component stays generic; it does not submit forms or fetch option data.
--->
-
 <script lang="ts">
 	import Check from '@lucide/svelte/icons/check';
 	import ChevronDown from '@lucide/svelte/icons/chevron-down';

@@ -1,10 +1,3 @@
-/**
- * Purpose: Smoke-test the three primary application pages without requiring a real API key.
- * Context: This verifies that the flattened route structure stays reachable after the route cleanup.
- * Responsibility: Assert the basic page shells and the main interactive controls.
- * Boundaries: It does not exercise live Pi calls or credential persistence.
- */
-
 import { expect, test } from '@playwright/test';
 
 test('renders the settings page', async ({ page }) => {

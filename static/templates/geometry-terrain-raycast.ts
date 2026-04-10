@@ -1,5 +1,3 @@
-/** Move the pointer over the terrain and watch the marker jump to the hit point. */
-
 import { ImprovedNoise } from 'three/addons/math/ImprovedNoise.js';
 import {
 	AmbientLight,
@@ -21,8 +19,6 @@ import {
 	defineThreeTemplateUi,
 	type ThreeDemoSceneFactory
 } from '$lib/features/editor/three-helpers';
-
-// The editor sidebar reads this to build the labels and controls.
 export const templateUi = defineThreeTemplateUi({
 	"id": "geometry-terrain-raycast",
 	"title": "Geometry Terrain Raycast",
@@ -62,8 +58,6 @@ export const templateUi = defineThreeTemplateUi({
 		}
 	]
 });
-
-// These are the values students can play with first.
 export const templateParameters = defineThreeTemplateParameters({
 	"amplitude": 1.8,
 	"background": "#082f49",

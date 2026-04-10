@@ -1,5 +1,3 @@
-<!-- Consolidated Pi settings screen. -->
-
 <script lang="ts">
 	import Check from '@lucide/svelte/icons/check';
 	import Cpu from '@lucide/svelte/icons/cpu';

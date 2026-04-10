@@ -2,7 +2,14 @@
 	"name": "three-js-vr-builder",
 	"private": true,
 	"version": "0.0.1",
+	"description": "An educational SvelteKit editor for learning three.js with guided Pi-assisted workflows and live previews.",
+	"license": "MIT",
 	"type": "module",
+	"packageManager": "bun@1.3.5",
+	"engines": {
+		"bun": ">=1.3.5"
+	},
+	"keywords": ["threejs", "sveltekit", "education", "editor", "pi", "openrouter"],
 	"scripts": {
 		"dev": "bunx vite dev",
 		"build": "bunx vite build",

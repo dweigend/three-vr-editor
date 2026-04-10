@@ -1,10 +1,3 @@
-<!--
-	Purpose: Provide the shared square application chrome for every route.
-	Context: The app now follows a single framed shell around the three primary pages: editor, chat, and settings.
-	Responsibility: Render the persistent top bar, manage the simple side menu state, and host route content.
-	Boundaries: Route-specific screen composition stays in the individual pages and shared workbench modules.
--->
-
 <script lang="ts">
 	import { resolve } from '$app/paths';
 	import { page } from '$app/state';

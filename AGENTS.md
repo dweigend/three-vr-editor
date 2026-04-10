@@ -1,18 +1,14 @@
 # AGENTS.md
 
-Purpose: Capture repository-local implementation rules for editor, template workbench, and documentation work.
-Context: This project uses SvelteKit, Three.js, and Pi with a strict server/client boundary.
-Responsibility: Keep architectural decisions, workflow defaults, and documentation expectations simple and consistent.
-Boundaries: This file defines repository guidance, not product behavior.
-
 ## Architecture Overview
 
-- `src/routes/three` exposes additive demo milestones. New work should prefer adding the next stage rather than replacing an older route.
-- `src/lib/editor` contains UI-focused CodeMirror helpers and should stay free of filesystem or preview orchestration.
-- `src/lib/three` contains viewer, editor workspace, template workbench, runtime, preview loader, and shared type modules.
-- `src/lib/pi` contains browser-side Pi UI and transport-only types.
+- `src/routes/editor`, `src/routes/chat`, and `src/routes/settings` expose the main app surfaces and their supporting endpoints.
+- `src/lib/components` contains reusable primitive UI families and thin Bits UI wrappers.
+- `src/lib/blocks` contains composed UI families built from local primitives.
+- `src/lib/features/editor` contains the editor-facing client modules, preview runtime wiring, workspace state, and template helpers.
+- `src/lib/features/chat` contains browser-side chat transport and conversation state.
 - `src/lib/server/pi` contains all Pi SDK usage, session setup, auth, and active-file edit tooling.
-- `src/lib/server/three` contains managed file access, preview building, demo bootstrap loaders, and template listing.
+- `src/lib/server/editor` contains managed file access, preview building, workspace bootstrap loading, and template listing.
 - `static/three` is the managed local workspace for editable scene files and should stay generated, not versioned beyond placeholders.
 - `static/templates` contains the teaching-oriented starter templates copied into editable scenes.
 
@@ -39,6 +35,7 @@ Boundaries: This file defines repository guidance, not product behavior.
 - Template metadata should stay machine-readable, minimal, and shared through the template parsing helpers.
 - Parameter panels should be driven by shared metadata and must degrade gracefully when a file has no template header.
 - Prefer app-compatible adaptations of official Three.js examples over copying full example HTML shells.
+- Comments are optional. Keep them only when they explain a non-obvious constraint, teaching point, or integration detail.
 
 ## Pi Integration Boundary
 

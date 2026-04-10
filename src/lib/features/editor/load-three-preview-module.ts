@@ -1,10 +1,3 @@
-/**
- * Purpose: Load bundled preview code into the browser as a scene factory module.
- * Context: The editor preview rebuilds TypeScript on the server and swaps the resulting module in the browser.
- * Responsibility: Import Blob-backed ESM code, validate the expected scene export, and expose source-map metadata plus optional renderer hints.
- * Boundaries: This module does not know anything about file persistence or Three runtime lifecycle.
- */
-
 import type { ThreePreviewBuildSuccess } from './three-editor-types';
 import type { ThreeDemoRendererKind, ThreeDemoSceneFactory } from './three-demo-scene';
 

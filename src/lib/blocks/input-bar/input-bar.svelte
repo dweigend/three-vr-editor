@@ -1,5 +1,3 @@
-<!-- Shared prompt/composer row. -->
-
 <script lang="ts">
 	import { CommandInput, Textarea } from '$lib/components';
 	import { joinClassNames } from '$lib/utils/class-names';

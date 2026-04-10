@@ -1,4 +1,3 @@
-/** Public entrypoint for composed UI blocks. */
 export { ConversationPanel } from './conversation-panel';
 export type { ConversationMessage, ConversationPanelProps } from './conversation-panel';
 export { InputBar } from './input-bar';

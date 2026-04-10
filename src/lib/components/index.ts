@@ -1,4 +1,3 @@
-/** Public entrypoint for reusable UI primitives. */
 export { Button } from './button';
 export type { ButtonProps } from './button';
 export { Card, CardBody, CardFooter, CardHeader } from './card';

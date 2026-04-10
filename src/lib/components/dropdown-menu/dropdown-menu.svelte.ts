@@ -1,7 +1,3 @@
-/**
- * Shared styling hooks for the dropdown-menu primitive family.
- * Keeps menu surfaces and compact selection fields visually aligned across routes.
- */
 export const dropdownMenuContentClass = 'ui-menu-content';
 export const dropdownMenuItemClass = 'ui-menu-item';
 export const dropdownFieldRootClass = 'ui-dropdown-field';

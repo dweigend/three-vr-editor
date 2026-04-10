@@ -1,5 +1,3 @@
-/** Start here if you want baked-looking lighting without loading any textures. */
-
 import * as THREE from 'three/webgpu';
 
 import {
@@ -7,8 +5,6 @@ import {
 	defineThreeTemplateUi,
 	type ThreeDemoSceneFactory
 } from '$lib/features/editor/three-helpers';
-
-// The editor sidebar reads this to build the labels and controls.
 export const templateUi = defineThreeTemplateUi({
 	"id": "materials-lightmap",
 	"title": "Materials Lightmap",
@@ -45,8 +41,6 @@ export const templateUi = defineThreeTemplateUi({
 		}
 	]
 });
-
-// These are the values students can play with first.
 export const templateParameters = defineThreeTemplateParameters({
 	"accentColor": "#60a5fa",
 	"background": "#111827",

@@ -1,5 +1,3 @@
-/** Pick a profile and watch it ride along a curved path. */
-
 import {
 	AmbientLight,
 	CatmullRomCurve3,
@@ -20,8 +18,6 @@ import {
 	defineThreeTemplateUi,
 	type ThreeDemoSceneFactory
 } from '$lib/features/editor/three-helpers';
-
-// The editor sidebar reads this to build the labels and controls.
 export const templateUi = defineThreeTemplateUi({
 	"id": "geometry-extrude-splines",
 	"title": "Geometry Extrude Splines",
@@ -62,8 +58,6 @@ export const templateUi = defineThreeTemplateUi({
 		}
 	]
 });
-
-// These are the values students can play with first.
 export const templateParameters = defineThreeTemplateParameters({
 	"background": "#111827",
 	"profile": "star",

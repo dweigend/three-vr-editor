@@ -1,5 +1,3 @@
-/** Start here if you want click-to-toggle bloom with WebGPU and TSL. */
-
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import { bloom } from 'three/addons/tsl/display/BloomNode.js';
 import { float, mrt, output, pass, uniform } from 'three/tsl';
@@ -11,8 +9,6 @@ import {
 	defineThreeTemplateUi,
 	type ThreeDemoSceneFactory
 } from '$lib/features/editor/three-helpers';
-
-// The editor sidebar reads this to build the labels and controls.
 export const templateUi = defineThreeTemplateUi({
 	"id": "postprocessing-bloom-selective",
 	"title": "Postprocessing Bloom Selective",
@@ -55,8 +51,6 @@ export const templateUi = defineThreeTemplateUi({
 		}
 	]
 });
-
-// These are the values students can play with first.
 export const templateParameters = defineThreeTemplateParameters({
 	"background": "#020617",
 	"bloomStrength": 1.2,

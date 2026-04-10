@@ -1,10 +1,3 @@
-/**
- * Purpose: Verify that Pi session scopes stay isolated on disk.
- * Context: Chat and editor may both persist sessions, but they must never accept each other's files.
- * Responsibility: Cover scope-specific directory resolution and managed-path validation.
- * Boundaries: These tests do not create real Pi sessions or call external providers.
- */
-
 import { resolve } from 'node:path';
 
 import { describe, expect, it } from 'vitest';
