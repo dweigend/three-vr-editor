@@ -83,7 +83,8 @@ describe('editorLiveLayer', () => {
 			documentValues: {},
 			editableParameters: [],
 			path: 'scenes/example.ts',
-			status: 'missing-template-header'
+			status: 'missing-template-header',
+			template: null
 		});
 	});
 

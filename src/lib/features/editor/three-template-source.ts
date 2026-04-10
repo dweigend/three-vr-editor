@@ -1,5 +1,3 @@
-import { runInNewContext } from 'node:vm';
-
 import type {
 	ThreeTemplateHeader,
 	ThreeTemplateParameterMap,
@@ -85,7 +83,7 @@ export function hasThreeTemplateHeader(source: string): boolean {
 }
 
 function parseTemplateObjectLiteral<TValue>(source: string): TValue {
-	const parsedValue = runInNewContext(`(${source.trim()})`, {}, { timeout: 100 });
+	const parsedValue = new Function(`"use strict"; return (${source.trim()});`)();
 
 	if (!isRecord(parsedValue)) {
 		throw new SyntaxError('Template metadata must evaluate to an object literal.');

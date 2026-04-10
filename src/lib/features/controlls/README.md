@@ -22,9 +22,9 @@ This folder contains the optional control-panel module that lives inside the edi
 
 ## Current Status
 
-- `ControlPanel.svelte` is wired into the editor workbench as a placeholder panel.
-- Window visibility now flows through the shared workbench toolbar state.
-- The panel intentionally shows an empty state until parameter controls land.
+- `ControlPanel.svelte` now reads editable values from the shared live layer.
+- Live preview overrides stay browser-side until the user explicitly applies them back into code.
+- Empty states remain first-class for files without template metadata or parameter blocks.
 
 ## Boundaries
 

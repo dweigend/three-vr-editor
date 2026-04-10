@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { untrack } from 'svelte';
+	import { onDestroy, untrack } from 'svelte';
 	import { resolve } from '$app/paths';
 
 	import { Pane, PaneGroup, PaneResizer } from 'paneforge';
@@ -8,6 +8,11 @@
 	import CodeEditor from '$lib/features/editor/CodeEditor.svelte';
 	import EditorAgentPanel from '$lib/features/editor/EditorAgentPanel.svelte';
 	import EditorWorkbenchToolbar from '$lib/features/editor/EditorWorkbenchToolbar.svelte';
+	import {
+		buildEditorLiveCommitRequest,
+		createEditorLiveParameterValueMap
+	} from '$lib/features/editor/editor-live-layer-commit';
+	import { editorLiveLayer } from '$lib/features/editor/editor-live-layer.svelte';
 	import {
 		defaultEditorWorkbenchVisibility,
 		editorWorkbenchPanels,
@@ -34,12 +39,6 @@
 
 	import type { PageProps } from './$types';
 
-	type CollapsiblePaneApi = {
-		collapse: () => void;
-		expand: () => void;
-		isCollapsed: () => boolean;
-	};
-
 	let { data }: PageProps = $props();
 
 	const stableData = untrack(() => {
@@ -60,11 +59,6 @@
 		editorWorkbenchPanels.map((panel) => [panel.key, panel.panelId])
 	) as Record<EditorWorkbenchPanelKey, string>;
 
-	let controlsPane: CollapsiblePaneApi | null = null;
-	let codePane: CollapsiblePaneApi | null = null;
-	let agentPane: CollapsiblePaneApi | null = null;
-	let nodeEditorPane: CollapsiblePaneApi | null = null;
-	let previewPane: CollapsiblePaneApi | null = null;
 	let codeEditorToolbarState = $state<CodeEditorToolbarState | null>(null);
 	let pendingAppliedEdit = $state<EditorAgentAppliedEdit | null>(null);
 	let pendingAppliedEditToken = $state(0);
@@ -166,24 +160,11 @@
 		setWorkbenchPanelVisibility(panelKey, true);
 	}
 
-	function syncPaneVisibility(
-		panelKey: EditorWorkbenchPanelKey,
-		pane: CollapsiblePaneApi | null
-	): void {
-		if (!pane) {
-			return;
-		}
-
-		const shouldBeVisible = isWorkbenchPanelVisible(panelKey);
-
-		if (shouldBeVisible && pane.isCollapsed()) {
-			pane.expand();
-			return;
-		}
-
-		if (!shouldBeVisible && !pane.isCollapsed()) {
-			pane.collapse();
-		}
+	function shouldHidePaneResizer(
+		firstPanelKey: EditorWorkbenchPanelKey,
+		secondPanelKey: EditorWorkbenchPanelKey
+	): boolean {
+		return !isWorkbenchPanelVisible(firstPanelKey) || !isWorkbenchPanelVisible(secondPanelKey);
 	}
 
 	const toolbarStatus = $derived.by(() => {
@@ -233,15 +214,62 @@
 	);
 
 	const canRedo = $derived(codeEditorToolbarState?.canRedo ?? false);
+	const hasLeftWorkbenchPanel = $derived.by(() => {
+		return (
+			isWorkbenchPanelVisible('code') ||
+			isWorkbenchPanelVisible('controls') ||
+			isWorkbenchPanelVisible('node-editor') ||
+			isWorkbenchPanelVisible('agent')
+		);
+	});
+	const livePreviewParameterValues = $derived.by(() => {
+		if (!editorLiveLayer.isActive || editorLiveLayer.activePath !== workspaceState.selectedPath) {
+			return null;
+		}
+
+		return createEditorLiveParameterValueMap(editorLiveLayer.resolvedParameters);
+	});
 
 	$effect(() => {
 		updateWorkbenchVisibility(workbenchVisibility);
-		syncPaneVisibility('controls', controlsPane);
-		syncPaneVisibility('code', codePane);
-		syncPaneVisibility('agent', agentPane);
-		syncPaneVisibility('node-editor', nodeEditorPane);
-		syncPaneVisibility('preview', previewPane);
 	});
+
+	$effect(() => {
+		const activeFileContext = workspaceState.activeFileContext;
+
+		untrack(() => {
+			editorLiveLayer.syncActiveFileContext(activeFileContext);
+		});
+	});
+
+	$effect(() => {
+		const controlsVisible = isWorkbenchPanelVisible('controls');
+		const nodeEditorVisible = isWorkbenchPanelVisible('node-editor');
+
+		untrack(() => {
+			editorLiveLayer.setConsumerActive('control-panel', controlsVisible);
+			editorLiveLayer.setConsumerActive('node-editor', nodeEditorVisible);
+		});
+	});
+
+	onDestroy(() => {
+		editorLiveLayer.reset();
+	});
+
+	function handleControlPanelApply(): void {
+		const commitRequest = buildEditorLiveCommitRequest(
+			workspaceState.activeFileContext,
+			editorLiveLayer.resolvedParameters
+		);
+
+		if (!commitRequest || commitRequest.path !== workspaceState.selectedPath) {
+			return;
+		}
+
+		workspaceState.applyDocumentUpdate(commitRequest.content);
+		editorLiveLayer.clearOverrides();
+		workspaceMessage = null;
+	}
 </script>
 
 <svelte:head>
@@ -271,146 +299,148 @@
 			class="ui-pane-group ui-pane-group--workbench"
 			direction="horizontal"
 		>
-			<Pane
-				bind:this={controlsPane}
-				class="ui-pane-slot"
-				collapsible={true}
-				collapsedSize={0}
-				defaultSize={16}
-				minSize={12}
-				onCollapse={() => handleWorkbenchPaneCollapse('controls')}
-				onExpand={() => handleWorkbenchPaneExpand('controls')}
-			>
-				<ControlPanel activeFileName={activeFileName} panelId={workbenchPanelIds.controls} />
-			</Pane>
-
-			<PaneResizer
-				class={joinClassNames(
-					'ui-pane-resizer ui-pane-resizer--vertical',
-					!isWorkbenchPanelVisible('controls') && 'ui-pane-resizer--hidden'
-				)}
-			/>
-
-			<Pane class="ui-pane-slot" defaultSize={52} minSize={20}>
-				<PaneGroup
-					autoSaveId="editor-page-stack-layout"
-					class="ui-pane-group ui-pane-group--stack"
-					direction="vertical"
-				>
-					<Pane
-						bind:this={codePane}
-						class="ui-pane-slot"
-						collapsible={true}
-						collapsedSize={0}
-						defaultSize={68}
-						minSize={18}
-						onCollapse={() => handleWorkbenchPaneCollapse('code')}
-						onExpand={() => handleWorkbenchPaneExpand('code')}
+			{#if hasLeftWorkbenchPanel}
+				<Pane class="ui-pane-slot" defaultSize={66} minSize={20}>
+					<PaneGroup
+						autoSaveId="editor-page-stack-layout"
+						class="ui-pane-group ui-pane-group--stack"
+						direction="vertical"
 					>
-						<section class="ui-pane" id={workbenchPanelIds.code}>
-							<div class="ui-pane__body ui-pane__body--flush">
-								{#if workspaceState.activeDocument === undefined}
-									<div class="ui-pane__body">
-										<p class="ui-empty-state">Loading file...</p>
+						{#if isWorkbenchPanelVisible('code')}
+							<Pane
+								class="ui-pane-slot"
+								collapsible={true}
+								collapsedSize={0}
+								defaultSize={68}
+								minSize={18}
+								onCollapse={() => handleWorkbenchPaneCollapse('code')}
+								onExpand={() => handleWorkbenchPaneExpand('code')}
+							>
+								<section class="ui-pane" id={workbenchPanelIds.code}>
+									<div class="ui-pane__body ui-pane__body--flush">
+										{#if workspaceState.activeDocument === undefined}
+											<div class="ui-pane__body">
+												<p class="ui-empty-state">Loading file...</p>
+											</div>
+										{:else}
+											{#key workspaceState.selectedPath}
+												<CodeEditor
+													changedLineRanges={workspaceState.changedLineRanges}
+													diagnostic={workspaceState.activeDiagnostic}
+													bind:toolbarState={codeEditorToolbarState}
+													value={workspaceState.activeDocument}
+													onChange={workspaceState.handleSourceChange}
+												/>
+											{/key}
+										{/if}
 									</div>
-								{:else}
-									{#key workspaceState.selectedPath}
-										<CodeEditor
-											changedLineRanges={workspaceState.changedLineRanges}
-											diagnostic={workspaceState.activeDiagnostic}
-											bind:toolbarState={codeEditorToolbarState}
-											value={workspaceState.activeDocument}
-											onChange={workspaceState.handleSourceChange}
-										/>
-									{/key}
-								{/if}
-							</div>
-						</section>
-					</Pane>
+								</section>
+							</Pane>
+						{/if}
 
-					<PaneResizer
-						class={joinClassNames(
-							'ui-pane-resizer ui-pane-resizer--horizontal',
-							(!isWorkbenchPanelVisible('code') || !isWorkbenchPanelVisible('agent')) &&
-								'ui-pane-resizer--hidden'
-						)}
-					/>
+						{#if isWorkbenchPanelVisible('code') && isWorkbenchPanelVisible('controls')}
+							<PaneResizer class="ui-pane-resizer ui-pane-resizer--horizontal" />
+						{/if}
 
-					<Pane
-						bind:this={agentPane}
-						class="ui-pane-slot"
-						collapsible={true}
-						collapsedSize={0}
-						defaultSize={32}
-						minSize={14}
-						onCollapse={() => handleWorkbenchPaneCollapse('agent')}
-						onExpand={() => handleWorkbenchPaneExpand('agent')}
-					>
-						<EditorAgentPanel
-							activeFileContext={workspaceState.activeFileContext}
-							endpoint={resolve('/editor/agent')}
-							hasActiveKey={stableData.hasActiveKey}
-							initialMessages={stableData.initialEditorMessages}
-							initialSessionReady={stableData.initialEditorSessionReady}
-							modelName={stableData.modelName}
-							onResponse={handleAgentResponse}
-							panelId={workbenchPanelIds.agent}
-						/>
-					</Pane>
-				</PaneGroup>
-			</Pane>
+						{#if isWorkbenchPanelVisible('controls')}
+							<Pane
+								class="ui-pane-slot"
+								collapsible={true}
+								collapsedSize={0}
+								defaultSize={18}
+								minSize={12}
+								onCollapse={() => handleWorkbenchPaneCollapse('controls')}
+								onExpand={() => handleWorkbenchPaneExpand('controls')}
+							>
+								<ControlPanel
+									activeFileName={activeFileName}
+									onApply={handleControlPanelApply}
+									panelId={workbenchPanelIds.controls}
+								/>
+							</Pane>
+						{/if}
 
-			<PaneResizer
-				class={joinClassNames(
-					'ui-pane-resizer ui-pane-resizer--vertical',
-					!isWorkbenchPanelVisible('node-editor') && 'ui-pane-resizer--hidden'
-				)}
-			/>
+						{#if isWorkbenchPanelVisible('controls') && isWorkbenchPanelVisible('node-editor')}
+							<PaneResizer class="ui-pane-resizer ui-pane-resizer--horizontal" />
+						{/if}
 
-			<Pane
-				bind:this={nodeEditorPane}
-				class="ui-pane-slot"
-				collapsible={true}
-				collapsedSize={0}
-				defaultSize={18}
-				minSize={12}
-				onCollapse={() => handleWorkbenchPaneCollapse('node-editor')}
-				onExpand={() => handleWorkbenchPaneExpand('node-editor')}
-			>
-				<NodeEditorPanel activeFileName={activeFileName} panelId={workbenchPanelIds['node-editor']} />
-			</Pane>
+						{#if isWorkbenchPanelVisible('node-editor')}
+							<Pane
+								class="ui-pane-slot"
+								collapsible={true}
+								collapsedSize={0}
+								defaultSize={16}
+								minSize={12}
+								onCollapse={() => handleWorkbenchPaneCollapse('node-editor')}
+								onExpand={() => handleWorkbenchPaneExpand('node-editor')}
+							>
+								<NodeEditorPanel
+									activeFileName={activeFileName}
+									panelId={workbenchPanelIds['node-editor']}
+								/>
+							</Pane>
+						{/if}
 
-			<PaneResizer
-				class={joinClassNames(
-					'ui-pane-resizer ui-pane-resizer--vertical',
-					!isWorkbenchPanelVisible('preview') && 'ui-pane-resizer--hidden'
-				)}
-			/>
+						{#if isWorkbenchPanelVisible('node-editor') && isWorkbenchPanelVisible('agent')}
+							<PaneResizer class="ui-pane-resizer ui-pane-resizer--horizontal" />
+						{/if}
 
-			<Pane
-				bind:this={previewPane}
-				class="ui-pane-slot"
-				collapsible={true}
-				collapsedSize={0}
-				defaultSize={34}
-				minSize={12}
-				onCollapse={() => handleWorkbenchPaneCollapse('preview')}
-				onExpand={() => handleWorkbenchPaneExpand('preview')}
-			>
-				<section class="ui-pane ui-pane--muted" id={workbenchPanelIds.preview}>
-					<div class="ui-pane__header">
-						<p class="ui-surface-label">Preview</p>
-						<p class="ui-toolbar-status">Live render</p>
-					</div>
+						{#if isWorkbenchPanelVisible('agent')}
+							<Pane
+								class="ui-pane-slot"
+								collapsible={true}
+								collapsedSize={0}
+								defaultSize={20}
+								minSize={14}
+								onCollapse={() => handleWorkbenchPaneCollapse('agent')}
+								onExpand={() => handleWorkbenchPaneExpand('agent')}
+							>
+								<EditorAgentPanel
+									activeFileContext={workspaceState.activeFileContext}
+									endpoint={resolve('/editor/agent')}
+									hasActiveKey={stableData.hasActiveKey}
+									initialMessages={stableData.initialEditorMessages}
+									initialSessionReady={stableData.initialEditorSessionReady}
+									modelName={stableData.modelName}
+									onResponse={handleAgentResponse}
+									panelId={workbenchPanelIds.agent}
+								/>
+							</Pane>
+						{/if}
+					</PaneGroup>
+				</Pane>
+			{/if}
 
-					<div class="ui-pane__body ui-pane__body--flush">
-						<ThreePreview
-							preview={workspaceState.preview}
-							onErrorChange={workspaceState.handlePreviewErrorChange}
-						/>
-					</div>
-				</section>
-			</Pane>
+			{#if hasLeftWorkbenchPanel && isWorkbenchPanelVisible('preview')}
+				<PaneResizer class="ui-pane-resizer ui-pane-resizer--vertical" />
+			{/if}
+
+			{#if isWorkbenchPanelVisible('preview')}
+				<Pane
+					class="ui-pane-slot"
+					collapsible={true}
+					collapsedSize={0}
+					defaultSize={34}
+					minSize={12}
+					onCollapse={() => handleWorkbenchPaneCollapse('preview')}
+					onExpand={() => handleWorkbenchPaneExpand('preview')}
+				>
+					<section class="ui-pane ui-pane--muted" id={workbenchPanelIds.preview}>
+						<div class="ui-pane__header">
+							<p class="ui-surface-label">Preview</p>
+							<p class="ui-toolbar-status">Live render</p>
+						</div>
+
+						<div class="ui-pane__body ui-pane__body--flush">
+							<ThreePreview
+								liveParameterValues={livePreviewParameterValues}
+								preview={workspaceState.preview}
+								onErrorChange={workspaceState.handlePreviewErrorChange}
+							/>
+						</div>
+					</section>
+				</Pane>
+			{/if}
 		</PaneGroup>
 	</div>
 </section>

@@ -51,6 +51,14 @@ This shared layer should exist once in the editor feature area and should not be
 - An empty list of editable values is valid.
 - In all of those cases the control panel should render no controls or a calm empty state and leave preview behavior unchanged.
 
+## Session Learnings
+
+- The control panel must follow the same selected-file flow as the code editor and preview. If file switching updates code but not controls, the architecture is already in an invalid state.
+- Keep the panel compact. Duplicate meta labels such as repeated code values, section counters, and descriptive cards add noise without helping the editing workflow.
+- Empty states should be calm and minimal, but they must still describe the current file accurately. Showing stale empty-state copy from a previous file is a real bug, not a cosmetic issue.
+- Reuse the shared live layer for parameter discovery and override handling, but keep layout and formatting concerns local to the control-panel feature so UI cleanup does not force state changes.
+- Prefer one compact list of controls over nested cards and group shells unless grouping adds real editing value.
+
 ## Concrete Steps
 
 1. Adopt the shared temporary parameter layer contract from `src/lib/features/editor/LIVE-LAYER-PLAN.md`.

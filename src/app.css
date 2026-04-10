@@ -593,6 +593,71 @@ select {
 	font-size: var(--ui-font-size-body);
 }
 
+.control-panel {
+	display: grid;
+	gap: var(--ui-space-3);
+	align-content: start;
+}
+
+.control-panel .ui-card {
+	background: rgba(8, 8, 12, 0.72);
+}
+
+.control-panel__body,
+.control-panel__footer {
+	padding: var(--ui-space-3);
+}
+
+.control-panel__body {
+	display: grid;
+	gap: var(--ui-space-2);
+}
+
+.control-panel__field {
+	display: grid;
+	gap: var(--ui-space-2);
+}
+
+.control-panel__field-row,
+.control-panel__footer {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: var(--ui-space-2);
+	flex-wrap: wrap;
+}
+
+.control-panel__field-meta {
+	margin: 0;
+	color: var(--ui-color-text);
+	font-size: var(--ui-font-size-meta);
+	text-align: right;
+}
+
+.control-panel__color-row {
+	display: grid;
+	grid-template-columns: auto minmax(0, 1fr);
+	align-items: center;
+	gap: var(--ui-space-2);
+}
+
+.control-panel__range-input {
+	width: 100%;
+	accent-color: var(--ui-color-accent);
+}
+
+.control-panel__color-input {
+	width: 2.8rem;
+	height: var(--ui-control-size);
+	border: 1px solid var(--ui-color-border);
+	background: rgba(255, 255, 255, 0.02);
+	padding: 0.2rem;
+}
+
+.control-panel__color-text {
+	min-width: 0;
+}
+
 .ui-workbench-placeholder {
 	display: grid;
 	gap: var(--ui-space-2);

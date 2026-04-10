@@ -12,7 +12,8 @@ This folder contains editor-specific client modules for the editor workspace.
   `three-editor-workspace-state.svelte.ts`, `editor-agent-client.ts`, `editor-agent-types.ts`
 - optional shared live-parameter layer for interactive editor modules
   `LIVE-LAYER-PLAN.md`, `editor-live-layer-types.ts`,
-  `editor-live-layer-discovery.ts`, `editor-live-layer.svelte.ts`
+  `editor-live-layer-discovery.ts`, `editor-live-layer-commit.ts`,
+  `editor-live-layer.svelte.ts`
 - template metadata and file creation UI
   `ThreeFileCreatePanel.svelte`, `ThreeTemplateParameterPanel.svelte`,
   `three-helpers.ts`, `three-template-source.ts`, `three-template-types.ts`

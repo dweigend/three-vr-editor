@@ -252,6 +252,14 @@ The preview control panel should live in `src/lib/features/controlls` and remain
 
 The node editor and control panel must not create separate live-edit structures. Both should consume one shared browser-side layer for temporary preview values and explicit write-back into the document.
 
+## Recent Session Learnings
+
+- Keep the selected editor file as the default shared source for code, controls, and preview. Introducing a second implicit preview source without a matching product affordance creates stale UI and broken file switching.
+- Treat workbench panel visibility, active-file selection, and live-parameter discovery as three separate responsibilities. Coupling them makes debugging much harder and causes hidden state transitions.
+- Compact controls work better than text-heavy inspector cards for this editor. The useful signal is the editable value itself, not repeated explanatory chrome.
+- Graceful degradation needs architectural tests, not just visual placeholders. Missing template metadata, missing parameter blocks, and empty parameter lists should all be exercised while switching between files.
+- First-principle refactors should prefer removing accidental intermediate layers over adding more coordination code. In this session the clean fix was to remove the extra preview-source split, not to patch around it.
+
 ## Phase 2: Tutorial Shell
 
 **Goal**

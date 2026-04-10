@@ -121,7 +121,8 @@ describe('discoverEditorLiveParameters', () => {
 			documentValues: {},
 			editableParameters: [],
 			path: null,
-			status: 'missing-template-header'
+			status: 'missing-template-header',
+			template: null
 		});
 	});
 
@@ -134,7 +135,8 @@ describe('discoverEditorLiveParameters', () => {
 			documentValues: {},
 			editableParameters: [],
 			path: 'scenes/example.ts',
-			status: 'missing-template-header'
+			status: 'missing-template-header',
+			template: null
 		});
 	});
 
@@ -145,7 +147,24 @@ describe('discoverEditorLiveParameters', () => {
 			documentValues: {},
 			editableParameters: [],
 			path: 'scenes/example.ts',
-			status: 'missing-parameter-block'
+			status: 'missing-parameter-block',
+			template: {
+				description: 'A simple cube template.',
+				id: 'geometry-cube',
+				parameters: [
+					{
+						control: 'range',
+						defaultValue: 1.2,
+						key: 'cubeSize',
+						label: 'Cube size',
+						max: 2,
+						min: 0.5
+					}
+				],
+				rendererKind: 'webgl',
+				tags: ['geometry'],
+				title: 'Geometry Cube'
+			}
 		});
 	});
 
@@ -154,7 +173,15 @@ describe('discoverEditorLiveParameters', () => {
 			documentValues: {},
 			editableParameters: [],
 			path: 'scenes/example.ts',
-			status: 'no-editable-parameters'
+			status: 'no-editable-parameters',
+			template: {
+				description: 'No live values.',
+				id: 'empty-template',
+				parameters: [],
+				rendererKind: 'webgl',
+				tags: ['empty'],
+				title: 'Empty template'
+			}
 		});
 	});
 
@@ -191,7 +218,30 @@ describe('discoverEditorLiveParameters', () => {
 				}
 			],
 			path: 'scenes/example.ts',
-			status: 'ready'
+			status: 'ready',
+			template: {
+				description: 'A simple cube template.',
+				id: 'geometry-cube',
+				parameters: [
+					{
+						control: 'color',
+						defaultValue: '#60a5fa',
+						key: 'cubeColor',
+						label: 'Cube color'
+					},
+					{
+						control: 'range',
+						defaultValue: 1.2,
+						key: 'cubeSize',
+						label: 'Cube size',
+						max: 2,
+						min: 0.5
+					}
+				],
+				rendererKind: 'webgl',
+				tags: ['geometry'],
+				title: 'Geometry Cube'
+			}
 		});
 	});
 
@@ -218,7 +268,24 @@ describe('discoverEditorLiveParameters', () => {
 				}
 			],
 			path: 'scenes/example.ts',
-			status: 'ready'
+			status: 'ready',
+			template: {
+				description: 'Falls back to defaults.',
+				id: 'missing-value',
+				parameters: [
+					{
+						control: 'range',
+						defaultValue: 0.01,
+						key: 'spinSpeed',
+						label: 'Spin speed',
+						max: 0.02,
+						min: 0.001
+					}
+				],
+				rendererKind: 'webgl',
+				tags: ['fallback'],
+				title: 'Missing value'
+			}
 		});
 	});
 

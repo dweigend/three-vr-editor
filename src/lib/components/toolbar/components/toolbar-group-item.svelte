@@ -7,7 +7,7 @@
 		class?: string;
 	};
 
-	let { children, class: className = '', ...restProps }: Props = $props();
+	let { children: renderContent, class: className = '', ...restProps }: Props = $props();
 </script>
 
 <Toolbar.GroupItem
@@ -18,6 +18,6 @@
 	)}
 >
 	{#snippet children({ pressed })}
-		{@render children?.({ pressed })}
+		{@render renderContent?.({ pressed })}
 	{/snippet}
 </Toolbar.GroupItem>

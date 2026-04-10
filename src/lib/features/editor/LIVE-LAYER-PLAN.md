@@ -105,6 +105,14 @@ The shared live layer is not responsible for:
 - use typed Svelte context only when passing the live layer through component subtrees is cleaner than prop plumbing
 - create effectful preview bindings only while the layer is active
 
+## Session Learnings
+
+- Keep one clear data source for code, controls, and preview during file switching. The currently selected editor file should stay the shared source unless the product explicitly introduces a separate preview-target concept.
+- Do not split `activeFileContext` and preview-facing control discovery unless there is a real user-facing preview-target feature. A hidden second source quickly creates stale controls and stale preview state.
+- Treat panel visibility and panel data source as separate concerns. Showing or hiding the control panel should only activate or idle the shared live layer, never change which file the layer reads from.
+- The live layer should degrade to empty states for missing metadata, but those empty states must always reflect the currently selected file. Empty-state correctness is part of the feature, not just a fallback.
+- Keep commit paths explicit. Temporary live overrides may stay browser-only, but accepted changes must still flow back through one predictable document-update path.
+
 ## Concrete Steps
 
 1. Define the shared type contract for discovered parameters, temporary overrides, resolved values, and commit requests.

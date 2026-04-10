@@ -1,4 +1,5 @@
 import type {
+	ThreeTemplateHeader,
 	ThreeTemplateParameterDefinition,
 	ThreeTemplateParameterMap,
 	ThreeTemplateParameterValue
@@ -32,6 +33,7 @@ export type EditorLiveDiscoveryResult = {
 	editableParameters: EditorLiveEditableParameter[];
 	path: string | null;
 	status: EditorLiveDiscoveryStatus;
+	template: ThreeTemplateHeader | null;
 };
 
 export type EditorLiveOverrideMap = Record<string, ThreeTemplateParameterValue>;

@@ -7,17 +7,19 @@
 	} from '$lib/features/editor/load-three-preview-module';
 	import { toPreviewRuntimeError } from '$lib/features/editor/preview-runtime-errors';
 	import type { ThreePreviewBuildResult } from '$lib/features/editor/three-editor-types';
+	import type { ThreeTemplateParameterMap } from '$lib/features/editor/three-template-types';
 	import { toViewerError, type ViewerError } from '$lib/features/editor/three-viewer-errors';
 	import '$lib/features/editor/three-preview.css';
 
 	import ThreeViewerErrorPanel from './ThreeViewerErrorPanel.svelte';
 
 	type Props = {
+		liveParameterValues?: ThreeTemplateParameterMap | null;
 		onErrorChange?: ((error: ViewerError | null) => void) | undefined;
 		preview: ThreePreviewBuildResult | null;
 	};
 
-	let { onErrorChange, preview }: Props = $props();
+	let { liveParameterValues = null, onErrorChange, preview }: Props = $props();
 
 	let previewModule: LoadedThreePreviewModule | null = $state(null);
 	let previewError: ViewerError | null = $state(null);
@@ -100,6 +102,8 @@
 		if (!viewerRoot || !previewModule || activeError) {
 			return;
 		}
+
+		previewModule.applyTemplateParameters(liveParameterValues);
 
 		try {
 			const runtime = createThreeRuntime({

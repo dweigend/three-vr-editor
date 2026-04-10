@@ -32,8 +32,7 @@ export const editorWorkbenchPanelKeys = editorWorkbenchPanels.map((panel) => pan
 
 export const defaultEditorWorkbenchVisibility: EditorWorkbenchPanelKey[] = [
 	'preview',
-	'code',
-	'agent'
+	'code'
 ];
 
 export function normalizeWorkbenchVisibility(

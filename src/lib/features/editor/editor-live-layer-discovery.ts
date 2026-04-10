@@ -7,6 +7,7 @@ import type {
 import { readThreeTemplateSourceDetails } from './three-template-source';
 import type {
 	ThreeTemplateParameterDefinition,
+	ThreeTemplateHeader,
 	ThreeTemplateParameterMap,
 	ThreeTemplateParameterValue
 } from './three-template-types';
@@ -31,11 +32,11 @@ export function discoverEditorLiveParameters(
 	}
 
 	if (!templateParameters) {
-		return createEmptyEditorLiveDiscoveryResult(context.path, 'missing-parameter-block');
+		return createEmptyEditorLiveDiscoveryResult(context.path, 'missing-parameter-block', templateHeader);
 	}
 
 	if (templateHeader.parameters.length === 0) {
-		return createEmptyEditorLiveDiscoveryResult(context.path, 'no-editable-parameters');
+		return createEmptyEditorLiveDiscoveryResult(context.path, 'no-editable-parameters', templateHeader);
 	}
 
 	const editableParameters = templateHeader.parameters.map((definition) =>
@@ -50,19 +51,22 @@ export function discoverEditorLiveParameters(
 		documentValues,
 		editableParameters,
 		path: context.path,
-		status: 'ready'
+		status: 'ready',
+		template: templateHeader
 	};
 }
 
 export function createEmptyEditorLiveDiscoveryResult(
 	path: string | null,
-	status: EditorLiveDiscoveryStatus
+	status: EditorLiveDiscoveryStatus,
+	template: ThreeTemplateHeader | null = null
 ): EditorLiveDiscoveryResult {
 	return {
 		documentValues: {},
 		editableParameters: [],
 		path,
-		status
+		status,
+		template
 	};
 }
 
