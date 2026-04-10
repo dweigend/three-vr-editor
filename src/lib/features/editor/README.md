@@ -11,7 +11,8 @@ This folder contains editor-specific client modules for the editor workspace.
 - workspace state and transport
   `three-editor-workspace-state.svelte.ts`, `editor-agent-client.ts`, `editor-agent-types.ts`
 - optional shared live-parameter layer for interactive editor modules
-  `LIVE-LAYER-PLAN.md`
+  `LIVE-LAYER-PLAN.md`, `editor-live-layer-types.ts`,
+  `editor-live-layer-discovery.ts`, `editor-live-layer.svelte.ts`
 - template metadata and file creation UI
   `ThreeFileCreatePanel.svelte`, `ThreeTemplateParameterPanel.svelte`,
   `three-helpers.ts`, `three-template-source.ts`, `three-template-types.ts`
@@ -34,3 +35,5 @@ multiple editor modules directly.
 - Keep composed reusable UI in `src/lib/blocks`.
 - Keep Pi SDK usage and filesystem access in `src/lib/server`.
 - Keep optional shared live preview state in this folder rather than duplicating it in feature modules.
+- The shared live layer is foundation-only for now and stays inert until an interactive
+  module explicitly activates it.
