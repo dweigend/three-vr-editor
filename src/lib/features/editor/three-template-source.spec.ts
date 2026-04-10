@@ -59,6 +59,35 @@ export const templateParameters = {
 export const createDemoScene = () => ({ update() {}, dispose() {} });
 `;
 
+const JAVASCRIPT_LITERAL_TEMPLATE_SOURCE = `import {
+\tdefineThreeTemplateParameters,
+\tdefineThreeTemplateUi
+} from '$lib/features/editor/three-helpers';
+
+export const templateUi = defineThreeTemplateUi({
+\tid: 'example-js',
+\ttitle: 'Example JS',
+\tdescription: 'Example template with a JavaScript object literal',
+\trendererKind: 'webgl',
+\ttags: ['example'],
+\tparameters: [
+\t\t{
+\t\t\tkey: 'speed',
+\t\t\tlabel: 'Speed',
+\t\t\tcontrol: 'range',
+\t\t\tmin: 0.1,
+\t\t\tmax: 2,
+\t\t\tstep: 0.1,
+\t\t\tdefaultValue: 1
+\t\t}
+\t]
+});
+
+export const templateParameters = defineThreeTemplateParameters({
+\tspeed: 1
+});
+`;
+
 describe('three-template-source', () => {
 	it('reads helper-based template metadata and parameter values', () => {
 		const result = readThreeTemplateSourceDetails(TEMPLATE_SOURCE);
@@ -75,6 +104,15 @@ describe('three-template-source', () => {
 		expect(result.header?.id).toBe('example');
 		expect(result.parameters).toEqual({
 			color: '#ffffff'
+		});
+	});
+
+	it('reads helper-based metadata from JavaScript object literals', () => {
+		const result = readThreeTemplateSourceDetails(JAVASCRIPT_LITERAL_TEMPLATE_SOURCE);
+
+		expect(result.header?.id).toBe('example-js');
+		expect(result.parameters).toEqual({
+			speed: 1
 		});
 	});
 

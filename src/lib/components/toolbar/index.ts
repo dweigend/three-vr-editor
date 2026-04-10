@@ -1,3 +1,8 @@
 import './toolbar.css';
-export { ToolbarButton, ToolbarRoot } from './exports';
-export type { ToolbarButtonProps, ToolbarRootProps } from './exports';
+export { ToolbarButton, ToolbarGroup, ToolbarGroupItem, ToolbarRoot } from './exports';
+export type {
+	ToolbarButtonProps,
+	ToolbarGroupItemProps,
+	ToolbarGroupProps,
+	ToolbarRootProps
+} from './exports';

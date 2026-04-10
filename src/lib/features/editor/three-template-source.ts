@@ -24,7 +24,7 @@ export function readThreeTemplateHeader(source: string): ThreeTemplateHeader | n
 	const templateUiMatch = TEMPLATE_UI_PATTERN.exec(source);
 
 	if (templateUiMatch) {
-		return JSON.parse(templateUiMatch[1].trim()) as ThreeTemplateHeader;
+		return parseTemplateObjectLiteral<ThreeTemplateHeader>(templateUiMatch[1]);
 	}
 
 	const match = TEMPLATE_HEADER_PATTERN.exec(source);
@@ -33,7 +33,7 @@ export function readThreeTemplateHeader(source: string): ThreeTemplateHeader | n
 		return null;
 	}
 
-	return JSON.parse(match[1].trim()) as ThreeTemplateHeader;
+	return parseTemplateObjectLiteral<ThreeTemplateHeader>(match[1]);
 }
 
 export function readThreeTemplateParameters(
@@ -42,7 +42,7 @@ export function readThreeTemplateParameters(
 	const helperMatch = TEMPLATE_PARAMETERS_HELPER_PATTERN.exec(source);
 
 	if (helperMatch) {
-		return JSON.parse(helperMatch[1]) as ThreeTemplateParameterMap;
+		return parseTemplateObjectLiteral<ThreeTemplateParameterMap>(helperMatch[1]);
 	}
 
 	const match = TEMPLATE_PARAMETERS_COMMENT_PATTERN.exec(source);
@@ -51,7 +51,7 @@ export function readThreeTemplateParameters(
 		return null;
 	}
 
-	return JSON.parse(match[1]) as ThreeTemplateParameterMap;
+	return parseTemplateObjectLiteral<ThreeTemplateParameterMap>(match[1]);
 }
 
 export function writeThreeTemplateParameters(
@@ -80,4 +80,18 @@ export function writeThreeTemplateParameters(
 
 export function hasThreeTemplateHeader(source: string): boolean {
 	return TEMPLATE_UI_PATTERN.test(source) || TEMPLATE_HEADER_PATTERN.test(source);
+}
+
+function parseTemplateObjectLiteral<TValue>(source: string): TValue {
+	const parsedValue = new Function(`"use strict"; return (${source.trim()});`)();
+
+	if (!isRecord(parsedValue)) {
+		throw new SyntaxError('Template metadata must evaluate to an object literal.');
+	}
+
+	return parsedValue as TValue;
+}
+
+function isRecord(value: unknown): value is Record<string, ThreeTemplateParameterValue> {
+	return typeof value === 'object' && value !== null && !Array.isArray(value);
 }

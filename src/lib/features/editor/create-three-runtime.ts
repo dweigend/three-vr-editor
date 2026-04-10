@@ -1,5 +1,5 @@
-import { PerspectiveCamera, Scene, WebGLRenderer } from 'three';
-import { WebGPURenderer } from 'three/webgpu';
+import type { PerspectiveCamera, Scene, WebGLRenderer } from 'three';
+import type { WebGPURenderer } from 'three/webgpu';
 
 import type {
 	ThreeCompatibleRenderer,
@@ -7,6 +7,11 @@ import type {
 	ThreeDemoSceneController,
 	ThreeDemoSceneFactory
 } from './three-demo-scene';
+import {
+	THREE_MODULE_URL,
+	THREE_WEBGPU_MODULE_URL,
+	toAbsoluteThreeRuntimeModuleUrl
+} from './three-runtime-module-urls';
 
 export type CreateThreeRuntimeOptions = {
 	container: HTMLDivElement;
@@ -19,6 +24,9 @@ export type ThreeRuntimeController = {
 	dispose: () => void;
 };
 
+type ThreeWebGlModule = typeof import('three');
+type ThreeWebGpuModule = typeof import('three/webgpu');
+
 const CAMERA_FAR = 100;
 const CAMERA_FOV = 60;
 const CAMERA_NEAR = 0.1;
@@ -26,18 +34,25 @@ const FALLBACK_HEIGHT = 360;
 const FALLBACK_WIDTH = 640;
 const MAX_PIXEL_RATIO = 2;
 
+let threeWebGlModulePromise: Promise<ThreeWebGlModule> | null = null;
+let threeWebGpuModulePromise: Promise<ThreeWebGpuModule> | null = null;
+
 export function createThreeRuntime(options: CreateThreeRuntimeOptions): ThreeRuntimeController {
 	const { container, onRuntimeError, rendererKind = 'webgl', sceneFactory } = options;
-	const scene = new Scene();
-	const camera = new PerspectiveCamera(CAMERA_FOV, 1, CAMERA_NEAR, CAMERA_FAR);
 
 	let animationFrameId = 0;
+	let camera: PerspectiveCamera | null = null;
 	let isDisposed = false;
 	let renderer: ThreeCompatibleRenderer | null = null;
 	let resizeObserver: ResizeObserver | null = null;
+	let scene: Scene | null = null;
 	let sceneController: ThreeDemoSceneController | null = null;
 
 	const updateSize = (): void => {
+		if (!camera) {
+			return;
+		}
+
 		const width = container.clientWidth || FALLBACK_WIDTH;
 		const height = container.clientHeight || FALLBACK_HEIGHT;
 
@@ -76,7 +91,7 @@ export function createThreeRuntime(options: CreateThreeRuntimeOptions): ThreeRun
 
 		try {
 			sceneController?.update();
-			sceneController?.render?.() ?? renderer?.render(scene, camera);
+			sceneController?.render?.() ?? renderer?.render(scene!, camera!);
 			animationFrameId = window.requestAnimationFrame(renderFrame);
 		} catch (error) {
 			fail(error);
@@ -89,7 +104,11 @@ export function createThreeRuntime(options: CreateThreeRuntimeOptions): ThreeRun
 
 	async function initialize(): Promise<void> {
 		try {
-			const nextRenderer = createRenderer(rendererKind);
+			const runtimeParts = await createRuntimeParts(rendererKind);
+			const nextRenderer = runtimeParts.renderer;
+
+			camera = runtimeParts.camera;
+			scene = runtimeParts.scene;
 
 			nextRenderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, MAX_PIXEL_RATIO));
 			container.replaceChildren(nextRenderer.domElement);
@@ -128,10 +147,47 @@ export function createThreeRuntime(options: CreateThreeRuntimeOptions): ThreeRun
 	}
 }
 
-function createRenderer(rendererKind: ThreeDemoRendererKind): ThreeCompatibleRenderer {
+async function createRuntimeParts(rendererKind: ThreeDemoRendererKind): Promise<{
+	camera: PerspectiveCamera;
+	renderer: ThreeCompatibleRenderer;
+	scene: Scene;
+}> {
 	if (rendererKind === 'webgpu') {
-		return new WebGPURenderer({ antialias: true });
+		const THREE = await loadThreeWebGpuModule();
+
+		return {
+			camera: new THREE.PerspectiveCamera(CAMERA_FOV, 1, CAMERA_NEAR, CAMERA_FAR),
+			renderer: new THREE.WebGPURenderer({ antialias: true }),
+			scene: new THREE.Scene()
+		};
 	}
 
-	return new WebGLRenderer({ antialias: true, alpha: false });
+	const THREE = await loadThreeWebGlModule();
+
+	return {
+		camera: new THREE.PerspectiveCamera(CAMERA_FOV, 1, CAMERA_NEAR, CAMERA_FAR),
+		renderer: new THREE.WebGLRenderer({ antialias: true, alpha: false }),
+		scene: new THREE.Scene()
+	};
+}
+
+function loadThreeWebGlModule(): Promise<ThreeWebGlModule> {
+	threeWebGlModulePromise ??=
+		import(
+			/* @vite-ignore */ toAbsoluteThreeRuntimeModuleUrl(THREE_MODULE_URL, window.location.href)
+		) as Promise<ThreeWebGlModule>;
+
+	return threeWebGlModulePromise;
+}
+
+function loadThreeWebGpuModule(): Promise<ThreeWebGpuModule> {
+	threeWebGpuModulePromise ??=
+		import(
+			/* @vite-ignore */ toAbsoluteThreeRuntimeModuleUrl(
+				THREE_WEBGPU_MODULE_URL,
+				window.location.href
+			)
+		) as Promise<ThreeWebGpuModule>;
+
+	return threeWebGpuModulePromise;
 }

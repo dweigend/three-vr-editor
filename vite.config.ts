@@ -5,8 +5,11 @@ import { sveltekit } from '@sveltejs/kit/vite';
 
 export default defineConfig({
 	plugins: [tailwindcss(), sveltekit()],
+	optimizeDeps: {
+		include: ['@lucide/svelte/icons/check-check', '@lucide/svelte/icons/rotate-ccw']
+	},
 	ssr: {
-		noExternal: ['bits-ui', 'paneforge']
+		noExternal: ['@xyflow/svelte', 'bits-ui', 'paneforge']
 	},
 	test: {
 		expect: { requireAssertions: true },

@@ -1,6 +1,6 @@
 # `src/lib/server/editor`
 
-This folder contains the server-side services behind the editor workspace.
+This folder contains the server-side services behind the editor workbench.
 
 ## Main Areas
 
@@ -8,33 +8,34 @@ This folder contains the server-side services behind the editor workspace.
   `files.ts`, `paths.ts`
 - preview building
   `preview-build.ts`, `preview-errors.ts`, `preview-source-map.ts`
-- editor workspace bootstrap loading
+- workspace bootstrap
   `editor-workspace-load.ts`
 - template discovery
   `templates.ts`
 
 ## Responsibilities
 
-- guard managed file paths under `static/three`
-- list, read, save, and create managed scene files
-- build browser-runnable preview bundles with `esbuild`
-- expose the initial page bootstrap data for the editor route
-- list valid templates by parsing helper-based metadata exports or legacy template
-  headers under `static/templates`
+- guard managed paths under `static/three`
+- list, read, save, create, and later migrate managed workspace content
+- build browser-runnable preview bundles
+- expose editor bootstrap data
+- discover valid starter templates from `static/templates`
 
-## Workspace Conventions
+## Current Workspace Model
 
-- `static/three/`
-  Ignored local editor workspace. The page loader bootstraps `scenes/cube.ts` here when the workspace starts empty.
-- `static/templates/`
-  Shared starter sources that can be copied into the editable workspace.
-- `static/three/scenes/`
-  Generated editable scene files created by the editor.
+- `static/templates`
+  committed starter material
+- `static/three`
+  local managed workspace
+- `static/three/scenes`
+  generated editable scene files
 
-The file service keeps path access constrained to the managed root and treats template metadata as optional. Starter material that should be committed belongs in `static/templates`, not in `static/three`.
+## Next Direction
+
+- migrate template discovery and workspace bootstrap toward self-contained template folders
+- keep route handlers thin and centralize that migration in this folder
 
 ## Boundaries
 
-- Client-side runtime, preview mounting, and editor UI do not belong here.
-- Route handlers should remain thin and delegate file and preview behavior to this folder.
-- Pi logic does not belong here.
+- client runtime and UI do not belong here
+- Pi logic does not belong here

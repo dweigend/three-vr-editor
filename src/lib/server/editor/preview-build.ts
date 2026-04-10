@@ -3,6 +3,10 @@ import { access } from 'node:fs/promises';
 import { dirname, resolve } from 'node:path';
 
 import type { ThreePreviewBuildRequest, ThreePreviewBuildResult } from '$lib/features/editor/three-editor-types';
+import {
+	THREE_MODULE_URL,
+	THREE_WEBGPU_MODULE_URL
+} from '$lib/features/editor/three-runtime-module-urls';
 
 import { resolveManagedFilePath } from './files';
 import { normalizePreviewSourceMap } from './preview-source-map';
@@ -14,6 +18,10 @@ export type ThreePreviewBuilder = {
 };
 
 const BUILD_TARGET = ['es2020'];
+const THREE_EXTERNAL_IMPORTS = new Map<string, string>([
+	['three', THREE_MODULE_URL],
+	['three/webgpu', THREE_WEBGPU_MODULE_URL]
+]);
 
 export function createThreePreviewBuilder(rootDir: string = STATIC_THREE_DIR): ThreePreviewBuilder {
 	const normalizedRootDir = resolve(rootDir);
@@ -46,6 +54,23 @@ export function createThreePreviewBuilder(rootDir: string = STATIC_THREE_DIR): T
 					outfile: 'preview.js',
 					platform: 'browser',
 					plugins: [
+						{
+							name: 'three-editor-runtime-imports',
+							setup(buildContext) {
+								buildContext.onResolve({ filter: /^three(?:\/webgpu)?$/ }, (args) => {
+									const runtimeImportPath = THREE_EXTERNAL_IMPORTS.get(args.path);
+
+									if (!runtimeImportPath) {
+										return null;
+									}
+
+									return {
+										external: true,
+										path: runtimeImportPath
+									};
+								});
+							}
+						},
 						{
 							name: 'three-editor-aliases',
 							setup(buildContext) {

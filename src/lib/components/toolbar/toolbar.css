@@ -27,6 +27,10 @@
 	min-width: 0;
 }
 
+.ui-toolbar__group--toggle {
+	flex-wrap: nowrap;
+}
+
 .ui-toolbar__group--editor-main {
 	justify-content: flex-start;
 }
@@ -50,10 +54,17 @@
 	min-width: 2.2rem;
 }
 
+.ui-toolbar-group-item[data-state='on'],
 .ui-toolbar-button--active {
-	border-color: transparent;
-	background: transparent;
-	color: var(--ui-color-accent-strong);
+	border-color: rgba(168, 85, 247, 0.52);
+	background: rgba(168, 85, 247, 0.16);
+	color: var(--ui-color-text);
+}
+
+.ui-toolbar-button--icon {
+	width: var(--ui-control-size);
+	min-width: var(--ui-control-size);
+	padding-inline: 0;
 }
 
 @media (max-width: 720px) {

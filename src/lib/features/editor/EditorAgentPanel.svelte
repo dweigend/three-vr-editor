@@ -1,7 +1,8 @@
 <script lang="ts">
 	import { untrack } from 'svelte';
 	import { resolve } from '$app/paths';
-	import { Button, ToolbarButton, ToolbarRoot } from '$lib/components';
+	import Plus from '@lucide/svelte/icons/plus';
+	import { Button, Switch, ToolbarButton, ToolbarRoot } from '$lib/components';
 	import { ConversationPanel, InputBar } from '$lib/blocks';
 	import { createConversationState } from '$lib/features/chat/conversation-state.svelte';
 	import { clearEditorAgentSession, sendEditorAgentRequest } from '$lib/features/editor/editor-agent-client';
@@ -30,6 +31,7 @@
 		initialSessionReady?: boolean;
 		modelName?: string | null;
 		onResponse?: ((event: EditorAgentResponseEvent) => void) | undefined;
+		panelId?: string;
 	};
 
 	let {
@@ -39,7 +41,8 @@
 		initialMessages = [],
 		initialSessionReady = false,
 		modelName = null,
-		onResponse
+		onResponse,
+		panelId = undefined
 	}: Props = $props();
 	const stableInitialMessages = untrack(() => initialMessages);
 	const stableInitialSessionReady = untrack(() => initialSessionReady);
@@ -49,6 +52,7 @@
 	let isSubmitting = $state(false);
 	let isResettingSession = $state(false);
 	let mode = $state<EditorAgentMode>(stableInitialMode);
+	let sessionEnabled = $state(stableInitialMode === 'session');
 	let turns = $state<EditorAgentTurn[]>([]);
 	let lastMode = $state<EditorAgentMode>(stableInitialMode);
 	let hasPersistedSession = $state(stableInitialSessionReady);
@@ -80,6 +84,18 @@
 		}
 
 		return 'Ask Pi about the current file.';
+	});
+
+	$effect(() => {
+		sessionEnabled = mode === 'session';
+	});
+
+	$effect(() => {
+		const nextMode: EditorAgentMode = sessionEnabled ? 'session' : 'one-shot';
+
+		if (nextMode !== mode) {
+			mode = nextMode;
+		}
 	});
 
 	$effect(() => {
@@ -195,7 +211,7 @@
 	}
 </script>
 
-<section class="ui-pane ui-pane--muted">
+<section class="ui-pane ui-pane--muted" id={panelId}>
 	<div class="ui-pane__header">
 		<ToolbarRoot aria-label="Pi agent toolbar" class="editor-agent-panel__toolbar">
 			<div class="ui-toolbar__group ui-toolbar__group--editor">
@@ -208,40 +224,20 @@
 			</div>
 
 			<div class="ui-toolbar__group ui-toolbar__group--editor">
-				<ToolbarButton
-					aria-pressed={mode === 'one-shot'}
-					class={mode === 'one-shot' ? 'ui-button--primary' : 'ui-button--ghost'}
-					type="button"
-					onclick={() => {
-						mode = 'one-shot';
-					}}
-				>
-					One-shot
-				</ToolbarButton>
+				<Switch bind:checked={sessionEnabled} label="Session" />
 
 				<ToolbarButton
-					aria-pressed={mode === 'session'}
-					class={mode === 'session' ? 'ui-button--primary' : 'ui-button--ghost'}
+					aria-label="Start new session"
+					class="ui-button--ghost ui-toolbar-button--icon"
+					disabled={!sessionEnabled || !hasPersistedSession || isResettingSession}
+					title={isResettingSession ? 'Resetting session' : 'Start new session'}
 					type="button"
 					onclick={() => {
-						mode = 'session';
+						void resetSession();
 					}}
 				>
-					Session
+					<Plus aria-hidden="true" size={16} />
 				</ToolbarButton>
-
-				{#if mode === 'session'}
-					<ToolbarButton
-						class="ui-button--secondary"
-						disabled={!hasPersistedSession || isResettingSession}
-						type="button"
-						onclick={() => {
-							void resetSession();
-						}}
-					>
-						{isResettingSession ? 'Resetting...' : 'New session'}
-					</ToolbarButton>
-				{/if}
 			</div>
 		</ToolbarRoot>
 	</div>
