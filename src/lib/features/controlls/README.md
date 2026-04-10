@@ -1,38 +1,30 @@
 # `src/lib/features/controlls`
 
-This folder contains the optional control-panel module that lives inside the editor workbench.
+This folder contains the optional preview control panel inside the editor workbench.
 
 ## Purpose
 
-- provide a lightweight preview control panel inspired by Three.js example controls
-- stay optional and isolated so the editor keeps working when the control panel is hidden
-- reuse the shared UI system from `src/lib/components`, `src/lib/blocks`, and `src/app.css`
-- share the same temporary parameter-access layer as the node editor instead of introducing a second live-edit path
+- provide compact, example-style preview controls
+- stay optional and inert when hidden
+- reuse the shared live layer from `src/lib/features/editor`
+- degrade cleanly for files without editable values
 
-## Planned Areas
+## Current Shape
 
-- panel shell and workbench integration
-  `ControlPanel.svelte`
-- browser-side panel state
-  `controlls-state.svelte.ts`
-- dynamic variable discovery and grouping
-  `controlls-discovery.ts`, `controlls-groups.ts`
-- adapters to the shared live parameter layer
-  `controlls-bridge.ts`
-
-## Current Status
-
-- `ControlPanel.svelte` now reads editable values from the shared live layer.
-- Live preview overrides stay browser-side until the user explicitly applies them back into code.
-- Empty states remain first-class for files without template metadata or parameter blocks.
+- `ControlPanel.svelte`
+  compact grouped controls
+- `controlls-panel.ts`
+  panel-specific shaping and grouping
 
 ## Boundaries
 
-- Do not add a separate route for this feature.
-- Do not depend on Pi, provider setup, or server-only modules.
-- Do not create a dedicated live-edit structure when the shared layer can be reused.
-- Keep control-panel-specific logic in this folder.
-- Keep reusable primitives in `src/lib/components`.
-- Keep reusable composed UI in `src/lib/blocks`.
-- Keep styling in `src/app.css` instead of feature-local CSS files.
-- Treat the code editor and workspace state as the source of truth.
+- no separate route
+- no Pi, auth, or provider dependencies
+- no second live-edit structure
+- `selectedPath` stays the source for which file the panel reads
+- accepted changes still flow back through the editor document update path
+
+## Direction
+
+- keep controls compact and parameter-focused
+- move future control metadata into template-local helper files once template folders land

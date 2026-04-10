@@ -1,31 +1,29 @@
 # `src/lib`
 
-`src/lib` contains the reusable code behind the editor, chat, and settings screens.
+`src/lib` contains the reusable browser and shared logic behind the editor, chat, and settings surfaces.
 
 ## Structure
 
 - [`components`](./components/README.md)
-  Reusable UI primitives.
+  primitive UI families
 - [`blocks`](./blocks/README.md)
-  Composed UI blocks.
+  composed UI blocks
 - [`features/editor`](./features/editor/README.md)
-  Editor-specific client code.
-- [`features/node-editor`](./features/node-editor/README.md)
-  Optional visual node-editor module for the editor workbench.
+  workbench state, preview runtime, live layer, and template helpers
 - [`features/controlls`](./features/controlls/README.md)
-  Optional preview control-panel module for the editor workbench.
+  optional preview control panel
+- [`features/node-editor`](./features/node-editor/README.md)
+  optional node editor
 - [`features/chat`](./features/chat/README.md)
-  Chat-specific client code.
+  chat-specific client code
 - [`server`](./server/README.md)
-  Server-only logic for Pi and editor workflows.
+  server-only editor and Pi logic
 - [`utils`](./utils/README.md)
-  Shared helpers.
+  shared helpers
 
 ## Boundaries
 
 - Browser code belongs in `components`, `blocks`, and `features`.
 - Server code belongs in `server`.
-- Pi SDK code must stay in server-only modules.
-- Shared serializable types can live outside `server` when both sides need them.
-
-See the root [`README.md`](../../README.md) for the repository overview.
+- Pi SDK code stays server-only.
+- Shared serializable types may live outside `server` when both sides need them.

@@ -1,125 +1,42 @@
 # Editor Live Layer Plan
 
-This document defines the optional shared live-parameter layer for editor modules such as the node editor and the control panel.
+This document defines the optional shared live layer used by controls and the node editor.
 
-## Goal
+## Purpose
 
-Keep the current code-to-preview workflow unchanged by default and add a shared browser-side layer only for optional interactive editor modules that need temporary live values.
+- keep the default `code -> preview` flow untouched
+- hold temporary browser-side overrides only while interactive panels need them
+- provide one shared live-edit path for controls and node editor
 
-## Design Principles
+## Hard Rules
 
-- Keep the default editor flow as simple as it is today.
-- Activate the live layer only when an interactive module needs it.
-- Keep the code document as the source of truth.
-- Use one shared layer for node-editor and control-panel behavior.
-- Reuse Svelte 5 state patterns instead of introducing a custom client-state abstraction.
-- For shared editor UI around this layer, inspect `/Volumes/SSD_Data/GitBase/ui-system/src/lib/components` first before introducing local primitives.
+- code stays the source of truth
+- `selectedPath` stays the shared source for code, controls, and preview
+- panel visibility may activate or idle the live layer, but must never change the file source
+- missing template metadata or empty discovery results are valid states
 
-## Default And Interactive Modes
+## Svelte Rules
 
-### Default mode
-
-- code changes update the preview exactly as they do today
-- no live overrides are created
-- no extra shared state is required
-
-### Interactive mode
-
-- code still remains the source of truth
-- optional modules can register temporary live overrides
-- preview can resolve values through the shared layer before rendering
-- explicit commit paths write accepted values back into the document
+- keep shared browser state in `.svelte.ts`
+- export stable objects and mutate properties instead of reassigning exported `$state`
+- use typed context only when it simplifies component-tree wiring
 
 ## Responsibilities
 
-The shared live layer is responsible for:
+- discover editable values from the current file and template metadata
+- hold temporary overrides
+- resolve preview-facing values while active
+- promote accepted values back through explicit document updates
 
-- discovering editable values from template metadata and active-file analysis
-- storing temporary live overrides for the active file
-- exposing resolved values for preview-facing consumers
-- tracking whether the layer is active or idle
-- clearing or resetting temporary overrides when modules are hidden or disposed
-- promoting accepted changes into explicit document updates
+## Non-Goals
 
-The shared live layer is not responsible for:
-
-- owning the main document state
-- replacing the existing preview builder
-- depending on Pi, auth, provider configuration, or server-only modules
+- owning main document state
+- replacing the preview builder
 - creating feature-specific UI
+- introducing a second preview runtime
 
-## Graceful Degradation Rule
+## Next Steps
 
-- If the active file exposes no editable values, the shared layer must return an empty result instead of throwing an error.
-- If template metadata is missing, the shared layer must stay idle and leave the current editor and preview flow untouched.
-- If a file has a template header but no editable parameter block, the shared layer must not fail. It should expose no editable live values until a supported block exists.
-- Empty discovery results are a valid state, not an error condition.
-
-## Planned Files
-
-- `editor-live-layer-types.ts`
-- `editor-live-layer.svelte.ts`
-- `editor-live-layer-discovery.ts`
-- `editor-live-layer-commit.ts`
-- optional context helper such as `editor-live-layer-context.ts`
-
-## Integration Boundaries
-
-### With workspace state
-
-- read active file context and template metadata from the existing editor state
-- never replace `workspaceState`
-- route committed changes through `workspaceState.applyDocumentUpdate(...)`
-
-### With node editor
-
-- read editable definitions and temporary values from the shared layer
-- write graph-driven temporary overrides into the shared layer
-- do not create a second live state structure inside `src/lib/features/node-editor`
-- treat an empty discovery result as a normal empty-state panel
-
-### With control panel
-
-- read editable definitions and temporary values from the shared layer
-- write panel-driven temporary overrides into the shared layer
-- do not create a second live state structure inside `src/lib/features/controlls`
-- treat an empty discovery result as a normal empty-state panel
-
-### With preview runtime
-
-- keep the normal direct preview flow as the default path
-- only resolve through the shared layer when interactive modules are active
-- avoid introducing a separate preview runtime or route
-
-## Activation Model
-
-- the layer should stay idle when neither node editor nor control panel is visible
-- the layer should activate when one of those modules is shown
-- the layer should be able to return to idle when no interactive module depends on it
-- hidden modules must not leave stale runtime behavior behind
-
-## Svelte Integration Notes
-
-- keep the shared state in `.svelte.ts` files so Svelte 5 runes can be used directly
-- export a stable state object and mutate properties instead of reassigning the object
-- use typed Svelte context only when passing the live layer through component subtrees is cleaner than prop plumbing
-- create effectful preview bindings only while the layer is active
-
-## Session Learnings
-
-- Keep one clear data source for code, controls, and preview during file switching. The currently selected editor file should stay the shared source unless the product explicitly introduces a separate preview-target concept.
-- Do not split `activeFileContext` and preview-facing control discovery unless there is a real user-facing preview-target feature. A hidden second source quickly creates stale controls and stale preview state.
-- Treat panel visibility and panel data source as separate concerns. Showing or hiding the control panel should only activate or idle the shared live layer, never change which file the layer reads from.
-- The live layer should degrade to empty states for missing metadata, but those empty states must always reflect the currently selected file. Empty-state correctness is part of the feature, not just a fallback.
-- Keep commit paths explicit. Temporary live overrides may stay browser-only, but accepted changes must still flow back through one predictable document-update path.
-
-## Concrete Steps
-
-1. Define the shared type contract for discovered parameters, temporary overrides, resolved values, and commit requests.
-2. Implement a browser-side `.svelte.ts` state module with an always-stable exported object.
-3. Add activation state so the layer only performs work while interactive modules are visible.
-4. Add discovery logic that merges template metadata and active-file analysis into one editable-parameter list.
-5. Add a resolve step that returns either document values or temporary override values for preview-facing consumers.
-6. Add an explicit commit adapter that converts accepted temporary values into `workspaceState.applyDocumentUpdate(...)` calls.
-7. Connect node-editor and control-panel plans to the same shared layer instead of feature-local live state.
-8. Verify that disabling interactive modules restores the current simple code-to-preview behavior.
+- keep discovery graceful and file-switch-safe
+- preserve the current selected-file flow during future template-folder work
+- stay shared between controls and node editor instead of growing feature-local live layers
